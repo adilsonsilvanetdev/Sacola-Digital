@@ -1,0 +1,6 @@
+{
+  "name": "AURA Atelier - Mala Digital & Provador em Casa",
+  "description": "Loja feminina exclusiva com serviço de Mala Digital: escolha suas peças para provar em casa ou receba uma curadoria personalizada da consultora de estilo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
