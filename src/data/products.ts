@@ -1,6 +1,6 @@
 import { Product } from '../types';
 
-export const HERO_IMAGE = '/src/assets/images/hero_fashion_atelier_1791074034560.jpg';
+export const HERO_IMAGE = '/images/hero_fashion_atelier_1791074034560.jpg';
 
 export const SAMPLE_PRODUCTS: Product[] = [
   {
@@ -14,7 +14,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
     color: 'Areia Natural',
     colorHex: '#E3DCD0',
-    image: '/src/assets/images/blazer_linen_tailored_1791074051268.jpg',
+    image: '/images/blazer_linen_tailored_1791074051268.jpg',
     styleKeywords: ['Alfaiataria Sofisticada', 'Casual Elegante', 'Neutros & Terrosos'],
     recommendedFor: ['Trabalho & Reuniões', 'Dia a Dia Prático & Chic', 'Jantar Especial'],
     inStock: true
@@ -30,7 +30,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['PP', 'P', 'M', 'G'],
     color: 'Terracota Queimado',
     colorHex: '#B85D43',
-    image: '/src/assets/images/dress_terracotta_satin_1791074043036.jpg',
+    image: '/images/dress_terracotta_satin_1791074043036.jpg',
     styleKeywords: ['Romântica & Fluida', 'Festiva & Noite', 'Neutros & Terrosos', 'Cores Marcantes'],
     recommendedFor: ['Jantar Especial', 'Viagem & Resort', 'Fim de Semana & Lazer'],
     inStock: true
@@ -46,7 +46,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
     color: 'Champanhe Ivory',
     colorHex: '#F7F3E8',
-    image: '/src/assets/images/silk_blouse_champagne_1791074061175.jpg',
+    image: '/images/silk_blouse_champagne_1791074061175.jpg',
     styleKeywords: ['Alfaiataria Sofisticada', 'Moderna & Minimalista', 'Neutros & Terrosos'],
     recommendedFor: ['Trabalho & Reuniões', 'Jantar Especial', 'Dia a Dia Prático & Chic'],
     inStock: true
@@ -62,7 +62,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['36', '38', '40', '42', '44'],
     color: 'Off-White Puro',
     colorHex: '#FAF8F5',
-    image: '/src/assets/images/pants_crepe_wideleg_1791074085020.jpg',
+    image: '/images/pants_crepe_wideleg_1791074085020.jpg',
     styleKeywords: ['Alfaiataria Sofisticada', 'Moderna & Minimalista', 'Preto & Branco / Minimal'],
     recommendedFor: ['Trabalho & Reuniões', 'Jantar Especial', 'Dia a Dia Prático & Chic'],
     inStock: true
@@ -78,7 +78,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['PP', 'P', 'M', 'G'],
     color: 'Amêndoa Tostada',
     colorHex: '#D7C2AB',
-    image: '/src/assets/images/knit_coord_set_ribbed_1791074094965.jpg',
+    image: '/images/knit_coord_set_ribbed_1791074094965.jpg',
     styleKeywords: ['Casual Elegante', 'Moderna & Minimalista', 'Neutros & Terrosos'],
     recommendedFor: ['Fim de Semana & Lazer', 'Viagem & Resort', 'Dia a Dia Prático & Chic'],
     inStock: true
@@ -94,7 +94,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
     color: 'Botânico Oliva & Areia',
     colorHex: '#7C826C',
-    image: '/src/assets/images/dress_wrap_botanical_1791074104443.jpg',
+    image: '/images/dress_wrap_botanical_1791074104443.jpg',
     styleKeywords: ['Romântica & Fluida', 'Casual Elegante', 'Tons Suaves & Pastel'],
     recommendedFor: ['Fim de Semana & Lazer', 'Viagem & Resort', 'Dia a Dia Prático & Chic'],
     inStock: true
@@ -110,7 +110,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['P', 'M', 'G'],
     color: 'Verde Oliva Savana',
     colorHex: '#585F49',
-    image: '/src/assets/images/trench_coat_drape_olive_1791074114650.jpg',
+    image: '/images/trench_coat_drape_olive_1791074114650.jpg',
     styleKeywords: ['Alfaiataria Sofisticada', 'Moderna & Minimalista', 'Casual Elegante', 'Cores Marcantes'],
     recommendedFor: ['Trabalho & Reuniões', 'Viagem & Resort', 'Dia a Dia Prático & Chic'],
     inStock: true
@@ -126,7 +126,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['PP', 'P', 'M', 'G'],
     color: 'Preto Noir Profundo',
     colorHex: '#181716',
-    image: '/src/assets/images/top_asymmetric_black_1791074124293.jpg',
+    image: '/images/top_asymmetric_black_1791074124293.jpg',
     styleKeywords: ['Festiva & Noite', 'Moderna & Minimalista', 'Preto & Branco / Minimal'],
     recommendedFor: ['Jantar Especial', 'Festiva & Noite'],
     inStock: true
@@ -142,7 +142,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['36', '38', '40', '42'],
     color: 'Caramelo Cognac',
     colorHex: '#9C582B',
-    image: '/src/assets/images/skirt_ecoleather_caramel_1791074133385.jpg',
+    image: '/images/skirt_ecoleather_caramel_1791074133385.jpg',
     styleKeywords: ['Casual Elegante', 'Alfaiataria Sofisticada', 'Neutros & Terrosos', 'Cores Marcantes'],
     recommendedFor: ['Trabalho & Reuniões', 'Jantar Especial', 'Dia a Dia Prático & Chic'],
     inStock: true
@@ -158,7 +158,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
     color: 'Verde Sálvia Suave',
     colorHex: '#93A492',
-    image: '/src/assets/images/jumpsuit_tailored_sage_1791074144320.jpg',
+    image: '/images/jumpsuit_tailored_sage_1791074144320.jpg',
     styleKeywords: ['Alfaiataria Sofisticada', 'Casual Elegante', 'Tons Suaves & Pastel'],
     recommendedFor: ['Trabalho & Reuniões', 'Jantar Especial', 'Viagem & Resort'],
     inStock: true
@@ -174,7 +174,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
     color: 'Areia Crua',
     colorHex: '#EAE5DB',
-    image: '/src/assets/images/dress_linen_maxi_sand_1791074747887.jpg',
+    image: '/images/dress_linen_maxi_sand_1791074747887.jpg',
     styleKeywords: ['Romântica & Fluida', 'Casual Elegante', 'Neutros & Terrosos'],
     recommendedFor: ['Fim de Semana & Lazer', 'Viagem & Resort', 'Dia a Dia Prático & Chic'],
     inStock: true
@@ -190,7 +190,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
     color: 'Listrado Azul & Branco',
     colorHex: '#B5CFE3',
-    image: '/src/assets/images/shirt_pima_striped_classic_1791074758763.jpg',
+    image: '/images/shirt_pima_striped_classic_1791074758763.jpg',
     styleKeywords: ['Alfaiataria Sofisticada', 'Casual Elegante', 'Preto & Branco / Minimal'],
     recommendedFor: ['Trabalho & Reuniões', 'Dia a Dia Prático & Chic'],
     inStock: true
@@ -206,7 +206,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['P', 'M', 'G'],
     color: 'Cinza Fendi & Fumo',
     colorHex: '#948D85',
-    image: '/src/assets/images/cardigan_cashmere_fendi_1791074768634.jpg',
+    image: '/images/cardigan_cashmere_fendi_1791074768634.jpg',
     styleKeywords: ['Moderna & Minimalista', 'Casual Elegante', 'Neutros & Terrosos'],
     recommendedFor: ['Trabalho & Reuniões', 'Viagem & Resort', 'Dia a Dia Prático & Chic'],
     inStock: true
@@ -222,7 +222,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['36', '38', '40', '42', '44'],
     color: 'Areia Dourada',
     colorHex: '#D8CCA6',
-    image: '/src/assets/images/shorts_tailored_pleated_1791074777895.jpg',
+    image: '/images/shorts_tailored_pleated_1791074777895.jpg',
     styleKeywords: ['Alfaiataria Sofisticada', 'Casual Elegante', 'Neutros & Terrosos'],
     recommendedFor: ['Dia a Dia Prático & Chic', 'Fim de Semana & Lazer', 'Trabalho & Reuniões'],
     inStock: true
@@ -238,7 +238,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     sizes: ['PP', 'P', 'M', 'G'],
     color: 'Verde Esmeralda Nobre',
     colorHex: '#1B4D3E',
-    image: '/src/assets/images/top_highneck_emerald_silk_1791074787847.jpg',
+    image: '/images/top_highneck_emerald_silk_1791074787847.jpg',
     styleKeywords: ['Festiva & Noite', 'Moderna & Minimalista', 'Cores Marcantes'],
     recommendedFor: ['Jantar Especial', 'Festiva & Noite', 'Trabalho & Reuniões'],
     inStock: true
