@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, Clock, MapPin, CheckCircle2, MessageCircle, ShieldCheck, ArrowRight, Sparkles, Send, Copy, ExternalLink } from 'lucide-react';
+import { X, Calendar, Clock, MapPin, CheckCircle2, MessageCircle, ShieldCheck, ArrowRight, Sparkles, Send, Copy, ExternalLink, Store } from 'lucide-react';
 import { MalaItem, MalaOrder } from '../types';
 import { buildClientConfirmationWhatsAppLink, buildStoreConciergeWhatsAppLink, cleanPhoneNumber, getClientOrderPlainText } from '../utils/whatsappHelper';
 
@@ -20,6 +20,8 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
   stylistNote,
   onSuccess,
 }) => {
+  const [deliveryType, setDeliveryType] = useState<'pickup' | 'delivery'>('pickup');
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -44,20 +46,28 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone || !formData.street) {
-      alert('Por favor, preencha seu nome, WhatsApp e endereço para a entrega da mala.');
+    if (!formData.name.trim() || !formData.phone.trim()) {
+      alert('Por favor, informe seu nome e WhatsApp para confirmar a sua mala.');
       return;
     }
 
     const orderId = `BELLA-ML-${Math.floor(1000 + Math.random() * 9000)}`;
-    const fullAddress = `${formData.street}, ${formData.number}${formData.complement ? ` - ${formData.complement}` : ''}`;
+
+    const isPickup = deliveryType === 'pickup' || !formData.street.trim();
+    const fullAddress = isPickup
+      ? 'Retirada na loja física (balcão)'
+      : `${formData.street}${formData.number ? `, ${formData.number}` : ''}${formData.complement ? ` - ${formData.complement}` : ''}`;
+
+    const neighborhood = isPickup
+      ? 'Loja Física'
+      : (formData.neighborhood.trim() || 'A combinar');
 
     const newOrder: MalaOrder = {
       id: orderId,
-      customerName: formData.name,
-      customerPhone: formData.phone,
+      customerName: formData.name.trim(),
+      customerPhone: formData.phone.trim(),
       address: fullAddress,
-      neighborhood: formData.neighborhood || 'Jardins',
+      neighborhood: neighborhood,
       city: formData.city,
       scheduledDate: formData.date,
       scheduledTimeSlot: formData.timeSlot,
@@ -103,7 +113,7 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
               Provador em Casa · Capacidade de até 15 Peças
             </span>
             <h2 className="font-editorial text-2xl font-medium text-stone-900">
-              {confirmedOrder ? 'Mala Solicitada com Sucesso!' : 'Agendar Entrega da Mala'}
+              {confirmedOrder ? 'Mala Solicitada com Sucesso!' : 'Agendar Mala de Roupas'}
             </h2>
           </div>
           <button
@@ -117,14 +127,14 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
         {!confirmedOrder ? (
           <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
             <div className="bg-amber-50/70 border border-amber-200/80 p-3.5 rounded text-xs text-stone-700 leading-relaxed">
-              <span className="font-semibold text-amber-900">Como funciona o pagamento? </span>
-              A mala é entregue sem cobrança prévia das peças. Você terá 48 horas para experimentar as {malaItems.length} peças no conforto da sua casa. O portador buscará o que você não quiser, e apenas as peças selecionadas serão faturadas via Pix ou Cartão.
+              <span className="font-semibold text-amber-900">Como funciona o provador? </span>
+              A mala é preparada sem cobrança prévia das roupas. Você tem 48 horas para experimentar as {malaItems.length} peças com tranquilidade. O que não couber ou não combinar, nós retiramos ou você devolve, e paga apenas pelo que decidir levar!
             </div>
 
             {/* Personal Details */}
             <div className="space-y-3">
               <h3 className="text-xs font-semibold text-stone-900 uppercase tracking-wider">
-                1. Seus Dados de Contato (Para Envio da Mala e WhatsApp)
+                1. Seus Dados de Contato
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -139,7 +149,7 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-stone-600 mb-1">Seu WhatsApp (Receberá o link com o comprovante) *</label>
+                  <label className="block text-xs text-stone-600 mb-1">Seu WhatsApp *</label>
                   <input
                     type="tel"
                     required
@@ -149,81 +159,132 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
                     className="w-full text-sm px-3 py-2 border border-stone-300 rounded focus:outline-none focus:border-stone-900"
                   />
                   <span className="text-[10px] text-stone-400 mt-0.5 block">
-                    Enviaremos a confirmação e o protocolo diretamente para o seu WhatsApp.
+                    Enviaremos o resumo e o protocolo direto para o seu WhatsApp.
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Address */}
+            {/* Delivery Option: Pickup vs Delivery */}
             <div className="space-y-3">
-              <h3 className="text-xs font-semibold text-stone-900 uppercase tracking-wider">
-                2. Endereço de Entrega da Mala
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="sm:col-span-2">
-                  <label className="block text-xs text-stone-600 mb-1">Rua / Avenida *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Rua Oscar Freire"
-                    value={formData.street}
-                    onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                    className="w-full text-sm px-3 py-2 border border-stone-300 rounded focus:outline-none focus:border-stone-900"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-stone-600 mb-1">Número *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="1200"
-                    value={formData.number}
-                    onChange={(e) => setFormData({ ...formData, number: e.target.value })}
-                    className="w-full text-sm px-3 py-2 border border-stone-300 rounded focus:outline-none focus:border-stone-900"
-                  />
-                </div>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-semibold text-stone-900 uppercase tracking-wider">
+                  2. Como Deseja Receber a Mala?
+                </h3>
+                <span className="text-[11px] text-amber-900 font-medium bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                  Endereço não obrigatório
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs text-stone-600 mb-1">Complemento / Apto</label>
-                  <input
-                    type="text"
-                    placeholder="Apto 82 Bloco B"
-                    value={formData.complement}
-                    onChange={(e) => setFormData({ ...formData, complement: e.target.value })}
-                    className="w-full text-sm px-3 py-2 border border-stone-300 rounded focus:outline-none focus:border-stone-900"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-stone-600 mb-1">Bairro *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Cerqueira César"
-                    value={formData.neighborhood}
-                    onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
-                    className="w-full text-sm px-3 py-2 border border-stone-300 rounded focus:outline-none focus:border-stone-900"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-stone-600 mb-1">CEP</label>
-                  <input
-                    type="text"
-                    placeholder="01426-001"
-                    value={formData.cep}
-                    onChange={(e) => setFormData({ ...formData, cep: e.target.value })}
-                    className="w-full text-sm px-3 py-2 border border-stone-300 rounded focus:outline-none focus:border-stone-900"
-                  />
-                </div>
+              {/* Selector buttons */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setDeliveryType('pickup')}
+                  className={`p-3.5 rounded-lg border text-left flex items-start gap-3 transition-all cursor-pointer ${
+                    deliveryType === 'pickup'
+                      ? 'bg-amber-50/90 border-amber-800 text-stone-950 ring-1 ring-amber-800 shadow-xs'
+                      : 'bg-white border-stone-200 text-stone-600 hover:bg-stone-50'
+                  }`}
+                >
+                  <div className={`p-2 rounded-full shrink-0 ${deliveryType === 'pickup' ? 'bg-amber-900 text-white' : 'bg-stone-100 text-stone-600'}`}>
+                    <Store className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-xs block text-stone-900">Vou retirar na loja</span>
+                    <span className="text-[11px] text-stone-500 block mt-0.5 leading-snug">
+                      Ideal se você está de passagem: mala pronta no balcão para levar e provar em casa
+                    </span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDeliveryType('delivery')}
+                  className={`p-3.5 rounded-lg border text-left flex items-start gap-3 transition-all cursor-pointer ${
+                    deliveryType === 'delivery'
+                      ? 'bg-amber-50/90 border-amber-800 text-stone-950 ring-1 ring-amber-800 shadow-xs'
+                      : 'bg-white border-stone-200 text-stone-600 hover:bg-stone-50'
+                  }`}
+                >
+                  <div className={`p-2 rounded-full shrink-0 ${deliveryType === 'delivery' ? 'bg-amber-900 text-white' : 'bg-stone-100 text-stone-600'}`}>
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-xs block text-stone-900">Entregar no meu endereço</span>
+                    <span className="text-[11px] text-stone-500 block mt-0.5 leading-snug">
+                      Portador leva até a sua residência ou trabalho e busca após 48h
+                    </span>
+                  </div>
+                </button>
               </div>
+
+              {/* Notice or Optional Address Inputs */}
+              {deliveryType === 'pickup' ? (
+                <div className="bg-stone-50 border border-stone-200 rounded p-3 text-xs text-stone-600 flex items-center gap-2">
+                  <Store className="w-4 h-4 text-amber-800 shrink-0" />
+                  <span>
+                    <strong>Ponto de Retirada:</strong> Bella Roupas & Acessórios. Assim que você confirmar, avisaremos no WhatsApp para você passar e pegar a mala no balcão sem filas!
+                  </span>
+                </div>
+              ) : (
+                <div className="space-y-3 pt-1 bg-stone-50/60 p-3.5 rounded border border-stone-200">
+                  <span className="text-[11px] text-stone-500 font-medium block">
+                    Preencha o endereço abaixo (opcional — caso prefira, combinamos pelo WhatsApp):
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs text-stone-600 mb-1">Rua / Avenida (Opcional)</label>
+                      <input
+                        type="text"
+                        placeholder="Ex: Rua Oscar Freire"
+                        value={formData.street}
+                        onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                        className="w-full text-sm px-3 py-2 bg-white border border-stone-300 rounded focus:outline-none focus:border-stone-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-stone-600 mb-1">Número (Opcional)</label>
+                      <input
+                        type="text"
+                        placeholder="Ex: 1200"
+                        value={formData.number}
+                        onChange={(e) => setFormData({ ...formData, number: e.target.value })}
+                        className="w-full text-sm px-3 py-2 bg-white border border-stone-300 rounded focus:outline-none focus:border-stone-900"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-stone-600 mb-1">Bairro / Região (Opcional)</label>
+                      <input
+                        type="text"
+                        placeholder="Ex: Jardins"
+                        value={formData.neighborhood}
+                        onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
+                        className="w-full text-sm px-3 py-2 bg-white border border-stone-300 rounded focus:outline-none focus:border-stone-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-stone-600 mb-1">Complemento (Apto/Bloco)</label>
+                      <input
+                        type="text"
+                        placeholder="Ex: Apto 82"
+                        value={formData.complement}
+                        onChange={(e) => setFormData({ ...formData, complement: e.target.value })}
+                        className="w-full text-sm px-3 py-2 bg-white border border-stone-300 rounded focus:outline-none focus:border-stone-900"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Date and Time */}
             <div className="space-y-3">
               <h3 className="text-xs font-semibold text-stone-900 uppercase tracking-wider">
-                3. Quando Deseja Receber a Mala?
+                3. {deliveryType === 'pickup' ? 'Quando Deseja Passar para Retirar?' : 'Quando Deseja Receber a Mala?'}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -237,7 +298,7 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-stone-600 mb-1">Turno de Entrega</label>
+                  <label className="block text-xs text-stone-600 mb-1">Turno Preferencial</label>
                   <select
                     value={formData.timeSlot}
                     onChange={(e) => setFormData({ ...formData, timeSlot: e.target.value as MalaOrder['scheduledTimeSlot'] })}
@@ -249,24 +310,8 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
                   </select>
                 </div>
               </div>
-
-              {/* Concierge checkbox */}
-              <div className="pt-2">
-                <label className="flex items-start gap-2 text-xs text-stone-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.wantStylistAssistance}
-                    onChange={(e) => setFormData({ ...formData, wantStylistAssistance: e.target.checked })}
-                    className="rounded border-stone-300 text-stone-900 focus:ring-0 mt-0.5"
-                  />
-                  <span>
-                    Desejo consultoria personalizada via WhatsApp durante o meu momento de prova (a consultora pode dar dicas de sapatos e combinações com o seu próprio armário).
-                  </span>
-                </label>
-              </div>
             </div>
 
-            {/* Submit */}
             <div className="pt-4 border-t border-stone-200 flex items-center justify-between">
               <span className="text-xs text-stone-500">
                 {malaItems.length} peças prontas para separação
@@ -276,7 +321,7 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
                 className="px-6 py-3 bg-stone-900 text-white rounded text-xs sm:text-sm font-medium hover:bg-stone-800 transition-colors flex items-center gap-2 cursor-pointer shadow"
               >
                 <Calendar className="w-4 h-4 text-amber-300" />
-                <span>Confirmar Solicitação da Mala</span>
+                <span>Confirmar Agendamento da Mala</span>
               </button>
             </div>
           </form>
@@ -295,7 +340,7 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
                 Sua Mala Bella Roupas & Acessórios foi Agendada com Sucesso!
               </h3>
               <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto mt-2 leading-relaxed">
-                Separamos {confirmedOrder.items.length} peças exclusivas para entrega em seu endereço. Você pode enviar a confirmação completa direto para o seu WhatsApp abaixo:
+                Separamos suas {confirmedOrder.items.length} peças. Você pode abrir o resumo diretamente no seu WhatsApp ou falar com a nossa consultora abaixo:
               </p>
             </div>
 
@@ -310,21 +355,23 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
                 <span className="font-medium text-stone-900">{confirmedOrder.customerPhone}</span>
               </div>
               <div className="flex items-center justify-between border-b border-stone-200 pb-2">
-                <span className="text-stone-500">Previsão de Entrega:</span>
+                <span className="text-stone-500">Data & Turno:</span>
                 <span className="font-medium text-stone-900">
                   {confirmedOrder.scheduledDate} · {confirmedOrder.scheduledTimeSlot}
                 </span>
               </div>
               <div className="flex items-center justify-between border-b border-stone-200 pb-2">
-                <span className="text-stone-500">Endereço:</span>
-                <span className="font-medium text-stone-900 truncate max-w-[240px]">
-                  {confirmedOrder.address}, {confirmedOrder.neighborhood}
+                <span className="text-stone-500">Modalidade:</span>
+                <span className="font-medium text-stone-900 truncate max-w-[280px]">
+                  {confirmedOrder.address.toLowerCase().includes('retirada')
+                    ? '🛍️ Retirada na loja física (balcão)'
+                    : `🚚 Entrega: ${confirmedOrder.address}, ${confirmedOrder.neighborhood}`}
                 </span>
               </div>
               <div className="flex items-center justify-between pt-1">
                 <span className="text-stone-500">Peças na Mala:</span>
                 <span className="font-semibold text-stone-900">
-                  {confirmedOrder.items.length} peças (48h para provar)
+                  {confirmedOrder.items.length} peças (48h de prova)
                 </span>
               </div>
             </div>
@@ -373,7 +420,7 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
                 className="w-full py-2.5 bg-white border border-stone-300 text-stone-800 rounded text-xs font-medium hover:bg-stone-50 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-700" />
-                <span>Falar Diretamente com a Consultora do Atelier</span>
+                <span>Falar Diretamente com a Consultora da Loja</span>
               </a>
 
               {/* Copy WhatsApp text & link */}

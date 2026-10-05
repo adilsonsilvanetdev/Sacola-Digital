@@ -33,14 +33,19 @@ export function getClientOrderPlainText(order: MalaOrder): string {
 
   const totalValue = order.items.reduce((acc, it) => acc + it.product.price, 0);
 
+  const isPickup = !order.address || order.address.toLowerCase().includes('retirada');
+  const locationText = isPickup
+    ? `📍 *Modalidade:* Retirada presencial na loja física`
+    : `📍 *Endereço:* ${order.address}${order.neighborhood ? `, ${order.neighborhood}` : ''}`;
+
   return [
     `✨ *BELLA ROUPAS & ACESSÓRIOS - Mala Digital* ✨`,
     ``,
     `Olá, *${order.customerName}*! Seu agendamento de provador em casa foi confirmado.`,
     ``,
     `📋 *Protocolo:* N° ${order.id}`,
-    `🗓 *Entrega:* ${order.scheduledDate} (${order.scheduledTimeSlot})`,
-    `📍 *Endereço:* ${order.address}, ${order.neighborhood}`,
+    `🗓 *Data Preferencial:* ${order.scheduledDate} (${order.scheduledTimeSlot})`,
+    locationText,
     `👗 *Peças na Mala:* ${order.items.length}`,
     ``,
     `*PEÇAS SELECIONADAS:*`,
@@ -82,6 +87,11 @@ export function getStylistOrderPlainText(order: MalaOrder, customLetter?: string
     order.stylistNote ||
     'Preparei sua mala com muito carinho! Todas as peças foram higienizadas e passadas para seu provador em casa.';
 
+  const isPickup = !order.address || order.address.toLowerCase().includes('retirada');
+  const locationText = isPickup
+    ? `📍 *Modalidade:* Retirada na loja física`
+    : `📍 *Endereço:* ${order.address}`;
+
   return [
     `Olá, *${firstName}*! Aqui é sua consultora da *BELLA ROUPAS & ACESSÓRIOS* 🤍`,
     ``,
@@ -94,7 +104,7 @@ export function getStylistOrderPlainText(order: MalaOrder, customLetter?: string
     itemsList || 'Nenhuma peça selecionada.',
     ``,
     `🚚 *Previsão:* ${order.scheduledDate} (${order.scheduledTimeSlot})`,
-    `📍 *Endereço:* ${order.address}`,
+    locationText,
     ``,
     `Você tem 48 horas para provar com calma. Qualquer dúvida, pode me chamar por aqui!`,
   ].join('\n');
