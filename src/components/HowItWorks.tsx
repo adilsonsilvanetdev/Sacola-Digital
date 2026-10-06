@@ -11,41 +11,41 @@ export const HowItWorks: React.FC<HowItWorksProps> = ({ onOpenQuiz, onExploreCat
     {
       num: '01',
       title: 'Você Escolhe ou Pede Curadoria',
-      description: 'Navegue pelo nosso acervo de peças femininas ou responda ao quiz rápido para que nossa consultora monte sua mala com peças que combinam com seu biotipo e rotina.',
+      description: 'Navegue pelo nosso acervo de bolsas e peças femininas ou responda ao quiz rápido para que nossa consultora monte sua mala com opções que combinam com seu estilo.',
       icon: ShoppingBag,
     },
     {
       num: '02',
-      title: 'Entregamos no Seu Endereço',
-      description: 'Sua mala exclusiva é enviada higienizada, com as peças nos cabides e opções de tamanhos reservas para você testar com total tranquilidade.',
+      title: 'Entregamos ou Você Retira',
+      description: 'Sua mala exclusiva é preparada com todo o capricho, higienizada, com tamanhos reservas e bolsas selecionadas. Entregamos na sua casa ou você retira na loja!',
       icon: Home,
     },
     {
       num: '03',
       title: '48 Horas de Provador no seu Closet',
-      description: 'Prove as peças com seus próprios sapatos, bolsas, maquiagem e na luz natural do seu espelho. Sem filas, sem luzes artificiais e sem pressa de vendedor.',
+      description: 'Prove as peças e teste as bolsas com seus próprios sapatos, acessórios, maquiagem e na luz natural do seu espelho. Sem filas e sem pressa.',
       icon: Sparkles,
     },
     {
       num: '04',
       title: 'Retiramos e Você só Paga o que Amar',
-      description: 'Nosso portador busca as peças que não vestiram tão bem. O acerto é feito de forma 100% digital apenas para o que você decidiu incluir no seu armário.',
+      description: 'Buscamos o que não servir. O acerto é feito de forma 100% prática via WhatsApp apenas pelas peças que você decidiu ficar.',
       icon: CheckCircle2,
     },
   ];
 
   return (
-    <section id="como-funciona" className="py-16 bg-white border-b border-stone-200">
+    <section id="como-funciona" className="py-16 bg-white border-b border-[#F2DEE4]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-xs uppercase tracking-widest text-amber-900/80 font-semibold block mb-2">
-            Como Funciona a Mala Digital
+          <span className="text-xs uppercase tracking-widest text-[#B84E67] font-semibold block mb-2">
+            Como Funciona a Mala Jô Bolsas Glamour
           </span>
-          <h2 className="font-editorial text-3xl sm:text-4xl text-stone-900 font-medium text-balance">
-            O conforto do shopping, sem precisar sair de casa.
+          <h2 className="font-editorial text-3xl sm:text-4xl text-[#181316] font-medium text-balance">
+            O conforto e glamour da loja no seu próprio quarto.
           </h2>
-          <p className="text-stone-600 text-sm sm:text-base mt-3">
-            Criada especialmente para mulheres que valorizam tempo, conforto e caimento impecável.
+          <p className="text-[#5A4D54] text-sm sm:text-base mt-3">
+            Criada para mulheres elegantes que valorizam praticidade, estilo e bom gosto.
           </p>
         </div>
 
@@ -55,19 +55,19 @@ export const HowItWorks: React.FC<HowItWorksProps> = ({ onOpenQuiz, onExploreCat
             return (
               <div
                 key={step.num}
-                className="p-6 rounded border border-stone-200 bg-[#FAF9F5] flex flex-col justify-between hover:border-stone-400 transition-colors"
+                className="p-6 rounded-xl border border-[#F2DEE4] bg-[#FDF9FA] flex flex-col justify-between hover:border-[#E598A9] hover:shadow-xs transition-all"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="font-editorial text-2xl font-semibold text-amber-900">
+                    <span className="font-editorial text-2xl font-semibold text-[#B84E67]">
                       {step.num}
                     </span>
-                    <Icon className="w-5 h-5 text-stone-700" />
+                    <Icon className="w-5 h-5 text-[#B84E67]" />
                   </div>
-                  <h3 className="text-base font-semibold text-stone-900 mb-2">
+                  <h3 className="text-base font-semibold text-[#181316] mb-2">
                     {step.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#5A4D54] leading-relaxed">
                     {step.description}
                   </p>
                 </div>
@@ -77,26 +77,26 @@ export const HowItWorks: React.FC<HowItWorksProps> = ({ onOpenQuiz, onExploreCat
         </div>
 
         {/* Dual Mode Switch Callout */}
-        <div className="mt-12 p-6 rounded-lg bg-stone-100 border border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="mt-12 p-6 rounded-xl bg-[#FAF6F7] border border-[#F2DEE4] flex flex-col sm:flex-row items-center justify-between gap-6 shadow-2xs">
           <div className="space-y-1 text-center sm:text-left">
-            <h4 className="text-base font-semibold text-stone-900">
+            <h4 className="text-base font-semibold text-[#181316]">
               Qual das duas experiências você prefere hoje?
             </h4>
-            <p className="text-xs sm:text-sm text-stone-600">
-              Você pode selecionar pessoalmente peça a peça, ou receber a seleção pensada pela nossa Personal Shopper.
+            <p className="text-xs sm:text-sm text-[#5A4D54]">
+              Você pode selecionar pessoalmente peça a peça, ou receber uma curadoria exclusiva feita pela nossa consultora.
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={onOpenQuiz}
-              className="px-4 py-2.5 bg-stone-900 text-white rounded text-xs font-medium hover:bg-stone-800 transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2.5 bg-[#181316] text-[#FAF6F7] rounded-lg text-xs font-medium hover:bg-[#2A2025] border border-[#F2BAC7]/30 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Pedir Curadoria da Vendedora</span>
+              <Sparkles className="w-3.5 h-3.5 text-[#F5BAC7]" />
+              <span>Pedir Curadoria da Consultora</span>
             </button>
             <button
               onClick={onExploreCatalog}
-              className="px-4 py-2.5 bg-white text-stone-900 border border-stone-300 rounded text-xs font-medium hover:bg-stone-50 transition-colors cursor-pointer"
+              className="px-4 py-2.5 bg-white text-[#181316] border border-[#F0D5DD] rounded-lg text-xs font-medium hover:bg-[#FDF2F4] hover:text-[#B84E67] transition-colors cursor-pointer"
             >
               <span>Escolher Minhas Peças</span>
             </button>

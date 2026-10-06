@@ -83,7 +83,7 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
     });
 
     const newOrder: MalaOrder = {
-      id: `BELLA-ML-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: `JB-ML-${Math.floor(1000 + Math.random() * 9000)}`,
       customerName: newClientName,
       customerPhone: newClientPhone,
       address: newClientAddress.trim() || 'Retirada na loja física (balcão)',
@@ -95,7 +95,7 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
       curationMode: 'stylist',
       stylistNote: `Curadoria exclusiva preparada pessoalmente pela vendedora para ${newClientName}.`,
       status: 'em_separacao',
-      createdAt: 'Criada pela Vendedora',
+      createdAt: 'Criada pela Consultora',
     };
 
     if (onCreateOrderByStylist) {
@@ -106,28 +106,28 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F4EE] pb-24">
+    <div className="min-h-screen bg-[#FAF6F7] pb-24">
       {/* Top Banner */}
-      <div className="bg-[#1C1917] text-white py-6 border-b border-stone-800">
+      <div className="bg-[#141113] text-white py-6 border-b border-[#2A2025]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-widest text-amber-400 font-semibold">
-                Painel da Consultora & Atelier
+              <span className="text-xs uppercase tracking-widest text-[#F5BAC7] font-semibold">
+                Painel da Consultora · Jô Bolsas Glamour
               </span>
             </div>
             <h1 className="font-editorial text-2xl sm:text-3xl font-medium mt-1">
               Gestão de Malas & Provadores em Casa
             </h1>
-            <p className="text-xs text-stone-400 mt-1">
-              Capacidade de até 15 peças por mala. Envie curadorias e confirmações diretamente para o WhatsApp de cada cliente.
+            <p className="text-xs text-[#BFA8B1] mt-1">
+              Capacidade de até 15 peças e bolsas por mala. Envie curadorias e confirmações diretamente para o WhatsApp de cada cliente.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsCreatingBag(true)}
-              className="px-4 py-2 bg-amber-200 text-stone-900 rounded text-xs font-semibold hover:bg-amber-300 transition-colors flex items-center gap-1.5 cursor-pointer shadow"
+              className="px-4 py-2 bg-[#F5BAC7] text-[#141113] rounded-lg text-xs font-semibold hover:bg-[#F2A3B4] transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Montar Mala para Cliente</span>
@@ -135,7 +135,7 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
 
             <button
               onClick={onReturnToStore}
-              className="px-4 py-2 bg-stone-800 text-stone-200 hover:text-white hover:bg-stone-700 border border-stone-700 rounded text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 bg-[#251E22] text-[#F0D5DD] hover:text-white hover:bg-[#32282E] border border-[#F2BAC7]/30 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Voltar à Loja</span>

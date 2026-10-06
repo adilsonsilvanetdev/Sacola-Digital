@@ -35,26 +35,26 @@ export function getClientOrderPlainText(order: MalaOrder): string {
 
   const isPickup = !order.address || order.address.toLowerCase().includes('retirada');
   const locationText = isPickup
-    ? `📍 *Modalidade:* Retirada presencial na loja física`
+    ? `📍 *Modalidade:* Retirada presencial na loja física (Jô Bolsas Glamour)`
     : `📍 *Endereço:* ${order.address}${order.neighborhood ? `, ${order.neighborhood}` : ''}`;
 
   return [
-    `✨ *BELLA ROUPAS & ACESSÓRIOS - Mala Digital* ✨`,
+    `✨ *JÔ BOLSAS GLAMOUR - Mala Digital* ✨`,
     ``,
-    `Olá, *${order.customerName}*! Seu agendamento de provador em casa foi confirmado.`,
+    `Olá, *${order.customerName}*! Seu agendamento de provador em casa foi confirmado com sucesso.`,
     ``,
     `📋 *Protocolo:* N° ${order.id}`,
     `🗓 *Data Preferencial:* ${order.scheduledDate} (${order.scheduledTimeSlot})`,
     locationText,
-    `👗 *Peças na Mala:* ${order.items.length}`,
+    `👜 *Peças & Bolsas na Mala:* ${order.items.length}`,
     ``,
-    `*PEÇAS SELECIONADAS:*`,
-    itemsList || 'Nenhuma peça selecionada.',
+    `*ITENS SELECIONADOS:*`,
+    itemsList || 'Nenhum item selecionado.',
     ``,
     `💰 *Total Consignado:* R$ ${totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-    `ℹ️ *Lembrete:* 48h para provar em casa. Você só paga o que decidir ficar!`,
+    `ℹ️ *Lembrete:* 48h para provar com seus looks em casa. Você só paga o que decidir ficar!`,
     ``,
-    `Desejamos uma ótima experiência! 🤍`,
+    `Desejamos uma maravilhosa experiência de glamour! 🤍`,
   ].join('\n');
 }
 
@@ -85,28 +85,28 @@ export function getStylistOrderPlainText(order: MalaOrder, customLetter?: string
   const letterText =
     customLetter ||
     order.stylistNote ||
-    'Preparei sua mala com muito carinho! Todas as peças foram higienizadas e passadas para seu provador em casa.';
+    'Preparei sua mala com muito carinho e glamour! Todas as peças e bolsas foram higienizadas para seu provador em casa.';
 
   const isPickup = !order.address || order.address.toLowerCase().includes('retirada');
   const locationText = isPickup
-    ? `📍 *Modalidade:* Retirada na loja física`
+    ? `📍 *Modalidade:* Retirada na loja física (Jô Bolsas Glamour)`
     : `📍 *Endereço:* ${order.address}`;
 
   return [
-    `Olá, *${firstName}*! Aqui é sua consultora da *BELLA ROUPAS & ACESSÓRIOS* 🤍`,
+    `Olá, *${firstName}*! Aqui é sua consultora da *JÔ BOLSAS GLAMOUR* 🤍`,
     ``,
-    `Sua *Mala N° ${order.id}* com *${order.items.length} peças* está pronta para envio!`,
+    `Sua *Mala N° ${order.id}* com *${order.items.length} itens* está pronta para você!`,
     ``,
     `💌 *Recado da Consultora:*`,
     `"${letterText}"`,
     ``,
-    `*PEÇAS SELECIONADAS:*`,
-    itemsList || 'Nenhuma peça selecionada.',
+    `*ITENS DA SUA MALA:*`,
+    itemsList || 'Nenhum item selecionado.',
     ``,
     `🚚 *Previsão:* ${order.scheduledDate} (${order.scheduledTimeSlot})`,
     locationText,
     ``,
-    `Você tem 48 horas para provar com calma. Qualquer dúvida, pode me chamar por aqui!`,
+    `Você tem 48 horas para provar e combinar tudo com calma no seu quarto. Qualquer dúvida, pode me chamar por aqui!`,
   ].join('\n');
 }
 
@@ -129,9 +129,9 @@ export function buildStylistToClientWhatsAppLink(
 export function buildStoreConciergeWhatsAppLink(order?: MalaOrder): string {
   const storePhone = '5511999998888';
   if (!order) {
-    const defaultText = `Olá Bella Roupas & Acessórios! Gostaria de informações sobre o serviço de Mala Digital em Casa.`;
+    const defaultText = `Olá Jô Bolsas Glamour! Gostaria de informações sobre o serviço de Mala Digital em Casa.`;
     return `https://wa.me/${storePhone}?text=${encodeURIComponent(defaultText)}`;
   }
-  const text = `Olá Bella Roupas & Acessórios! Gostaria de falar sobre a minha solicitação de Mala N° ${order.id} agendada para ${order.scheduledDate}.`;
+  const text = `Olá Jô Bolsas Glamour! Gostaria de falar sobre a minha solicitação de Mala N° ${order.id} agendada para ${order.scheduledDate}.`;
   return `https://wa.me/${storePhone}?text=${encodeURIComponent(text)}`;
 }

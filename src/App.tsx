@@ -42,7 +42,7 @@ export default function App() {
   // Demo Orders for the Consultora Dashboard
   const [orders, setOrders] = useState<MalaOrder[]>([
     {
-      id: 'BELLA-ML-7842',
+      id: 'JB-ML-7842',
       customerName: 'Mariana de Albuquerque',
       customerPhone: '(11) 98123-4567',
       address: 'Alameda Lorena, 1420 - Apto 91',
@@ -51,7 +51,7 @@ export default function App() {
       scheduledDate: '2026-10-04',
       scheduledTimeSlot: 'Manhã (09h às 13h)',
       curationMode: 'stylist',
-      stylistNote: 'Mariana solicitou mala para reuniões de diretoria e evento noturno. Selecionei blazer de linho areia, calça pantalona off-white e top ombro só noir.',
+      stylistNote: 'Mariana solicitou mala com opções de bolsas estruturadas e looks para reuniões e jantar. Selecionei blazer de linho areia, bolsa caramelo e vestido terracota.',
       status: 'em_separacao',
       createdAt: 'Hoje às 10:15',
       items: [
@@ -80,7 +80,7 @@ export default function App() {
       ],
     },
     {
-      id: 'BELLA-ML-6291',
+      id: 'JB-ML-6291',
       customerName: 'Beatriz Fontes',
       customerPhone: '(11) 99876-5432',
       address: 'Rua Bela Cintra, 890 - Casa 3',
@@ -291,14 +291,14 @@ export default function App() {
             {/* Catalog Section Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
               <div>
-                <span className="text-xs uppercase tracking-widest text-amber-900 font-semibold block mb-1">
-                  Peças Exclusivas para Consignação em Casa
+                <span className="text-xs uppercase tracking-widest text-[#B84E67] font-semibold block mb-1">
+                  Bolsas & Peças Exclusivas para o seu Provador em Casa
                 </span>
-                <h2 className="font-editorial text-3xl sm:text-4xl text-stone-900 font-medium">
-                  Coleção Cápsula Feminina
+                <h2 className="font-editorial text-3xl sm:text-4xl text-[#181316] font-medium">
+                  Coleção Jô Bolsas Glamour
                 </h2>
-                <p className="text-stone-500 text-xs sm:text-sm mt-1">
-                  15 peças em tecidos nobres (linho puro europeu, seda mulberry, tricot modal e crepe encorpado). Escolha até {MAX_MALA_ITEMS} peças para seu provador de 48h.
+                <p className="text-[#5A4D54] text-xs sm:text-sm mt-1">
+                  15 modelos de bolsas e peças femininas em tecidos nobres e acabamento refinado. Escolha até {MAX_MALA_ITEMS} itens para seu provador de 48h.
                 </p>
               </div>
 
@@ -306,26 +306,26 @@ export default function App() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setIsMalaOpen(true)}
-                  className="px-4 py-2 bg-stone-100 border border-stone-200 rounded text-xs font-medium text-stone-800 hover:bg-stone-200 transition-colors flex items-center gap-2 cursor-pointer"
+                  className="px-4 py-2 bg-white border border-[#F0D5DD] rounded-xl text-xs font-medium text-[#181316] hover:bg-[#FAF6F7] hover:border-[#D87F95] transition-colors flex items-center gap-2 cursor-pointer shadow-2xs"
                 >
-                  <ShoppingBag className="w-3.5 h-3.5 text-stone-700" />
-                  <span>Sua Mala: <strong>{malaItems.length}/{MAX_MALA_ITEMS}</strong> peças</span>
+                  <ShoppingBag className="w-3.5 h-3.5 text-[#B84E67]" />
+                  <span>Sua Mala: <strong>{malaItems.length}/{MAX_MALA_ITEMS}</strong> itens</span>
                 </button>
               </div>
             </div>
 
             {/* Interactive Filters: Categories (Segmented functional controls) */}
-            <div className="space-y-4 mb-8 pb-4 border-b border-stone-200">
+            <div className="space-y-4 mb-8 pb-4 border-b border-[#F2DEE4]">
               <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                <span className="text-xs text-stone-400 font-medium shrink-0 mr-1">Categoria:</span>
+                <span className="text-xs text-[#7A6B73] font-medium shrink-0 mr-1">Categoria:</span>
                 {categories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap cursor-pointer ${
+                    className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
                       selectedCategory === cat
-                        ? 'bg-stone-900 text-white shadow-xs'
-                        : 'bg-white border border-stone-200 text-stone-700 hover:border-stone-400'
+                        ? 'bg-[#181316] text-[#FAF6F7] shadow-xs'
+                        : 'bg-white border border-[#F0D5DD] text-[#5A4D54] hover:border-[#D87F95] hover:bg-[#FDF2F4]'
                     }`}
                   >
                     {cat}
@@ -335,15 +335,15 @@ export default function App() {
 
               {/* Style Sub-filter */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-                <span className="text-xs text-stone-400 font-medium shrink-0 mr-1">Estilo:</span>
+                <span className="text-xs text-[#7A6B73] font-medium shrink-0 mr-1">Estilo:</span>
                 {styles.map((st) => (
                   <button
                     key={st}
                     onClick={() => setSelectedStyle(st)}
-                    className={`px-2.5 py-1 text-xs rounded transition-colors whitespace-nowrap cursor-pointer ${
+                    className={`px-2.5 py-1 text-xs rounded-md transition-colors whitespace-nowrap cursor-pointer ${
                       selectedStyle === st
-                        ? 'bg-stone-200 text-stone-900 font-semibold'
-                        : 'text-stone-500 hover:text-stone-900'
+                        ? 'bg-[#FDF2F4] text-[#B84E67] font-semibold border border-[#F2DEE4]'
+                        : 'text-[#7A6B73] hover:text-[#181316]'
                     }`}
                   >
                     {st}
@@ -355,7 +355,7 @@ export default function App() {
                       setSelectedCategory('Todas');
                       setSelectedStyle('Todos');
                     }}
-                    className="text-xs text-amber-900 underline hover:text-stone-900 ml-2 whitespace-nowrap cursor-pointer"
+                    className="text-xs text-[#B84E67] underline hover:text-[#8C2A40] ml-2 whitespace-nowrap cursor-pointer"
                   >
                     Limpar filtros
                   </button>
@@ -379,41 +379,41 @@ export default function App() {
             </div>
 
             {filteredProducts.length === 0 && (
-              <div className="text-center py-12 bg-white rounded border border-stone-200 p-8">
-                <p className="text-stone-600 text-sm">
-                  Nenhuma peça encontrada com os filtros selecionados.
+              <div className="text-center py-12 bg-white rounded-xl border border-[#F0D5DD] p-8">
+                <p className="text-[#5A4D54] text-sm">
+                  Nenhuma peça ou bolsa encontrada com os filtros selecionados.
                 </p>
                 <button
                   onClick={() => {
                     setSelectedCategory('Todas');
                     setSelectedStyle('Todos');
                   }}
-                  className="mt-3 text-xs text-stone-900 font-medium underline cursor-pointer"
+                  className="mt-3 text-xs text-[#B84E67] font-medium underline cursor-pointer"
                 >
-                  Restaurar todas as 15 roupas da coleção
+                  Restaurar todos os 15 itens da coleção
                 </button>
               </div>
             )}
 
             {/* Bottom Callout to Schedule Mala */}
             {malaItems.length > 0 && (
-              <div className="mt-12 p-6 rounded-lg bg-stone-900 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md">
+              <div className="mt-12 p-6 md:p-8 rounded-2xl bg-[#141113] text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md border border-[#F2BAC7]/35">
                 <div>
-                  <span className="text-xs uppercase tracking-wider text-amber-400 font-semibold block">
-                    Provador Particular Agendado
+                  <span className="text-xs uppercase tracking-wider text-[#F5BAC7] font-semibold block">
+                    Provador em Casa · Jô Bolsas Glamour
                   </span>
-                  <h3 className="font-editorial text-2xl font-medium mt-1">
-                    Pronta para receber suas {malaItems.length} peças selecionadas em casa?
+                  <h3 className="font-editorial text-2xl sm:text-3xl font-medium mt-1">
+                    Pronta para receber seus {malaItems.length} itens no conforto do seu closet?
                   </h3>
-                  <p className="text-xs text-stone-400 mt-1 max-w-lg">
-                    Entregamos na sua porta. Você experimenta no seu próprio espelho por 48 horas e nós retiramos o que não ficar.
+                  <p className="text-xs text-[#BFA8B1] mt-1.5 max-w-lg">
+                    Entregamos na sua porta ou deixamos pronto para retirada no balcão da loja. Você experimenta no seu próprio espelho por 48 horas!
                   </p>
                 </div>
                 <button
                   onClick={() => setIsAgendamentoOpen(true)}
-                  className="px-6 py-3 bg-amber-200 text-stone-900 rounded font-medium text-xs sm:text-sm hover:bg-amber-300 transition-colors whitespace-nowrap cursor-pointer flex items-center gap-2 shadow"
+                  className="px-6 py-3.5 bg-[#F5BAC7] text-[#141113] rounded-xl font-semibold text-xs sm:text-sm hover:bg-[#F2A3B4] transition-colors whitespace-nowrap cursor-pointer flex items-center gap-2 shadow-xs"
                 >
-                  <span>Agendar Entrega da Minha Mala</span>
+                  <span>Agendar Minha Mala</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
