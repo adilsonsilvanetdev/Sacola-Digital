@@ -1,23 +1,23 @@
 import React from 'react';
-import { ShoppingBag, Sparkles, Home, CheckCircle2 } from 'lucide-react';
+import { ShoppingBag, Sparkles, Home, CheckCircle2, MessageCircle } from 'lucide-react';
 
 interface HowItWorksProps {
-  onOpenQuiz: () => void;
   onExploreCatalog: () => void;
+  onOpenSellerArea?: () => void;
 }
 
-export const HowItWorks: React.FC<HowItWorksProps> = ({ onOpenQuiz, onExploreCatalog }) => {
+export const HowItWorks: React.FC<HowItWorksProps> = ({ onExploreCatalog, onOpenSellerArea }) => {
   const steps = [
     {
       num: '01',
-      title: 'Você Escolhe ou Pede Curadoria',
-      description: 'Navegue pelo nosso acervo de bolsas e peças femininas ou responda ao quiz rápido para que nossa consultora monte sua mala com opções que combinam com seu estilo.',
+      title: 'Você Escolhe Suas Peças & Bolsas',
+      description: 'Navegue pelo nosso acervo de bolsas e roupas femininas, selecione suas peças favoritas (até 15 itens) para experimentar com calma no seu quarto.',
       icon: ShoppingBag,
     },
     {
       num: '02',
       title: 'Entregamos ou Você Retira',
-      description: 'Sua mala exclusiva é preparada com todo o capricho, higienizada, com tamanhos reservas e bolsas selecionadas. Entregamos na sua casa ou você retira na loja!',
+      description: 'Sua mala exclusiva é preparada pela Josy com todo o capricho, higienizada, com tamanhos reservas e bolsas selecionadas. Entregamos na sua casa ou você retira na loja!',
       icon: Home,
     },
     {
@@ -76,30 +76,31 @@ export const HowItWorks: React.FC<HowItWorksProps> = ({ onOpenQuiz, onExploreCat
           })}
         </div>
 
-        {/* Dual Mode Switch Callout */}
+        {/* Action Callout */}
         <div className="mt-12 p-6 rounded-xl bg-[#FAF6F7] border border-[#F2DEE4] flex flex-col sm:flex-row items-center justify-between gap-6 shadow-2xs">
           <div className="space-y-1 text-center sm:text-left">
             <h4 className="text-base font-semibold text-[#181316]">
-              Qual das duas experiências você prefere hoje?
+              Pronta para montar a sua mala de provador?
             </h4>
             <p className="text-xs sm:text-sm text-[#5A4D54]">
-              Você pode selecionar pessoalmente peça a peça, ou receber uma curadoria exclusiva feita pela nossa consultora.
+              Você seleciona até 15 peças para receber em casa ou retirar no balcão da loja física.
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
             <button
-              onClick={onOpenQuiz}
-              className="px-4 py-2.5 bg-[#181316] text-[#FAF6F7] rounded-lg text-xs font-medium hover:bg-[#2A2025] border border-[#F2BAC7]/30 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#F5BAC7]" />
-              <span>Pedir Curadoria da Consultora</span>
-            </button>
-            <button
               onClick={onExploreCatalog}
-              className="px-4 py-2.5 bg-white text-[#181316] border border-[#F0D5DD] rounded-lg text-xs font-medium hover:bg-[#FDF2F4] hover:text-[#B84E67] transition-colors cursor-pointer"
+              className="px-5 py-2.5 bg-[#181316] text-[#FAF6F7] rounded-lg text-xs font-semibold hover:bg-[#2A2025] border border-[#F2BAC7]/30 transition-colors cursor-pointer shadow-xs"
             >
-              <span>Escolher Minhas Peças</span>
+              <span>Explorar Coleção & Bolsas</span>
             </button>
+            {onOpenSellerArea && (
+              <button
+                onClick={onOpenSellerArea}
+                className="px-4 py-2.5 bg-white text-[#B84E67] border border-[#F0D5DD] rounded-lg text-xs font-medium hover:bg-[#FDF2F4] transition-colors cursor-pointer"
+              >
+                <span>Área da Josy (Vendedora)</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

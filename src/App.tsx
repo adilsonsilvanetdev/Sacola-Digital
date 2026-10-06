@@ -4,7 +4,6 @@ import { Hero } from './components/Hero';
 import { HowItWorks } from './components/HowItWorks';
 import { ProductCard } from './components/ProductCard';
 import { ProductQuickViewModal } from './components/ProductQuickViewModal';
-import { CuratorQuizModal } from './components/CuratorQuizModal';
 import { MalaDrawer } from './components/MalaDrawer';
 import { CheckoutAgendamentoModal } from './components/CheckoutAgendamentoModal';
 import { ConsultoraDashboard } from './components/ConsultoraDashboard';
@@ -12,9 +11,9 @@ import { TestimonialsExperience } from './components/TestimonialsExperience';
 import { Footer } from './components/Footer';
 import { FloatingMalaBar } from './components/FloatingMalaBar';
 
-import { Product, MalaItem, MalaOrder, StylistQuizAnswers } from './types';
+import { Product, MalaItem, MalaOrder } from './types';
 import { SAMPLE_PRODUCTS, MAX_MALA_ITEMS } from './data/products';
-import { Sparkles, SlidersHorizontal, RotateCcw, Check, ShoppingBag, ArrowRight } from 'lucide-react';
+import { SlidersHorizontal, RotateCcw, Check, ShoppingBag, ArrowRight } from 'lucide-react';
 
 export default function App() {
   // Store or Stylist Dashboard view
@@ -22,12 +21,8 @@ export default function App() {
 
   // Mala State
   const [malaItems, setMalaItems] = useState<MalaItem[]>([]);
-  const [curationMode, setCurationMode] = useState<'self' | 'stylist'>('self');
-  const [stylistNote, setStylistNote] = useState<string | undefined>(undefined);
-  const [quizAnswers, setQuizAnswers] = useState<StylistQuizAnswers | undefined>(undefined);
 
   // Modals & Drawers
-  const [isQuizOpen, setIsQuizOpen] = useState(false);
   const [isMalaOpen, setIsMalaOpen] = useState(false);
   const [isAgendamentoOpen, setIsAgendamentoOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
@@ -45,6 +40,7 @@ export default function App() {
       id: 'JB-ML-7842',
       customerName: 'Mariana de Albuquerque',
       customerPhone: '(11) 98123-4567',
+      deliveryType: 'delivery',
       address: 'Alameda Lorena, 1420 - Apto 91',
       neighborhood: 'Jardins',
       city: 'São Paulo - SP',
@@ -83,8 +79,9 @@ export default function App() {
       id: 'JB-ML-6291',
       customerName: 'Beatriz Fontes',
       customerPhone: '(11) 99876-5432',
-      address: 'Rua Bela Cintra, 890 - Casa 3',
-      neighborhood: 'Consolação',
+      deliveryType: 'pickup',
+      address: 'Retirada na loja física (balcão)',
+      neighborhood: 'Loja Física',
       city: 'São Paulo - SP',
       scheduledDate: '2026-10-03',
       scheduledTimeSlot: 'Tarde (14h às 18h)',
@@ -162,21 +159,7 @@ export default function App() {
     );
   };
 
-  // Apply Stylist Curation from Quiz
-  const handleApplyCuration = (
-    items: MalaItem[],
-    answers: StylistQuizAnswers,
-    note: string
-  ) => {
-    setMalaItems(items);
-    setCurationMode('stylist');
-    setStylistNote(note);
-    setQuizAnswers(answers);
-    setIsMalaOpen(true);
-    showToast(`Curadoria da Consultora aplicada com ${items.length} peças!`);
-  };
-
-  // Order completed
+  // Order completed from customer checkout
   const handleOrderSuccess = (newOrder: MalaOrder) => {
     setOrders((prev) => [newOrder, ...prev]);
   };
@@ -214,14 +197,13 @@ export default function App() {
       <Header
         malaItems={malaItems}
         onOpenMala={() => setIsMalaOpen(true)}
-        onOpenQuiz={() => setIsQuizOpen(true)}
         activeView={activeView}
         setActiveView={setActiveView}
         addedToastMessage={addedToastMessage}
       />
 
       {activeView === 'dashboard' ? (
-        /* Seller / Stylist Backoffice View */
+        /* Área da Vendedora Josy (Montar mala para cliente & gerenciar pedidos) */
         <ConsultoraDashboard
           orders={orders}
           onUpdateOrderStatus={handleUpdateOrderStatus}
@@ -233,61 +215,25 @@ export default function App() {
         <main className="flex-1">
           {/* Hero Section */}
           <Hero
-            onOpenQuiz={() => setIsQuizOpen(true)}
             onExploreCatalog={() => {
               const el = document.getElementById('colecao');
               el?.scrollIntoView({ behavior: 'smooth' });
             }}
+            onOpenSellerArea={() => setActiveView('dashboard')}
           />
 
           {/* How it works 4-step Section */}
           <HowItWorks
-            onOpenQuiz={() => setIsQuizOpen(true)}
             onExploreCatalog={() => {
               const el = document.getElementById('colecao');
               el?.scrollIntoView({ behavior: 'smooth' });
             }}
+            onOpenSellerArea={() => setActiveView('dashboard')}
           />
 
           {/* Catalog Section: 15 Fictional Women's Garments */}
           <section id="colecao" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Curated Mode Banner if active */}
-            {curationMode === 'stylist' && stylistNote && (
-              <div className="mb-10 p-5 rounded-lg bg-amber-50 border border-amber-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-amber-900 text-white flex items-center justify-center shrink-0 mt-0.5">
-                    <Sparkles className="w-4 h-4 text-amber-200" />
-                  </div>
-                  <div>
-                    <span className="text-xs uppercase font-semibold text-amber-900 tracking-wider">
-                      Mala com Curadoria da Personal Shopper Ativa
-                    </span>
-                    <p className="text-xs sm:text-sm text-stone-700 mt-0.5">
-                      Você pode manter a curadoria recomendada ou adicionar/substituir peças do catálogo abaixo à vontade (capacidade de até {MAX_MALA_ITEMS} peças).
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 self-end sm:self-auto">
-                  <button
-                    onClick={() => setIsMalaOpen(true)}
-                    className="px-3.5 py-1.5 bg-stone-900 text-white rounded text-xs font-medium hover:bg-stone-800 transition-colors whitespace-nowrap cursor-pointer"
-                  >
-                    Ver Mala ({malaItems.length})
-                  </button>
-                  <button
-                    onClick={() => {
-                      setCurationMode('self');
-                      setStylistNote(undefined);
-                    }}
-                    className="px-3 py-1.5 bg-white border border-stone-300 text-stone-600 rounded text-xs font-medium hover:bg-stone-50 transition-colors whitespace-nowrap cursor-pointer"
-                  >
-                    Trocar para Modo Livre
-                  </button>
-                </div>
-              </div>
-            )}
-
+            
             {/* Catalog Section Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
               <div>
@@ -298,34 +244,38 @@ export default function App() {
                   Coleção Jô Bolsas Glamour
                 </h2>
                 <p className="text-[#5A4D54] text-xs sm:text-sm mt-1">
-                  15 modelos de bolsas e peças femininas em tecidos nobres e acabamento refinado. Escolha até {MAX_MALA_ITEMS} itens para seu provador de 48h.
+                  Adicione até {MAX_MALA_ITEMS} peças na sua mala para experimentar em casa por 48 horas. Pague apenas pelo que decidir ficar!
                 </p>
               </div>
 
-              {/* Mala Capacity Floating Quick Badge */}
+              {/* Counter Pill */}
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setIsMalaOpen(true)}
-                  className="px-4 py-2 bg-white border border-[#F0D5DD] rounded-xl text-xs font-medium text-[#181316] hover:bg-[#FAF6F7] hover:border-[#D87F95] transition-colors flex items-center gap-2 cursor-pointer shadow-2xs"
-                >
-                  <ShoppingBag className="w-3.5 h-3.5 text-[#B84E67]" />
-                  <span>Sua Mala: <strong>{malaItems.length}/{MAX_MALA_ITEMS}</strong> itens</span>
-                </button>
+                <div className="bg-[#FAF6F7] border border-[#F2DEE4] px-4 py-2 rounded-xl flex items-center gap-2">
+                  <ShoppingBag className="w-4 h-4 text-[#B84E67]" />
+                  <span className="text-xs text-[#5A4D54]">Sua Mala:</span>
+                  <span className="text-xs font-semibold text-[#181316]">
+                    {malaItems.length} de {MAX_MALA_ITEMS} peças
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Interactive Filters: Categories (Segmented functional controls) */}
-            <div className="space-y-4 mb-8 pb-4 border-b border-[#F2DEE4]">
+            {/* Filter and Category Navigation */}
+            <div className="space-y-4 mb-10 pb-6 border-b border-[#F2DEE4]">
+              {/* Category Pills */}
               <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                <span className="text-xs text-[#7A6B73] font-medium shrink-0 mr-1">Categoria:</span>
+                <span className="text-xs font-semibold text-stone-500 mr-2 shrink-0 flex items-center gap-1">
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  Categorias:
+                </span>
                 {categories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
+                    className={`text-xs px-3.5 py-1.5 rounded-full transition-all shrink-0 cursor-pointer ${
                       selectedCategory === cat
-                        ? 'bg-[#181316] text-[#FAF6F7] shadow-xs'
-                        : 'bg-white border border-[#F0D5DD] text-[#5A4D54] hover:border-[#D87F95] hover:bg-[#FDF2F4]'
+                        ? 'bg-[#181316] text-[#F5BAC7] font-medium shadow-2xs'
+                        : 'bg-white text-[#5A4D54] border border-[#F0D5DD] hover:bg-[#FAF6F7]'
                     }`}
                   >
                     {cat}
@@ -333,69 +283,75 @@ export default function App() {
                 ))}
               </div>
 
-              {/* Style Sub-filter */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-                <span className="text-xs text-[#7A6B73] font-medium shrink-0 mr-1">Estilo:</span>
+              {/* Style Sub-filter Pills */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none text-xs">
+                <span className="text-xs text-stone-400 mr-2 shrink-0">Estilos:</span>
                 {styles.map((st) => (
                   <button
                     key={st}
                     onClick={() => setSelectedStyle(st)}
-                    className={`px-2.5 py-1 text-xs rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+                    className={`text-xs px-3 py-1 rounded-md transition-colors shrink-0 cursor-pointer ${
                       selectedStyle === st
                         ? 'bg-[#FDF2F4] text-[#B84E67] font-semibold border border-[#F2DEE4]'
-                        : 'text-[#7A6B73] hover:text-[#181316]'
+                        : 'text-stone-500 hover:text-stone-900'
                     }`}
                   >
                     {st}
                   </button>
                 ))}
+
                 {(selectedCategory !== 'Todas' || selectedStyle !== 'Todos') && (
                   <button
                     onClick={() => {
                       setSelectedCategory('Todas');
                       setSelectedStyle('Todos');
                     }}
-                    className="text-xs text-[#B84E67] underline hover:text-[#8C2A40] ml-2 whitespace-nowrap cursor-pointer"
+                    className="text-xs text-[#B84E67] hover:text-[#9C384E] flex items-center gap-1 ml-auto shrink-0 underline cursor-pointer"
                   >
-                    Limpar filtros
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Limpar Filtros</span>
                   </button>
                 )}
               </div>
             </div>
 
-            {/* Products Grid: 3-column desktop layout as per ecommerce reference */}
+            {/* Product Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {filteredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  isInMala={malaItems.some((item) => item.product.id === product.id)}
-                  onAddToMala={handleAddToMala}
-                  onRemoveFromMala={handleRemoveFromMala}
-                  onOpenQuickView={(prod) => setQuickViewProduct(prod)}
-                  isMalaFull={isMalaFull}
-                />
-              ))}
+              {filteredProducts.map((product) => {
+                const isInMala = malaItems.some((item) => item.product.id === product.id);
+
+                return (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    isInMala={isInMala}
+                    onAddToMala={handleAddToMala}
+                    onRemoveFromMala={handleRemoveFromMala}
+                    onOpenQuickView={(prod: Product) => setQuickViewProduct(prod)}
+                    isMalaFull={isMalaFull}
+                  />
+                );
+              })}
             </div>
 
             {filteredProducts.length === 0 && (
-              <div className="text-center py-12 bg-white rounded-xl border border-[#F0D5DD] p-8">
-                <p className="text-[#5A4D54] text-sm">
-                  Nenhuma peça ou bolsa encontrada com os filtros selecionados.
+              <div className="text-center py-16 bg-white rounded-lg border border-stone-200">
+                <p className="text-sm text-stone-500">
+                  Nenhuma peça encontrada para os filtros selecionados.
                 </p>
                 <button
                   onClick={() => {
                     setSelectedCategory('Todas');
                     setSelectedStyle('Todos');
                   }}
-                  className="mt-3 text-xs text-[#B84E67] font-medium underline cursor-pointer"
+                  className="mt-3 text-xs text-stone-900 font-medium underline cursor-pointer"
                 >
-                  Restaurar todos os 15 itens da coleção
+                  Restaurar todas as 15 roupas da coleção
                 </button>
               </div>
             )}
 
-            {/* Bottom Callout to Schedule Mala */}
+            {/* Mala Bottom Callout */}
             {malaItems.length > 0 && (
               <div className="mt-12 p-6 md:p-8 rounded-2xl bg-[#141113] text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md border border-[#F2BAC7]/35">
                 <div>
@@ -435,15 +391,9 @@ export default function App() {
       )}
 
       {/* Footer */}
-      <Footer onOpenQuiz={() => setIsQuizOpen(true)} />
+      <Footer onOpenSellerArea={() => setActiveView('dashboard')} />
 
-      {/* Modals & Drawers */}
-      <CuratorQuizModal
-        isOpen={isQuizOpen}
-        onClose={() => setIsQuizOpen(false)}
-        onApplyCuration={handleApplyCuration}
-      />
-
+      {/* Drawers & Modals */}
       <MalaDrawer
         isOpen={isMalaOpen}
         onClose={() => setIsMalaOpen(false)}
@@ -455,12 +405,6 @@ export default function App() {
           setIsMalaOpen(false);
           setIsAgendamentoOpen(true);
         }}
-        onOpenQuiz={() => {
-          setIsMalaOpen(false);
-          setIsQuizOpen(true);
-        }}
-        curationMode={curationMode}
-        stylistNote={stylistNote}
       />
 
       <ProductQuickViewModal
@@ -476,8 +420,7 @@ export default function App() {
         isOpen={isAgendamentoOpen}
         onClose={() => setIsAgendamentoOpen(false)}
         malaItems={malaItems}
-        curationMode={curationMode}
-        stylistNote={stylistNote}
+        curationMode="self"
         onSuccess={handleOrderSuccess}
       />
     </div>

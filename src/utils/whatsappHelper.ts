@@ -18,8 +18,8 @@ export function cleanPhoneNumber(rawPhone: string): string {
 }
 
 /**
- * Retorna o texto do comprovante da cliente com formato enxuto:
- * Título do produto, Cor, Tamanho e Valor (sem descrições longas).
+ * Retorna o texto do comprovante quando a CLIENTE solicita no site:
+ * A mensagem inicial identifica a vendedora JOSY com dados idênticos de entrega ou retirada!
  */
 export function getClientOrderPlainText(order: MalaOrder): string {
   const itemsList = order.items.map((item, idx) => {
@@ -33,28 +33,33 @@ export function getClientOrderPlainText(order: MalaOrder): string {
 
   const totalValue = order.items.reduce((acc, it) => acc + it.product.price, 0);
 
-  const isPickup = !order.address || order.address.toLowerCase().includes('retirada');
-  const locationText = isPickup
-    ? `📍 *Modalidade:* Retirada presencial na loja física (Jô Bolsas Glamour)`
-    : `📍 *Endereço:* ${order.address}${order.neighborhood ? `, ${order.neighborhood}` : ''}`;
+  const isPickup = order.deliveryType === 'pickup' || !order.address || order.address.toLowerCase().includes('retirada');
+  const locationLines = isPickup
+    ? [`📍 *Modalidade:* Retirada presencial na loja física (Jô Bolsas Glamour - Balcão)`]
+    : [
+        `📍 *Modalidade:* Entrega em domicílio`,
+        `📍 *Endereço de Entrega:* ${order.address}${order.neighborhood ? `, ${order.neighborhood}` : ''}${order.city ? ` - ${order.city}` : ''}`,
+        ...(order.deliveryInstructions ? [`📍 *Ponto de Referência:* ${order.deliveryInstructions}`] : [])
+      ];
 
   return [
     `✨ *JÔ BOLSAS GLAMOUR - Mala Digital* ✨`,
     ``,
-    `Olá, *${order.customerName}*! Seu agendamento de provador em casa foi confirmado com sucesso.`,
+    `Olá, *${order.customerName}*! Aqui é a *Josy* da *JÔ BOLSAS GLAMOUR* 🤍`,
+    `Recebi seu pedido de mala para provar em casa e já estou separando suas peças e bolsas com todo carinho!`,
     ``,
-    `📋 *Protocolo:* N° ${order.id}`,
-    `🗓 *Data Preferencial:* ${order.scheduledDate} (${order.scheduledTimeSlot})`,
-    locationText,
-    `👜 *Peças & Bolsas na Mala:* ${order.items.length}`,
+    `📋 *Protocolo da Mala:* N° ${order.id}`,
+    `🗓 *Data Agendada:* ${order.scheduledDate} (${order.scheduledTimeSlot})`,
+    ...locationLines,
+    `👜 *Quantidade:* ${order.items.length} itens na mala`,
     ``,
     `*ITENS SELECIONADOS:*`,
     itemsList || 'Nenhum item selecionado.',
     ``,
     `💰 *Total Consignado:* R$ ${totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-    `ℹ️ *Lembrete:* 48h para provar com seus looks em casa. Você só paga o que decidir ficar!`,
+    `ℹ️ *Lembrete:* Você tem 48h para provar no seu espelho com tranquilidade e só acerta o que decidir ficar!`,
     ``,
-    `Desejamos uma maravilhosa experiência de glamour! 🤍`,
+    `Qualquer dúvida estou à sua disposição por aqui! Um beijo, Josy 🤍`,
   ].join('\n');
 }
 
@@ -68,7 +73,8 @@ export function buildClientConfirmationWhatsAppLink(order: MalaOrder): string {
 }
 
 /**
- * Retorna o texto puro da curadoria enviada pela vendedora (formato conciso).
+ * Retorna o texto quando a VENDEDORA JOSY monta a mala e envia para a cliente:
+ * A mensagem inicial identifica a vendedora JOSY com dados idênticos de entrega ou retirada!
  */
 export function getStylistOrderPlainText(order: MalaOrder, customLetter?: string): string {
   const firstName = order.customerName ? order.customerName.trim().split(' ')[0] : 'querida';
@@ -82,37 +88,49 @@ export function getStylistOrderPlainText(order: MalaOrder, customLetter?: string
     return `${idx + 1}. *${p.name}*\n   Cor: ${p.color} · Tam: ${sizeInfo} · R$ ${p.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   }).join('\n\n');
 
+  const totalValue = order.items.reduce((acc, it) => acc + it.product.price, 0);
+
   const letterText =
     customLetter ||
     order.stylistNote ||
-    'Preparei sua mala com muito carinho e glamour! Todas as peças e bolsas foram higienizadas para seu provador em casa.';
+    'Preparei uma seleção especial de bolsas e peças exclusivas pensando em você para provar com calma em casa!';
 
-  const isPickup = !order.address || order.address.toLowerCase().includes('retirada');
-  const locationText = isPickup
-    ? `📍 *Modalidade:* Retirada na loja física (Jô Bolsas Glamour)`
-    : `📍 *Endereço:* ${order.address}`;
+  const isPickup = order.deliveryType === 'pickup' || !order.address || order.address.toLowerCase().includes('retirada');
+  const locationLines = isPickup
+    ? [`📍 *Modalidade:* Retirada presencial na loja física (Jô Bolsas Glamour - Balcão)`]
+    : [
+        `📍 *Modalidade:* Entrega em domicílio`,
+        `📍 *Endereço de Entrega:* ${order.address}${order.neighborhood ? `, ${order.neighborhood}` : ''}${order.city ? ` - ${order.city}` : ''}`,
+        ...(order.deliveryInstructions ? [`📍 *Ponto de Referência:* ${order.deliveryInstructions}`] : [])
+      ];
 
   return [
-    `Olá, *${firstName}*! Aqui é sua consultora da *JÔ BOLSAS GLAMOUR* 🤍`,
+    `✨ *JÔ BOLSAS GLAMOUR - Mala Digital* ✨`,
     ``,
-    `Sua *Mala N° ${order.id}* com *${order.items.length} itens* está pronta para você!`,
+    `Olá, *${order.customerName}*! Aqui é a *Josy* da *JÔ BOLSAS GLAMOUR* 🤍`,
+    `Preparei sua *Mala N° ${order.id}* com *${order.items.length} itens* exclusivos para seu provador de 48 horas!`,
     ``,
-    `💌 *Recado da Consultora:*`,
+    `💌 *Recadinho da Josy:*`,
     `"${letterText}"`,
+    ``,
+    `📋 *Protocolo da Mala:* N° ${order.id}`,
+    `🗓 *Data Agendada:* ${order.scheduledDate} (${order.scheduledTimeSlot})`,
+    ...locationLines,
+    `👜 *Quantidade:* ${order.items.length} itens na mala`,
     ``,
     `*ITENS DA SUA MALA:*`,
     itemsList || 'Nenhum item selecionado.',
     ``,
-    `🚚 *Previsão:* ${order.scheduledDate} (${order.scheduledTimeSlot})`,
-    locationText,
+    `💰 *Total Consignado:* R$ ${totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+    `ℹ️ *Lembrete:* Você tem 48 horas para provar com seus sapatos e espelho com total calma. Você só paga o que amar!`,
     ``,
-    `Você tem 48 horas para provar e combinar tudo com calma no seu quarto. Qualquer dúvida, pode me chamar por aqui!`,
+    `Me confirme se está tudo certinho por aqui! Um beijo, Josy 🤍`,
   ].join('\n');
 }
 
 /**
- * Link acionado pela VENDEDORA / CONSULTORA no painel para falar diretamente
- * com a CLIENTE no WhatsApp dela, enviando a curadoria concisa.
+ * Link acionado pela VENDEDORA JOSY no painel para falar diretamente
+ * com a CLIENTE no WhatsApp dela, enviando a seleção completa.
  */
 export function buildStylistToClientWhatsAppLink(
   order: MalaOrder,
@@ -124,14 +142,14 @@ export function buildStylistToClientWhatsAppLink(
 }
 
 /**
- * Link para a cliente falar com o atendimento/concierge da loja.
+ * Link para a cliente falar com o atendimento da loja.
  */
 export function buildStoreConciergeWhatsAppLink(order?: MalaOrder): string {
   const storePhone = '5511999998888';
   if (!order) {
-    const defaultText = `Olá Jô Bolsas Glamour! Gostaria de informações sobre o serviço de Mala Digital em Casa.`;
+    const defaultText = `Olá Josy da Jô Bolsas Glamour! Gostaria de informações sobre o serviço de Mala em Casa.`;
     return `https://wa.me/${storePhone}?text=${encodeURIComponent(defaultText)}`;
   }
-  const text = `Olá Jô Bolsas Glamour! Gostaria de falar sobre a minha solicitação de Mala N° ${order.id} agendada para ${order.scheduledDate}.`;
+  const text = `Olá Josy da Jô Bolsas Glamour! Gostaria de falar sobre a minha Mala N° ${order.id} agendada para ${order.scheduledDate}.`;
   return `https://wa.me/${storePhone}?text=${encodeURIComponent(text)}`;
 }

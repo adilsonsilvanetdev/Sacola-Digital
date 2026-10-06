@@ -1,8 +1,12 @@
 import React from 'react';
-import { Sparkles, MessageCircle, MapPin, Clock, ShieldCheck } from 'lucide-react';
+import { MessageCircle, MapPin, Clock, ShieldCheck, UserCheck } from 'lucide-react';
 import { JoBolsasLogo } from './JoBolsasLogo';
 
-export const Footer: React.FC<{ onOpenQuiz: () => void }> = ({ onOpenQuiz }) => {
+interface FooterProps {
+  onOpenSellerArea?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenSellerArea }) => {
   return (
     <footer className="bg-[#141113] text-[#F0D5DD] text-xs py-14 border-t border-[#2A2025]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,15 +30,17 @@ export const Footer: React.FC<{ onOpenQuiz: () => void }> = ({ onOpenQuiz }) => 
               Serviços Exclusivos
             </h4>
             <ul className="space-y-2 text-[#BFA8B1]">
-              <li>
-                <button
-                  onClick={onOpenQuiz}
-                  className="hover:text-[#F5BAC7] transition-colors cursor-pointer text-left flex items-center gap-1.5"
-                >
-                  <Sparkles className="w-3 h-3 text-[#F5BAC7]" />
-                  <span>Curadoria da Consultora de Estilo</span>
-                </button>
-              </li>
+              {onOpenSellerArea && (
+                <li>
+                  <button
+                    onClick={onOpenSellerArea}
+                    className="hover:text-[#F5BAC7] transition-colors cursor-pointer text-left flex items-center gap-1.5"
+                  >
+                    <UserCheck className="w-3 h-3 text-[#F5BAC7]" />
+                    <span>Área da Vendedora Josy</span>
+                  </button>
+                </li>
+              )}
               <li>
                 <a href="#como-funciona" className="hover:text-[#F5BAC7] transition-colors">
                   Como Funciona o Provador 48h
@@ -58,45 +64,50 @@ export const Footer: React.FC<{ onOpenQuiz: () => void }> = ({ onOpenQuiz }) => 
             </h4>
             <div className="space-y-2 text-[#BFA8B1]">
               <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-[#F5BAC7] shrink-0 mt-0.5" />
-                <span>Entregas presenciais e retirada física na loja em São Paulo e região</span>
+                <MapPin className="w-3.5 h-3.5 text-[#F5BAC7] shrink-0 mt-0.5" />
+                <span>
+                  Retirada no balcão da loja física ou entregas na Grande São Paulo e região.
+                </span>
               </div>
               <div className="flex items-start gap-2">
-                <Clock className="w-4 h-4 text-[#F5BAC7] shrink-0 mt-0.5" />
-                <span>Segunda a Sábado: 09h às 19h</span>
+                <Clock className="w-3.5 h-3.5 text-[#F5BAC7] shrink-0 mt-0.5" />
+                <span>
+                  Segunda a Sábado, das 09h às 19h (turnos manhã, tarde e noite).
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Direct Concierge Contact */}
+          {/* Concierge & Contact */}
           <div className="space-y-3">
-            <h4 className="text-white font-semibold tracking-wider uppercase text-[11px] mb-2">
-              Atendimento Glamour
+            <h4 className="text-white font-semibold tracking-wider uppercase text-[11px]">
+              Atendimento Direto com Josy
             </h4>
-            <p className="text-[#BFA8B1] text-xs">
-              Dúvidas sobre modelos, cores ou retirada de malas? Fale direto com a nossa equipe:
+            <p className="text-[#BFA8B1] leading-relaxed">
+              Dúvidas sobre o provador em casa ou ajuste da sua mala? Fale conosco no WhatsApp.
             </p>
             <a
-              href="https://wa.me/5511999998888?text=Olá Jô Bolsas Glamour! Gostaria de tirar uma dúvida sobre a Mala de Peças e Bolsas."
+              href="https://wa.me/5511999998888?text=Olá Josy da Jô Bolsas Glamour! Gostaria de tirar uma dúvida sobre a Mala Digital."
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 px-3.5 py-2.5 bg-[#251E22] hover:bg-[#32282E] text-[#FAF6F7] hover:text-[#F5BAC7] rounded-lg border border-[#F2BAC7]/30 transition-colors shadow-xs"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#251E22] hover:bg-[#32282E] text-[#F9D6DF] hover:text-white rounded-lg border border-[#F2BAC7]/30 transition-colors"
             >
               <MessageCircle className="w-3.5 h-3.5 text-[#F5BAC7]" />
-              <span>WhatsApp: (11) 99999-8888</span>
+              <span>WhatsApp da Loja</span>
             </a>
           </div>
 
         </div>
 
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-[#8A7880] text-[11px] gap-4">
-          <p>© {new Date().getFullYear()} JÔ BOLSAS GLAMOUR. Todos os direitos reservados. Moda feminina & bolsas de luxo.</p>
-          <div className="flex items-center gap-4">
-            <span className="hover:text-[#F5BAC7] transition-colors cursor-pointer">Privacidade de Dados</span>
-            <span>·</span>
-            <span className="hover:text-[#F5BAC7] transition-colors cursor-pointer">Termos de Consignação</span>
-            <span>·</span>
-            <span className="hover:text-[#F5BAC7] transition-colors cursor-pointer">Regras de Higienização</span>
+        {/* Bottom copyright */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-[#8A7981] text-[11px] gap-4">
+          <p>
+            © {new Date().getFullYear()} Jô Bolsas Glamour. Todos os direitos reservados.
+          </p>
+          <div className="flex items-center gap-6">
+            <span>Privacidade & Consignação</span>
+            <span>Termos de Prova</span>
+            <span>Segurança de Dados</span>
           </div>
         </div>
       </div>

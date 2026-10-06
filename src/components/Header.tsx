@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, Sparkles, UserCheck, Check } from 'lucide-react';
+import { ShoppingBag, UserCheck, Check, Sparkles } from 'lucide-react';
 import { MalaItem } from '../types';
 import { MAX_MALA_ITEMS } from '../data/products';
 import { JoBolsasLogo } from './JoBolsasLogo';
@@ -7,7 +7,6 @@ import { JoBolsasLogo } from './JoBolsasLogo';
 interface HeaderProps {
   malaItems: MalaItem[];
   onOpenMala: () => void;
-  onOpenQuiz: () => void;
   activeView: 'store' | 'dashboard';
   setActiveView: (view: 'store' | 'dashboard') => void;
   addedToastMessage?: string | null;
@@ -16,7 +15,6 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   malaItems,
   onOpenMala,
-  onOpenQuiz,
   activeView,
   setActiveView,
   addedToastMessage,
@@ -65,13 +63,6 @@ export const Header: React.FC<HeaderProps> = ({
               Como Funciona
             </button>
             <button
-              onClick={onOpenQuiz}
-              className="flex items-center gap-1.5 text-[#B84E67] hover:text-[#9A384F] transition-colors font-medium cursor-pointer"
-            >
-              <Sparkles className="w-4 h-4 text-[#D96B85]" />
-              <span>Curadoria de Estilo</span>
-            </button>
-            <button
               onClick={() => {
                 setActiveView('store');
                 const el = document.getElementById('depoimentos');
@@ -81,23 +72,30 @@ export const Header: React.FC<HeaderProps> = ({
             >
               Experiência no Quarto
             </button>
+            <button
+              onClick={() => setActiveView('dashboard')}
+              className="flex items-center gap-1.5 text-[#B84E67] hover:text-[#9A384F] transition-colors font-semibold cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#B84E67]" />
+              <span>Montar Mala (Josy)</span>
+            </button>
           </nav>
 
           {/* Zone 3: Primary Actions */}
           <div className="flex items-center gap-3">
-            {/* Toggle Seller / Dashboard Mode */}
+            {/* Dedicated Seller Area button for Josy */}
             <button
               onClick={() => setActiveView(activeView === 'store' ? 'dashboard' : 'store')}
-              className={`text-xs font-medium px-3 py-2 rounded-lg border transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              className={`text-xs font-semibold px-3.5 py-2 rounded-lg border transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer shadow-2xs ${
                 activeView === 'dashboard'
-                  ? 'bg-[#B84E67] text-white border-[#B84E67] shadow-xs'
-                  : 'bg-white text-[#5A4D54] border-[#F0D5DD] hover:bg-[#FDF2F4] hover:text-[#B84E67]'
+                  ? 'bg-[#181316] text-[#F5BAC7] border-[#181316]'
+                  : 'bg-white text-[#B84E67] border-[#F0D5DD] hover:bg-[#FDF2F4]'
               }`}
-              title="Alternar entre visão da cliente e painel da vendedora"
+              title="Área da Vendedora Josy: Escolha peças para clientes e envie no WhatsApp"
             >
               <UserCheck className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">
-                {activeView === 'store' ? 'Área da Consultora' : 'Voltar à Loja'}
+              <span>
+                {activeView === 'store' ? 'Área da Vendedora Josy' : 'Voltar à Loja'}
               </span>
             </button>
 

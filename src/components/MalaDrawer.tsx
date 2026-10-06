@@ -11,9 +11,6 @@ interface MalaDrawerProps {
   onUpdateSize: (productId: string, newSize: string) => void;
   onToggleSecondarySize: (productId: string) => void;
   onOpenAgendamento: () => void;
-  onOpenQuiz: () => void;
-  curationMode: 'self' | 'stylist';
-  stylistNote?: string;
 }
 
 export const MalaDrawer: React.FC<MalaDrawerProps> = ({
@@ -24,9 +21,6 @@ export const MalaDrawer: React.FC<MalaDrawerProps> = ({
   onUpdateSize,
   onToggleSecondarySize,
   onOpenAgendamento,
-  onOpenQuiz,
-  curationMode,
-  stylistNote,
 }) => {
   if (!isOpen) return null;
 
@@ -49,7 +43,7 @@ export const MalaDrawer: React.FC<MalaDrawerProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-[11px] uppercase tracking-wider text-[#B84E67] font-semibold">
-                  {curationMode === 'stylist' ? 'Curadoria Personal Shopper' : 'Sua Seleção'}
+                  Provador Particular · 48 Horas em Casa
                 </span>
                 <h2 className="font-editorial text-2xl font-medium text-[#181316]">
                   Mala Jô Bolsas Glamour
@@ -86,17 +80,6 @@ export const MalaDrawer: React.FC<MalaDrawerProps> = ({
                 )}
               </div>
             </div>
-
-            {/* Stylist note snippet if curated */}
-            {curationMode === 'stylist' && stylistNote && (
-              <div className="mt-3 p-2.5 rounded-lg bg-[#FDF2F4] border border-[#F2DEE4] text-[11px] text-[#5A4D54] italic">
-                <div className="font-semibold text-[#B84E67] not-italic mb-0.5 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-[#B84E67]" />
-                  <span>Nota da Consultora:</span>
-                </div>
-                "{stylistNote.slice(0, 140)}..."
-              </div>
-            )}
           </div>
 
           {/* Items List */}
