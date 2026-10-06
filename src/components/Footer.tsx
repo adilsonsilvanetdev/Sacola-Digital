@@ -1,9 +1,9 @@
 import React from 'react';
-import { MessageCircle, MapPin, Clock, ShieldCheck, UserCheck } from 'lucide-react';
+import { MessageCircle, MapPin, Clock, ShieldCheck, Lock } from 'lucide-react';
 import { JoBolsasLogo } from './JoBolsasLogo';
 
 interface FooterProps {
-  onOpenSellerArea?: () => void;
+  onOpenSellerArea: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onOpenSellerArea }) => {
@@ -30,17 +30,6 @@ export const Footer: React.FC<FooterProps> = ({ onOpenSellerArea }) => {
               Serviços Exclusivos
             </h4>
             <ul className="space-y-2 text-[#BFA8B1]">
-              {onOpenSellerArea && (
-                <li>
-                  <button
-                    onClick={onOpenSellerArea}
-                    className="hover:text-[#F5BAC7] transition-colors cursor-pointer text-left flex items-center gap-1.5"
-                  >
-                    <UserCheck className="w-3 h-3 text-[#F5BAC7]" />
-                    <span>Área da Vendedora Josy</span>
-                  </button>
-                </li>
-              )}
               <li>
                 <a href="#como-funciona" className="hover:text-[#F5BAC7] transition-colors">
                   Como Funciona o Provador 48h
@@ -53,6 +42,16 @@ export const Footer: React.FC<FooterProps> = ({ onOpenSellerArea }) => {
               </li>
               <li>
                 <span className="text-[#7A6A71]">Mala Delivery Corporativa (Em Breve)</span>
+              </li>
+              <li className="pt-2">
+                <button
+                  onClick={onOpenSellerArea}
+                  className="hover:text-[#F5BAC7] transition-colors cursor-pointer text-left flex items-center gap-1.5 text-[11px] text-[#A6939B]"
+                  title="Acesso exclusivo para a equipe da loja"
+                >
+                  <Lock className="w-3 h-3 text-[#F5BAC7]" />
+                  <span>Área da Equipe / Josy (Protegido por Senha)</span>
+                </button>
               </li>
             </ul>
           </div>

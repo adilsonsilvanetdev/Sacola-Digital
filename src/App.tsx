@@ -10,6 +10,7 @@ import { ConsultoraDashboard } from './components/ConsultoraDashboard';
 import { TestimonialsExperience } from './components/TestimonialsExperience';
 import { Footer } from './components/Footer';
 import { FloatingMalaBar } from './components/FloatingMalaBar';
+import { SellerAuthModal } from './components/SellerAuthModal';
 
 import { Product, MalaItem, MalaOrder } from './types';
 import { SAMPLE_PRODUCTS, MAX_MALA_ITEMS } from './data/products';
@@ -18,6 +19,15 @@ import { SlidersHorizontal, RotateCcw, Check, ShoppingBag, ArrowRight } from 'lu
 export default function App() {
   // Store or Stylist Dashboard view
   const [activeView, setActiveView] = useState<'store' | 'dashboard'>('store');
+
+  // Seller Authentication & Security (PIN/Senha)
+  const [isSellerAuthenticated, setIsSellerAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem('jb_seller_auth') === 'true';
+  });
+  const [sellerPin, setSellerPin] = useState<string>(() => {
+    return localStorage.getItem('jb_seller_pin') || 'josy2026';
+  });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   // Mala State
   const [malaItems, setMalaItems] = useState<MalaItem[]>([]);
@@ -110,6 +120,33 @@ export default function App() {
     },
   ]);
 
+  // Handle Opening Seller Area (Protected by Password/PIN)
+  const handleOpenSellerArea = () => {
+    if (isSellerAuthenticated) {
+      setActiveView('dashboard');
+    } else {
+      setIsAuthModalOpen(true);
+    }
+  };
+
+  const handleSellerAuthenticated = () => {
+    setIsSellerAuthenticated(true);
+    sessionStorage.setItem('jb_seller_auth', 'true');
+    setIsAuthModalOpen(false);
+    setActiveView('dashboard');
+  };
+
+  const handleLogoutSeller = () => {
+    setIsSellerAuthenticated(false);
+    sessionStorage.removeItem('jb_seller_auth');
+    setActiveView('store');
+  };
+
+  const handleUpdatePin = (newPin: string) => {
+    setSellerPin(newPin);
+    localStorage.setItem('jb_seller_pin', newPin);
+  };
+
   // Add Item to Mala
   const handleAddToMala = (product: Product, size: string) => {
     if (malaItems.length >= MAX_MALA_ITEMS) {
@@ -199,16 +236,21 @@ export default function App() {
         onOpenMala={() => setIsMalaOpen(true)}
         activeView={activeView}
         setActiveView={setActiveView}
+        onOpenSellerAuth={handleOpenSellerArea}
+        isSellerAuthenticated={isSellerAuthenticated}
         addedToastMessage={addedToastMessage}
       />
 
       {activeView === 'dashboard' ? (
-        /* Área da Vendedora Josy (Montar mala para cliente & gerenciar pedidos) */
+        /* Área da Vendedora Josy (Protegida por Senha / PIN) */
         <ConsultoraDashboard
           orders={orders}
           onUpdateOrderStatus={handleUpdateOrderStatus}
           onReturnToStore={() => setActiveView('store')}
           onCreateOrderByStylist={(newOrder) => setOrders((prev) => [newOrder, ...prev])}
+          onLogout={handleLogoutSeller}
+          currentPin={sellerPin}
+          onUpdatePin={handleUpdatePin}
         />
       ) : (
         /* Boutique Customer Storefront View */
@@ -219,7 +261,6 @@ export default function App() {
               const el = document.getElementById('colecao');
               el?.scrollIntoView({ behavior: 'smooth' });
             }}
-            onOpenSellerArea={() => setActiveView('dashboard')}
           />
 
           {/* How it works 4-step Section */}
@@ -228,7 +269,6 @@ export default function App() {
               const el = document.getElementById('colecao');
               el?.scrollIntoView({ behavior: 'smooth' });
             }}
-            onOpenSellerArea={() => setActiveView('dashboard')}
           />
 
           {/* Catalog Section: 15 Fictional Women's Garments */}
@@ -391,7 +431,7 @@ export default function App() {
       )}
 
       {/* Footer */}
-      <Footer onOpenSellerArea={() => setActiveView('dashboard')} />
+      <Footer onOpenSellerArea={handleOpenSellerArea} />
 
       {/* Drawers & Modals */}
       <MalaDrawer
@@ -422,6 +462,14 @@ export default function App() {
         malaItems={malaItems}
         curationMode="self"
         onSuccess={handleOrderSuccess}
+      />
+
+      {/* Modal de Autenticação / Senha da Vendedora Josy */}
+      <SellerAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthenticated={handleSellerAuthenticated}
+        currentPin={sellerPin}
       />
     </div>
   );

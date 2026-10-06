@@ -3,10 +3,9 @@ import { ShoppingBag, Sparkles, Home, CheckCircle2, MessageCircle } from 'lucide
 
 interface HowItWorksProps {
   onExploreCatalog: () => void;
-  onOpenSellerArea?: () => void;
 }
 
-export const HowItWorks: React.FC<HowItWorksProps> = ({ onExploreCatalog, onOpenSellerArea }) => {
+export const HowItWorks: React.FC<HowItWorksProps> = ({ onExploreCatalog }) => {
   const steps = [
     {
       num: '01',
@@ -93,14 +92,15 @@ export const HowItWorks: React.FC<HowItWorksProps> = ({ onExploreCatalog, onOpen
             >
               <span>Explorar Coleção & Bolsas</span>
             </button>
-            {onOpenSellerArea && (
-              <button
-                onClick={onOpenSellerArea}
-                className="px-4 py-2.5 bg-white text-[#B84E67] border border-[#F0D5DD] rounded-lg text-xs font-medium hover:bg-[#FDF2F4] transition-colors cursor-pointer"
-              >
-                <span>Área da Josy (Vendedora)</span>
-              </button>
-            )}
+            <a
+              href="https://wa.me/5511999998888?text=Olá Josy! Gostaria de tirar uma dúvida sobre a Mala Jô Bolsas Glamour."
+              target="_blank"
+              rel="noreferrer"
+              className="px-4 py-2.5 bg-white text-[#B84E67] border border-[#F0D5DD] rounded-lg text-xs font-medium hover:bg-[#FDF2F4] transition-colors cursor-pointer flex items-center gap-1.5"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span>Tirar Dúvida no WhatsApp</span>
+            </a>
           </div>
         </div>
       </div>

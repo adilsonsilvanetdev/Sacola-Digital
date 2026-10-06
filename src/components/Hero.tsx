@@ -1,13 +1,12 @@
 import React from 'react';
-import { ArrowRight, ShieldCheck, Clock, RefreshCw, ShoppingBag, Sparkles, UserCheck } from 'lucide-react';
+import { ShieldCheck, Clock, RefreshCw, ShoppingBag, ArrowRight } from 'lucide-react';
 import { HERO_IMAGE } from '../data/products';
 
 interface HeroProps {
   onExploreCatalog: () => void;
-  onOpenSellerArea?: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onExploreCatalog, onOpenSellerArea }) => {
+export const Hero: React.FC<HeroProps> = ({ onExploreCatalog }) => {
   return (
     <section className="relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24 border-b border-[#F2DEE4]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,15 +37,16 @@ export const Hero: React.FC<HeroProps> = ({ onExploreCatalog, onOpenSellerArea }
                 <span>Escolher Minhas Peças na Coleção</span>
               </button>
 
-              {onOpenSellerArea && (
-                <button
-                  onClick={onOpenSellerArea}
-                  className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white text-[#B84E67] border border-[#F0D5DD] rounded-lg hover:bg-[#FDF2F4] transition-colors text-sm font-semibold cursor-pointer shadow-2xs"
-                >
-                  <UserCheck className="w-4 h-4" />
-                  <span>Área da Vendedora Josy</span>
-                </button>
-              )}
+              <button
+                onClick={() => {
+                  const el = document.getElementById('como-funciona');
+                  el?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white text-[#4A3E44] border border-[#F0D5DD] rounded-lg hover:bg-[#FDF2F4] hover:text-[#B84E67] transition-colors text-sm font-medium cursor-pointer shadow-2xs"
+              >
+                <span>Como Funciona o Provador</span>
+                <ArrowRight className="w-4 h-4 text-[#B84E67]" />
+              </button>
             </div>
 
             {/* Trust and Comfort Metrics */}
@@ -97,7 +97,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreCatalog, onOpenSellerArea }
               <div className="absolute bottom-6 left-6 right-6 text-white">
                 <div className="text-xs uppercase tracking-wider text-[#F5BAC7] font-semibold flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#F5BAC7]" />
-                  <span>Jô Bolsas Glamour · Atendimento da Josy</span>
+                  <span>Jô Bolsas Glamour · Atendimento Personalizado</span>
                 </div>
                 <div className="font-editorial text-xl sm:text-2xl mt-1 text-white font-medium">
                   Peças e bolsas selecionadas no cabide, higienizadas e prontas para você brilhar.

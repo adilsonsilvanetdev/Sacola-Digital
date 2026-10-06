@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, UserCheck, Check, Sparkles } from 'lucide-react';
+import { ShoppingBag, Lock, ArrowLeft, Check } from 'lucide-react';
 import { MalaItem } from '../types';
 import { MAX_MALA_ITEMS } from '../data/products';
 import { JoBolsasLogo } from './JoBolsasLogo';
@@ -9,6 +9,8 @@ interface HeaderProps {
   onOpenMala: () => void;
   activeView: 'store' | 'dashboard';
   setActiveView: (view: 'store' | 'dashboard') => void;
+  onOpenSellerAuth: () => void;
+  isSellerAuthenticated: boolean;
   addedToastMessage?: string | null;
 }
 
@@ -17,6 +19,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenMala,
   activeView,
   setActiveView,
+  onOpenSellerAuth,
+  isSellerAuthenticated,
   addedToastMessage,
 }) => {
   return (
@@ -40,7 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
             <JoBolsasLogo variant="full" size="md" />
           </button>
 
-          {/* Zone 2: Clean Navigation links */}
+          {/* Zone 2: Customer Navigation links (Strictly customer-facing) */}
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-[#5A4D54]">
             <button
               onClick={() => {
@@ -72,32 +76,30 @@ export const Header: React.FC<HeaderProps> = ({
             >
               Experiência no Quarto
             </button>
-            <button
-              onClick={() => setActiveView('dashboard')}
-              className="flex items-center gap-1.5 text-[#B84E67] hover:text-[#9A384F] transition-colors font-semibold cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#B84E67]" />
-              <span>Montar Mala (Josy)</span>
-            </button>
           </nav>
 
-          {/* Zone 3: Primary Actions */}
+          {/* Zone 3: Actions */}
           <div className="flex items-center gap-3">
-            {/* Dedicated Seller Area button for Josy */}
-            <button
-              onClick={() => setActiveView(activeView === 'store' ? 'dashboard' : 'store')}
-              className={`text-xs font-semibold px-3.5 py-2 rounded-lg border transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer shadow-2xs ${
-                activeView === 'dashboard'
-                  ? 'bg-[#181316] text-[#F5BAC7] border-[#181316]'
-                  : 'bg-white text-[#B84E67] border-[#F0D5DD] hover:bg-[#FDF2F4]'
-              }`}
-              title="Área da Vendedora Josy: Escolha peças para clientes e envie no WhatsApp"
-            >
-              <UserCheck className="w-3.5 h-3.5" />
-              <span>
-                {activeView === 'store' ? 'Área da Vendedora Josy' : 'Voltar à Loja'}
-              </span>
-            </button>
+            {/* If in dashboard mode, show return to store */}
+            {activeView === 'dashboard' ? (
+              <button
+                onClick={() => setActiveView('store')}
+                className="text-xs font-semibold px-3 py-2 bg-[#181316] text-[#FAF6F7] rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Voltar à Loja</span>
+              </button>
+            ) : (
+              /* Discreet lock for seller Josy */
+              <button
+                onClick={onOpenSellerAuth}
+                className="p-2 text-stone-400 hover:text-[#B84E67] hover:bg-[#FDF2F4] rounded-lg transition-colors cursor-pointer"
+                title="Acesso Restrito · Vendedora Josy (Requer Senha)"
+                aria-label="Acesso Restrito Vendedora"
+              >
+                <Lock className="w-4 h-4" />
+              </button>
+            )}
 
             {/* Mala Bag Button */}
             <button

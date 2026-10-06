@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { 
   Package, Clock, CheckCircle2, User, MapPin, Sparkles, MessageCircle, 
   FileText, Send, RefreshCw, ArrowLeft, Plus, ExternalLink, Copy, Store, 
-  Search, Trash2, Check, ShoppingBag, Eye, Calendar, Phone, Home, AlertCircle
+  Search, Trash2, Check, ShoppingBag, Eye, Calendar, Phone, Home, AlertCircle,
+  Lock, KeyRound
 } from 'lucide-react';
 import { MalaOrder, MalaItem, Product } from '../types';
 import { SAMPLE_PRODUCTS, MAX_MALA_ITEMS } from '../data/products';
@@ -17,6 +18,9 @@ interface ConsultoraDashboardProps {
   onUpdateOrderStatus: (orderId: string, newStatus: MalaOrder['status']) => void;
   onReturnToStore: () => void;
   onCreateOrderByStylist?: (order: MalaOrder) => void;
+  onLogout?: () => void;
+  currentPin?: string;
+  onUpdatePin?: (newPin: string) => void;
 }
 
 export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
@@ -24,9 +28,15 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
   onUpdateOrderStatus,
   onReturnToStore,
   onCreateOrderByStylist,
+  onLogout,
+  currentPin = 'josy2026',
+  onUpdatePin,
 }) => {
   // Navigation tabs: 'create' (Montar Mala) or 'orders' (Gerenciar Malas)
   const [activeTab, setActiveTab] = useState<'create' | 'orders'>('create');
+  const [isChangingPin, setIsChangingPin] = useState(false);
+  const [newPinValue, setNewPinValue] = useState('');
+  const [pinChangeSuccess, setPinChangeSuccess] = useState(false);
 
   // Selected order for inspection in 'orders' tab
   const [selectedOrderId, setSelectedOrderId] = useState<string>(orders[0]?.id || '');
@@ -294,14 +304,34 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={() => setIsChangingPin(true)}
+              className="px-3 py-2 bg-[#251E22] text-[#F0D5DD] hover:text-white hover:bg-[#32282E] border border-[#F2BAC7]/30 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+              title="Alterar o PIN / Senha de acesso da vendedora"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-[#F5BAC7]" />
+              <span>Alterar Senha</span>
+            </button>
+
             <button
               onClick={onReturnToStore}
-              className="px-4 py-2 bg-[#251E22] text-[#F0D5DD] hover:text-white hover:bg-[#32282E] border border-[#F2BAC7]/30 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-3 py-2 bg-[#251E22] text-[#F0D5DD] hover:text-white hover:bg-[#32282E] border border-[#F2BAC7]/30 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Voltar à Loja</span>
+              <span>Ver Loja</span>
             </button>
+
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="px-3 py-2 bg-red-950/60 hover:bg-red-900 text-red-200 hover:text-white border border-red-700/50 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title="Sair e bloquear acesso à área da vendedora"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Bloquear / Sair</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -1094,6 +1124,92 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
         )}
 
       </div>
+
+      {/* Modal para Alterar Senha / PIN da Josy */}
+      {isChangingPin && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-[#F2DEE4] space-y-4 animate-fadeIn">
+            <div className="flex items-center justify-between border-b border-[#F2DEE4] pb-3">
+              <div className="flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-[#B84E67]" />
+                <h3 className="font-editorial text-lg font-medium text-[#181316]">
+                  Alterar Senha de Acesso
+                </h3>
+              </div>
+              <button
+                onClick={() => {
+                  setIsChangingPin(false);
+                  setPinChangeSuccess(false);
+                }}
+                className="text-stone-400 hover:text-stone-700 text-xs font-semibold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-[#5A4D54]">
+              Defina uma nova senha para proteger a Área da Vendedora Josy contra acessos públicos.
+            </p>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (newPinValue.trim().length < 3) {
+                  alert('A senha deve ter pelo menos 3 caracteres.');
+                  return;
+                }
+                if (onUpdatePin) {
+                  onUpdatePin(newPinValue.trim());
+                }
+                setPinChangeSuccess(true);
+                setTimeout(() => {
+                  setPinChangeSuccess(false);
+                  setIsChangingPin(false);
+                  setNewPinValue('');
+                }, 1800);
+              }}
+              className="space-y-3"
+            >
+              <div>
+                <label className="block text-xs font-semibold text-[#181316] mb-1">
+                  Nova Senha / PIN
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: josy7788"
+                  value={newPinValue}
+                  onChange={(e) => setNewPinValue(e.target.value)}
+                  className="w-full text-sm px-3.5 py-2.5 border border-[#F0D5DD] rounded-xl focus:outline-none focus:border-[#B84E67]"
+                />
+              </div>
+
+              {pinChangeSuccess && (
+                <div className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 p-2 rounded-lg text-center font-medium">
+                  Senha alterada com sucesso!
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsChangingPin(false)}
+                  className="flex-1 py-2 text-xs text-stone-600 border border-stone-200 rounded-lg hover:bg-stone-50 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2 text-xs font-semibold bg-[#181316] text-[#FAF6F7] rounded-lg hover:bg-[#2A2025] cursor-pointer"
+                >
+                  Salvar Nova Senha
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
