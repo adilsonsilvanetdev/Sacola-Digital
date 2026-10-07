@@ -3,7 +3,7 @@ import {
   Package, Clock, CheckCircle2, User, MapPin, Sparkles, MessageCircle, 
   FileText, Send, RefreshCw, ArrowLeft, Plus, ExternalLink, Copy, Store, 
   Search, Trash2, Check, ShoppingBag, Eye, Calendar, Phone, Home, AlertCircle,
-  Lock, KeyRound
+  Lock, KeyRound, Pencil, Tag, SlidersHorizontal
 } from 'lucide-react';
 import { MalaOrder, MalaItem, Product } from '../types';
 import { SAMPLE_PRODUCTS, MAX_MALA_ITEMS } from '../data/products';
@@ -12,6 +12,7 @@ import {
   getStylistOrderPlainText, 
   cleanPhoneNumber 
 } from '../utils/whatsappHelper';
+import { EditProductModal } from './EditProductModal';
 
 interface ConsultoraDashboardProps {
   orders: MalaOrder[];
@@ -21,6 +22,11 @@ interface ConsultoraDashboardProps {
   onLogout?: () => void;
   currentPin?: string;
   onUpdatePin?: (newPin: string) => void;
+  products?: Product[];
+  onUpdateProduct?: (product: Product) => void;
+  onAddProduct?: (product: Product) => void;
+  onDeleteProduct?: (productId: string) => void;
+  onResetProducts?: () => void;
 }
 
 export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
@@ -31,12 +37,23 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
   onLogout,
   currentPin = 'josy2026',
   onUpdatePin,
+  products = SAMPLE_PRODUCTS,
+  onUpdateProduct,
+  onAddProduct,
+  onDeleteProduct,
+  onResetProducts,
 }) => {
-  // Navigation tabs: 'create' (Montar Mala) or 'orders' (Gerenciar Malas)
-  const [activeTab, setActiveTab] = useState<'create' | 'orders'>('create');
+  // Navigation tabs: 'create' (Montar Mala), 'products' (Gerenciar Catálogo) or 'orders' (Gerenciar Malas)
+  const [activeTab, setActiveTab] = useState<'create' | 'products' | 'orders'>('create');
   const [isChangingPin, setIsChangingPin] = useState(false);
   const [newPinValue, setNewPinValue] = useState('');
   const [pinChangeSuccess, setPinChangeSuccess] = useState(false);
+
+  // Edit / Add product modal states
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [productManagerSearch, setProductManagerSearch] = useState('');
+  const [productManagerCategory, setProductManagerCategory] = useState('Todas');
 
   // Selected order for inspection in 'orders' tab
   const [selectedOrderId, setSelectedOrderId] = useState<string>(orders[0]?.id || '');
@@ -98,24 +115,44 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
   const [createdSuccessOrder, setCreatedSuccessOrder] = useState<MalaOrder | null>(null);
 
   // Filtered products for Josy to browse
-  const categories = ['Todas', 'Bolsas & Alfaiataria', 'Vestidos', 'Camisas & Blusas', 'Calças & Shorts', 'Conjuntos & Tricot', 'Casacos'];
+  const categories = ['Todas', 'Bolsas', 'Vestidos', 'Blazers & Alfaiataria', 'Camisas & Blusas', 'Calças & Shorts', 'Conjuntos & Tricot', 'Casacos'];
 
   const filteredProducts = useMemo(() => {
-    return SAMPLE_PRODUCTS.filter((prod) => {
+    return products.filter((prod) => {
       const matchesCategory =
         catalogCategory === 'Todas' ||
-        (catalogCategory === 'Bolsas & Alfaiataria' && (prod.category.includes('Blazers') || prod.name.toLowerCase().includes('bolsa'))) ||
+        (catalogCategory === 'Bolsas' && (prod.category.toLowerCase().includes('bolsa') || prod.name.toLowerCase().includes('bolsa'))) ||
         prod.category.toLowerCase().includes(catalogCategory.toLowerCase());
 
       const matchesSearch =
         searchQuery === '' ||
         prod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         prod.fabric.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        prod.color.toLowerCase().includes(searchQuery.toLowerCase());
+        prod.color.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        prod.description.toLowerCase().includes(searchQuery.toLowerCase());
 
       return matchesCategory && matchesSearch;
     });
-  }, [catalogCategory, searchQuery]);
+  }, [products, catalogCategory, searchQuery]);
+
+  // Filtered products for the Product Manager tab (Substituição de Fotos, Descrições e Valores)
+  const managedProducts = useMemo(() => {
+    return products.filter((prod) => {
+      const matchesCategory =
+        productManagerCategory === 'Todas' ||
+        (productManagerCategory === 'Bolsas' && (prod.category.toLowerCase().includes('bolsa') || prod.name.toLowerCase().includes('bolsa'))) ||
+        prod.category.toLowerCase().includes(productManagerCategory.toLowerCase());
+
+      const matchesSearch =
+        productManagerSearch === '' ||
+        prod.name.toLowerCase().includes(productManagerSearch.toLowerCase()) ||
+        prod.description.toLowerCase().includes(productManagerSearch.toLowerCase()) ||
+        prod.fabric.toLowerCase().includes(productManagerSearch.toLowerCase()) ||
+        prod.color.toLowerCase().includes(productManagerSearch.toLowerCase());
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [products, productManagerCategory, productManagerSearch]);
 
   // Product selection helpers
   const handleToggleProduct = (product: Product) => {
@@ -351,6 +388,21 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
             <span>Montar Mala para Cliente</span>
             <span className="bg-[#B84E67] text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
               {selectedItems.length}/{MAX_MALA_ITEMS}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('products')}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+              activeTab === 'products'
+                ? 'bg-[#141113] text-white shadow-xs'
+                : 'text-[#5A4D54] hover:bg-[#FAF6F7] hover:text-[#141113]'
+            }`}
+          >
+            <Tag className="w-4 h-4 text-[#F5BAC7]" />
+            <span>Gerenciar Produtos (Fotos, Preços & Descrições)</span>
+            <span className="bg-[#FAF0F3] text-[#B84E67] border border-[#F2BAC7]/40 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+              {products.length} peças
             </span>
           </button>
 
@@ -594,9 +646,22 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                         </div>
 
                         <div className="mt-3 pt-2.5 border-t border-[#F0D5DD] flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-1 text-[11px] text-[#5A4D54]">
-                            <span>Tams:</span>
-                            <span className="font-medium text-[#181316]">{prod.sizes.join(', ')}</span>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingProduct(prod);
+                                setIsEditModalOpen(true);
+                              }}
+                              title="Substituir foto, descrição ou valor desta peça"
+                              className="p-1 text-[#B84E67] hover:bg-[#FAF0F3] rounded-md transition-colors cursor-pointer border border-[#F2BAC7]/40"
+                            >
+                              <Pencil className="w-3 h-3" />
+                            </button>
+                            <span className="text-[11px] text-[#5A4D54]">
+                              {prod.sizes.join(', ')}
+                            </span>
                           </div>
 
                           <button
@@ -901,7 +966,200 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
         )}
 
         {/* =============================================================== */}
-        {/* TAB 2: GERENCIAMENTO DE MALAS ATIVAS (PAINEL DA JOSY)           */}
+        {/* TAB 2: GERENCIAMENTO DE PRODUTOS (FOTOS, DESCRIÇÕES E VALORES) */}
+        {/* =============================================================== */}
+        {activeTab === 'products' && (
+          <div className="space-y-6">
+            
+            {/* Header Toolbar */}
+            <div className="bg-white rounded-2xl p-6 border border-[#F2DEE4] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#B84E67] block">
+                  Edição & Catálogo Oficial
+                </span>
+                <h2 className="font-editorial text-2xl font-medium text-[#181316]">
+                  Substituir Fotos, Descrições e Valores
+                </h2>
+                <p className="text-xs text-[#7A6B73] mt-1 max-w-2xl">
+                  Clique em qualquer peça para substituir a foto (upload do celular/computador ou link), atualizar valores de venda e editar textos descritivos. As alterações ficam salvas no navegador e aparecem em toda a loja.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                {onResetProducts && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm('Deseja restaurar todo o catálogo para os produtos originais de fábrica?')) {
+                        onResetProducts();
+                      }
+                    }}
+                    className="px-3.5 py-2.5 rounded-xl border border-stone-300 text-stone-700 hover:bg-stone-50 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    title="Restaurar catálogo inicial"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 text-stone-500" />
+                    <span>Restaurar Catálogo Padrão</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingProduct(null);
+                    setIsEditModalOpen(true);
+                  }}
+                  className="px-4 py-2.5 rounded-xl bg-[#B84E67] hover:bg-[#A33D56] text-white text-xs font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Cadastrar Nova Bolsa / Peça</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Filter & Search Bar */}
+            <div className="bg-white rounded-2xl p-4 border border-[#F2DEE4] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="relative w-full sm:w-80">
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar por nome, tecido, cor ou descrição..."
+                  value={productManagerSearch}
+                  onChange={(e) => setProductManagerSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-[#FAF6F7] border border-[#F0D5DD] rounded-xl focus:outline-none focus:border-[#B84E67] text-[#181316]"
+                />
+              </div>
+
+              <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+                {['Todas', 'Bolsas', 'Vestidos', 'Blazers & Alfaiataria', 'Camisas & Blusas', 'Calças & Shorts', 'Conjuntos & Tricot', 'Casacos'].map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setProductManagerCategory(cat)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                      productManagerCategory === cat
+                        ? 'bg-[#181316] text-[#F5BAC7]'
+                        : 'bg-[#FAF6F7] text-stone-600 hover:bg-[#F2DEE4]'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Products Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {managedProducts.map((prod) => (
+                <div
+                  key={prod.id}
+                  className="bg-white rounded-2xl border border-[#F2DEE4] overflow-hidden hover:border-[#D87F95] hover:shadow-md transition-all flex flex-col justify-between group"
+                >
+                  <div>
+                    {/* Image with overlay action */}
+                    <div className="relative aspect-[3/4] bg-[#FAF3F5] overflow-hidden">
+                      <img
+                        src={prod.image}
+                        alt={prod.name}
+                        className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingProduct(prod);
+                          setIsEditModalOpen(true);
+                        }}
+                        className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 text-white text-xs font-bold p-3 cursor-pointer"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-white text-[#B84E67] flex items-center justify-center shadow-lg">
+                          <Pencil className="w-5 h-5" />
+                        </div>
+                        <span>Substituir Foto & Dados</span>
+                      </button>
+
+                      {/* Stock badge */}
+                      <div className="absolute top-2.5 right-2.5">
+                        {prod.inStock !== false ? (
+                          <span className="bg-emerald-600/90 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs">
+                            Ativo
+                          </span>
+                        ) : (
+                          <span className="bg-stone-600/90 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs">
+                            Esgotado
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Category tag */}
+                      <div className="absolute bottom-2.5 left-2.5 bg-white/90 backdrop-blur-xs text-[#B84E67] text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs border border-[#F2DEE4]">
+                        {prod.category}
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-4 space-y-2">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-base font-extrabold text-[#181316]">
+                          R$ {prod.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                        <span className="text-[11px] text-[#7A6B73]">
+                          {prod.color}
+                        </span>
+                      </div>
+
+                      <h3 className="font-semibold text-xs text-[#181316] line-clamp-1" title={prod.name}>
+                        {prod.name}
+                      </h3>
+
+                      <p className="text-[11px] text-[#5A4D54] line-clamp-2 leading-relaxed" title={prod.description}>
+                        {prod.description}
+                      </p>
+
+                      <div className="pt-1 text-[10px] text-[#7A6B73] flex items-center gap-1">
+                        <span className="font-semibold text-stone-700">Tamanhos:</span>
+                        <span>{prod.sizes.join(', ')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Bottom Action */}
+                  <div className="p-3 border-t border-[#F2DEE4] bg-[#FAF9F5] flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingProduct(prod);
+                        setIsEditModalOpen(true);
+                      }}
+                      className="flex-1 py-2 px-3 bg-white hover:bg-[#FFF5F8] text-[#B84E67] border border-[#F0D5DD] hover:border-[#B84E67] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                      <span>Substituir Foto, Descrição & Valor</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {managedProducts.length === 0 && (
+              <div className="bg-white rounded-2xl p-12 text-center border border-[#F2DEE4] text-stone-500">
+                <Search className="w-10 h-10 text-stone-300 mx-auto mb-2" />
+                <p className="text-sm font-medium">Nenhum produto encontrado com os filtros atuais.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProductManagerSearch('');
+                    setProductManagerCategory('Todas');
+                  }}
+                  className="mt-3 text-xs text-[#B84E67] font-semibold underline cursor-pointer"
+                >
+                  Limpar busca e filtros
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* =============================================================== */}
+        {/* TAB 3: GERENCIAMENTO DE MALAS ATIVAS (PAINEL DA JOSY)           */}
         {/* =============================================================== */}
         {activeTab === 'orders' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -1209,6 +1467,25 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
           </div>
         </div>
       )}
+
+      {/* Modal para Substituir Foto, Descrição e Valores */}
+      <EditProductModal
+        product={editingProduct}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSaveProduct={(savedProd) => {
+          if (editingProduct && onUpdateProduct) {
+            onUpdateProduct(savedProd);
+          } else if (onAddProduct) {
+            onAddProduct(savedProd);
+          }
+        }}
+        onDeleteProduct={(id) => {
+          if (onDeleteProduct) {
+            onDeleteProduct(id);
+          }
+        }}
+      />
 
     </div>
   );

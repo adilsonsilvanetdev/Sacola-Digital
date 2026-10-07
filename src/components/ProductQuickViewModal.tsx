@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ShoppingBag, Check, Ruler } from 'lucide-react';
+import { X, ShoppingBag, Check, Ruler, Pencil } from 'lucide-react';
 import { Product } from '../types';
 
 interface ProductQuickViewModalProps {
@@ -9,6 +9,7 @@ interface ProductQuickViewModalProps {
   onAddToMala: (product: Product, size: string) => void;
   onRemoveFromMala: (productId: string) => void;
   isMalaFull: boolean;
+  onEditProduct?: (product: Product) => void;
 }
 
 export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
@@ -18,6 +19,7 @@ export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
   onAddToMala,
   onRemoveFromMala,
   isMalaFull,
+  onEditProduct,
 }) => {
   if (!product) return null;
 
@@ -113,6 +115,20 @@ export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
 
             {/* Modal Actions */}
             <div className="pt-4 border-t border-[#F2DEE4] space-y-2">
+              {onEditProduct && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onEditProduct(product);
+                  }}
+                  className="w-full py-2.5 text-xs font-bold bg-[#FFF5F8] text-[#B84E67] border border-[#F8D2DD] rounded-xl hover:bg-[#FFEBF1] transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs mb-2"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span>Substituir Foto, Descrição ou Valor Desta Peça</span>
+                </button>
+              )}
+
               {isInMala ? (
                 <button
                   onClick={() => {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Check, Eye } from 'lucide-react';
+import { ShoppingBag, Check, Eye, Pencil } from 'lucide-react';
 import { Product } from '../types';
 
 interface ProductCardProps {
@@ -9,6 +9,7 @@ interface ProductCardProps {
   onRemoveFromMala: (productId: string) => void;
   onOpenQuickView: (product: Product) => void;
   isMalaFull: boolean;
+  onEditProduct?: (product: Product) => void;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -18,6 +19,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onRemoveFromMala,
   onOpenQuickView,
   isMalaFull,
+  onEditProduct,
 }) => {
   const [selectedSize, setSelectedSize] = useState<string>(product.sizes[1] || product.sizes[0]);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -65,6 +67,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <Eye className="w-3.5 h-3.5 text-[#B84E67]" />
           <span>Ver Detalhes & Fotos</span>
         </button>
+
+        {/* Edit Button for Seller */}
+        {onEditProduct && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditProduct(product);
+            }}
+            title="Substituir foto, descrição ou valor desta peça"
+            className="absolute top-3 left-3 bg-white/95 hover:bg-[#FDF2F4] text-[#B84E67] text-[11px] font-bold px-2.5 py-1 rounded-md shadow border border-[#F2DEE4] flex items-center gap-1 cursor-pointer transition-all hover:scale-105 z-10"
+          >
+            <Pencil className="w-3 h-3 text-[#B84E67]" />
+            <span>Editar Peça</span>
+          </button>
+        )}
 
         {/* Subtle Indicator if already in Mala */}
         {isInMala && (

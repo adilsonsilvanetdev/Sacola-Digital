@@ -1,12 +1,12 @@
 export interface Product {
   id: string;
   name: string;
-  category: 'Vestidos' | 'Blazers & Alfaiataria' | 'Camisas & Blusas' | 'Calças & Shorts' | 'Conjuntos & Tricot' | 'Casacos';
+  category: 'Bolsas' | 'Vestidos' | 'Blazers & Alfaiataria' | 'Camisas & Blusas' | 'Calças & Shorts' | 'Conjuntos & Tricot' | 'Casacos' | string;
   price: number;
   description: string;
   fabric: string;
   fitTip: string;
-  sizes: ('PP' | 'P' | 'M' | 'G' | 'GG' | '36' | '38' | '40' | '42' | '44')[];
+  sizes: ('Único' | 'PP' | 'P' | 'M' | 'G' | 'GG' | '36' | '38' | '40' | '42' | '44' | string)[];
   color: string;
   colorHex: string;
   image: string;
@@ -14,6 +14,7 @@ export interface Product {
   styleKeywords: string[];
   recommendedFor: string[];
   inStock: boolean;
+  isCustom?: boolean;
 }
 
 export interface MalaItem {

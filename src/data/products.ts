@@ -4,6 +4,38 @@ export const HERO_IMAGE = '/images/hero_fashion_atelier_1791074034560.jpg';
 
 export const SAMPLE_PRODUCTS: Product[] = [
   {
+    id: 'prod-bag-1',
+    name: 'Bolsa Tote Glamour em Couro Caramelo',
+    category: 'Bolsas',
+    price: 589,
+    description: 'Bolsa tote estruturada confeccionada em couro legítimo textura floater. Detalhes em metal dourado nobre, alças reforçadas e bolso interno com divisória para celular e maquiagem.',
+    fabric: '100% Couro Bovino Legítimo com Forro Toque Acetinado',
+    fitTip: 'Espaçosa e elegante para transitar com perfeição do trabalho ao jantar executivo.',
+    sizes: ['Único'],
+    color: 'Caramelo Cognac',
+    colorHex: '#9C582B',
+    image: '/images/bag_tote_leather_glamour_1791406308576.jpg',
+    styleKeywords: ['Alfaiataria Sofisticada', 'Casual Elegante', 'Neutros & Terrosos'],
+    recommendedFor: ['Trabalho & Reuniões', 'Dia a Dia Prático & Chic', 'Jantar Especial'],
+    inStock: true
+  },
+  {
+    id: 'prod-bag-2',
+    name: 'Bolsa Tiracolo Matelassê Noir com Corrente Dourada',
+    category: 'Bolsas',
+    price: 479,
+    description: 'Bolsa clássica acolchoada em padrão matelassê chevron com fecho giratório dourado. Alça de corrente deslizante versátil para uso a tiracolo ou no ombro.',
+    fabric: 'Couro Premium Acolchoado com Ferragens Antialérgicas',
+    fitTip: 'Tamanho perfeito para carregar smartphone, carteira compacta, chaves e batom.',
+    sizes: ['Único'],
+    color: 'Preto Noir Ônix',
+    colorHex: '#181716',
+    image: '/images/bag_crossbody_noir_1791406322451.jpg',
+    styleKeywords: ['Festiva & Noite', 'Moderna & Minimalista', 'Preto & Branco / Minimal'],
+    recommendedFor: ['Jantar Especial', 'Festiva & Noite', 'Fim de Semana & Lazer'],
+    inStock: true
+  },
+  {
     id: 'prod-1',
     name: 'Blazer de Alfaiataria em Linho Areia',
     category: 'Blazers & Alfaiataria',

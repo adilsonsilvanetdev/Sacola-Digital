@@ -150,16 +150,15 @@ export const JoBolsasLogo: React.FC<JoBolsasLogoProps> = ({
       <div className={`flex flex-col items-center select-none ${className}`}>
         {PlaqueSVG}
         {showPhrase && (
-          <div className="flex items-baseline gap-1.5 mt-3 text-center">
+          <div className="flex flex-col items-center mt-3 text-center">
             <span
-              className={`font-sans font-bold uppercase tracking-[0.2em] text-lg sm:text-xl ${textColor}`}
+              className={`font-sans font-bold uppercase tracking-[0.22em] text-lg sm:text-xl ${textColor} text-center leading-tight`}
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
               JÔ BOLSAS
             </span>
-            <span className={`${accentColor} text-lg font-light`}>-</span>
             <span
-              className={`${accentColor} text-xl sm:text-2xl italic leading-none`}
+              className={`${accentColor} text-xl sm:text-2xl md:text-3xl italic leading-none mt-1 text-center`}
               style={{ fontFamily: "'Great Vibes', cursive" }}
             >
               glamour
@@ -170,30 +169,26 @@ export const JoBolsasLogo: React.FC<JoBolsasLogoProps> = ({
     );
   }
 
-  // Default: Full variant (plaque on the left, typography lockup + phrase "JÔ BOLSAS - glamour")
+  // Default: Full variant (plaque on the left, typography lockup with JÔ BOLSAS and underneath centralized glamour)
   return (
     <div className={`flex items-center gap-4 sm:gap-5 select-none ${className}`}>
       {/* 1. Logo Plaque Oficial (igual à foto sem alteração) */}
       {PlaqueSVG}
 
-      {/* 2. Textos e frase "JÔ BOLSAS - glamour" na mesma fonte */}
-      <div className="flex flex-col justify-center">
-        {/* Frase oficial: JO BOLSAS - glamour na mesma fonte */}
-        <div className="flex items-baseline gap-2 flex-wrap">
-          <span
-            className={`font-sans tracking-[0.22em] text-xl sm:text-2xl md:text-3xl font-bold uppercase ${textColor} leading-tight`}
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-          >
-            JÔ BOLSAS
-          </span>
-          <span className={`${accentColor} text-xl sm:text-2xl font-light`}>-</span>
-          <span
-            className={`${accentColor} text-2xl sm:text-3xl md:text-4xl italic font-normal leading-none`}
-            style={{ fontFamily: "'Great Vibes', cursive" }}
-          >
-            glamour
-          </span>
-        </div>
+      {/* 2. Textos: após o logo a palavra JÔ BOLSAS, embaixo centralizada a palavra glamour */}
+      <div className="flex flex-col items-center justify-center text-center">
+        <span
+          className={`font-sans tracking-[0.24em] text-xl sm:text-2xl md:text-3xl font-bold uppercase ${textColor} leading-tight text-center`}
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+        >
+          JÔ BOLSAS
+        </span>
+        <span
+          className={`${accentColor} text-2xl sm:text-3xl md:text-4xl italic font-normal leading-none mt-1 text-center`}
+          style={{ fontFamily: "'Great Vibes', cursive" }}
+        >
+          glamour
+        </span>
       </div>
     </div>
   );

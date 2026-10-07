@@ -14,11 +14,26 @@ import { SellerAuthModal } from './components/SellerAuthModal';
 
 import { Product, MalaItem, MalaOrder } from './types';
 import { SAMPLE_PRODUCTS, MAX_MALA_ITEMS } from './data/products';
+import { 
+  getStoredProducts, 
+  updateStoredProduct, 
+  addStoredProduct, 
+  deleteStoredProduct, 
+  resetStoredProducts 
+} from './utils/productStorage';
+import { EditProductModal } from './components/EditProductModal';
 import { SlidersHorizontal, RotateCcw, Check, ShoppingBag, ArrowRight } from 'lucide-react';
 
 export default function App() {
   // Store or Stylist Dashboard view
   const [activeView, setActiveView] = useState<'store' | 'dashboard'>('store');
+
+  // Dynamic Products Catalog (Stored in localStorage to persist photo/description/price edits)
+  const [products, setProducts] = useState<Product[]>(() => {
+    return getStoredProducts();
+  });
+  const [storeEditProduct, setStoreEditProduct] = useState<Product | null>(null);
+  const [isStoreEditModalOpen, setIsStoreEditModalOpen] = useState(false);
 
   // Seller Authentication & Security (PIN/Senha)
   const [isSellerAuthenticated, setIsSellerAuthenticated] = useState<boolean>(() => {
@@ -216,13 +231,51 @@ export default function App() {
     );
   };
 
+  // Handlers for updating photos, descriptions, and values across the store
+  const handleUpdateProduct = (updated: Product) => {
+    const next = updateStoredProduct(updated);
+    setProducts(next);
+    // Also update malaItems if the modified item is in the user's bag
+    setMalaItems((prev) =>
+      prev.map((item) => (item.product.id === updated.id ? { ...item, product: updated } : item))
+    );
+    showToast(`"${updated.name}" foi atualizado com sucesso!`);
+  };
+
+  const handleAddProduct = (newProd: Product) => {
+    const next = addStoredProduct(newProd);
+    setProducts(next);
+    showToast(`"${newProd.name}" foi adicionado ao catálogo!`);
+  };
+
+  const handleDeleteProduct = (productId: string) => {
+    const next = deleteStoredProduct(productId);
+    setProducts(next);
+    setMalaItems((prev) => prev.filter((item) => item.product.id !== productId));
+    showToast('Produto removido do catálogo.');
+  };
+
+  const handleResetProducts = () => {
+    const next = resetStoredProducts();
+    setProducts(next);
+    showToast('Catálogo restaurado para o padrão original de fábrica.');
+  };
+
+  const handleOpenStoreEdit = (product: Product) => {
+    setStoreEditProduct(product);
+    setIsStoreEditModalOpen(true);
+  };
+
   // Filter products
-  const categories = ['Todas', 'Vestidos', 'Blazers & Alfaiataria', 'Camisas & Blusas', 'Calças & Shorts', 'Conjuntos & Tricot', 'Casacos'];
+  const categories = ['Todas', 'Bolsas', 'Vestidos', 'Blazers & Alfaiataria', 'Camisas & Blusas', 'Calças & Shorts', 'Conjuntos & Tricot', 'Casacos'];
   const styles = ['Todos', 'Alfaiataria Sofisticada', 'Casual Elegante', 'Romântica & Fluida', 'Moderna & Minimalista', 'Festiva & Noite'];
 
-  const filteredProducts = SAMPLE_PRODUCTS.filter((product) => {
-    const matchCategory = selectedCategory === 'Todas' || product.category === selectedCategory;
-    const matchStyle = selectedStyle === 'Todos' || product.styleKeywords.includes(selectedStyle);
+  const filteredProducts = products.filter((product) => {
+    const matchCategory =
+      selectedCategory === 'Todas' ||
+      (selectedCategory === 'Bolsas' && (product.category.toLowerCase().includes('bolsa') || product.name.toLowerCase().includes('bolsa'))) ||
+      product.category === selectedCategory;
+    const matchStyle = selectedStyle === 'Todos' || product.styleKeywords?.includes(selectedStyle);
     return matchCategory && matchStyle;
   });
 
@@ -251,6 +304,11 @@ export default function App() {
           onLogout={handleLogoutSeller}
           currentPin={sellerPin}
           onUpdatePin={handleUpdatePin}
+          products={products}
+          onUpdateProduct={handleUpdateProduct}
+          onAddProduct={handleAddProduct}
+          onDeleteProduct={handleDeleteProduct}
+          onResetProducts={handleResetProducts}
         />
       ) : (
         /* Boutique Customer Storefront View */
@@ -369,6 +427,7 @@ export default function App() {
                     onRemoveFromMala={handleRemoveFromMala}
                     onOpenQuickView={(prod: Product) => setQuickViewProduct(prod)}
                     isMalaFull={isMalaFull}
+                    onEditProduct={isSellerAuthenticated ? handleOpenStoreEdit : undefined}
                   />
                 );
               })}
@@ -454,6 +513,7 @@ export default function App() {
         onAddToMala={handleAddToMala}
         onRemoveFromMala={handleRemoveFromMala}
         isMalaFull={isMalaFull}
+        onEditProduct={isSellerAuthenticated ? handleOpenStoreEdit : undefined}
       />
 
       <CheckoutAgendamentoModal
@@ -470,6 +530,15 @@ export default function App() {
         onClose={() => setIsAuthModalOpen(false)}
         onAuthenticated={handleSellerAuthenticated}
         currentPin={sellerPin}
+      />
+
+      {/* Modal de Edição de Produto direto da Loja (quando logada como Josy) */}
+      <EditProductModal
+        product={storeEditProduct}
+        isOpen={isStoreEditModalOpen}
+        onClose={() => setIsStoreEditModalOpen(false)}
+        onSaveProduct={handleUpdateProduct}
+        onDeleteProduct={handleDeleteProduct}
       />
     </div>
   );
