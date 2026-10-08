@@ -1433,9 +1433,9 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                   Nova Senha / PIN
                 </label>
                 <input
-                  type="text"
+                  type="password"
                   required
-                  placeholder="Ex: josy7788"
+                  placeholder="Digite a nova senha segura"
                   value={newPinValue}
                   onChange={(e) => setNewPinValue(e.target.value)}
                   className="w-full text-sm px-3.5 py-2.5 border border-[#F0D5DD] rounded-xl focus:outline-none focus:border-[#B84E67]"

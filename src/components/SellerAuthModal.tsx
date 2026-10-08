@@ -95,15 +95,11 @@ export const SellerAuthModal: React.FC<SellerAuthModalProps> = ({
               </button>
             </div>
 
-            {errorMessage ? (
+            {errorMessage && (
               <div className="flex items-center gap-1.5 text-xs text-red-600 pt-1">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
-            ) : (
-              <span className="text-[11px] text-[#7A6B73] block pt-0.5">
-                Senha inicial padrão: <strong className="text-[#181316]">josy2026</strong>
-              </span>
             )}
           </div>
 
