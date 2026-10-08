@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShoppingBag, Sparkles, Home, CheckCircle2, MessageCircle } from 'lucide-react';
+import { STORE_WHATSAPP_NUMBER } from '../utils/whatsappHelper';
 
 interface HowItWorksProps {
   onExploreCatalog: () => void;
@@ -93,7 +94,7 @@ export const HowItWorks: React.FC<HowItWorksProps> = ({ onExploreCatalog }) => {
               <span>Explorar Coleção & Bolsas</span>
             </button>
             <a
-              href="https://wa.me/5511999998888?text=Olá Josy! Gostaria de tirar uma dúvida sobre a Mala Jô Bolsas Glamour."
+              href={`https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá Josy! Gostaria de tirar uma dúvida sobre a Mala Jô Bolsas Glamour.')}`}
               target="_blank"
               rel="noreferrer"
               className="px-4 py-2.5 bg-white text-[#B84E67] border border-[#F0D5DD] rounded-lg text-xs font-medium hover:bg-[#FDF2F4] transition-colors cursor-pointer flex items-center gap-1.5"

@@ -30,7 +30,7 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
     number: '',
     complement: '',
     neighborhood: '',
-    city: 'São Paulo - SP',
+    city: 'Bauru - SP',
     cep: '',
     date: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
     timeSlot: 'Manhã (09h às 13h)' as MalaOrder['scheduledTimeSlot'],
@@ -55,7 +55,7 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
 
     const isPickup = deliveryType === 'pickup' || !formData.street.trim();
     const fullAddress = isPickup
-      ? 'Retirada na loja física (balcão)'
+      ? 'Retirada na loja física (Rua: Dr José Ranieri N 5-28, Bauru - SP)'
       : `${formData.street}${formData.number ? `, ${formData.number}` : ''}${formData.complement ? ` - ${formData.complement}` : ''}`;
 
     const neighborhood = isPickup
@@ -229,7 +229,7 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
                 <div className="bg-[#FAF6F7] border border-[#F2DEE4] rounded-xl p-3 text-xs text-[#5A4D54] flex items-center gap-2">
                   <Store className="w-4 h-4 text-[#B84E67] shrink-0" />
                   <span>
-                    <strong>Ponto de Retirada:</strong> Jô Bolsas Glamour. Assim que você confirmar, avisaremos no WhatsApp para você passar e pegar a mala no balcão!
+                    <strong>Ponto de Retirada:</strong> Loja Física Jô Bolsas Glamour (Rua: Dr José Ranieri N 5-28, Bauru - SP). Assim que você confirmar, avisaremos no WhatsApp para você passar e pegar a mala no balcão!
                   </span>
                 </div>
               ) : (

@@ -54,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
               }}
               className="hover:text-[#B84E67] transition-colors cursor-pointer"
             >
-              Bolsas & Coleção
+              Acesse a Loja
             </button>
             <button
               onClick={() => {
@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
               }}
               className="hover:text-[#B84E67] transition-colors cursor-pointer"
             >
-              Como Funciona
+              Mala/Sacola Digital
             </button>
             <button
               onClick={() => {
@@ -94,8 +94,8 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={onOpenSellerAuth}
                 className="p-2 text-stone-400 hover:text-[#B84E67] hover:bg-[#FDF2F4] rounded-lg transition-colors cursor-pointer"
-                title="Acesso Restrito · Vendedora Josy (Requer Senha)"
-                aria-label="Acesso Restrito Vendedora"
+                title="Acesso Vendedora"
+                aria-label="Acesso Vendedora"
               >
                 <Lock className="w-4 h-4" />
               </button>

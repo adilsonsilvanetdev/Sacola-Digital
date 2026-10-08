@@ -68,7 +68,7 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
   const [number, setNumber] = useState('');
   const [complement, setComplement] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
-  const [city, setCity] = useState('São Paulo - SP');
+  const [city, setCity] = useState('Bauru - SP');
   const [deliveryInstructions, setDeliveryInstructions] = useState('');
 
   // Date and Time slot

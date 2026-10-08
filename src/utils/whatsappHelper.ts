@@ -1,4 +1,7 @@
-import { MalaOrder } from '../types';
+import { MalaOrder, Product } from '../types';
+
+export const STORE_WHATSAPP_NUMBER = '5514997224065';
+export const STORE_WHATSAPP_DISPLAY = '(14) 99722-4065';
 
 export function cleanPhoneNumber(rawPhone: string): string {
   if (!rawPhone) return '';
@@ -14,7 +17,47 @@ export function cleanPhoneNumber(rawPhone: string): string {
     return `55${digits}`;
   }
 
-  return digits || '5511999998888';
+  return digits || STORE_WHATSAPP_NUMBER;
+}
+
+/**
+ * Link para COMPRA DIRETA de uma peça específica pelo WhatsApp da loja (14) 99722-4065
+ */
+export function buildProductPurchaseWhatsAppLink(product: Product, selectedSize?: string): string {
+  const sizeText = selectedSize || (product.sizes && product.sizes.length === 1 ? product.sizes[0] : 'Único');
+  const priceFormatted = product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  
+  const text = [
+    `✨ *JÔ BOLSAS GLAMOUR* ✨`,
+    ``,
+    `Olá, *Josy*! Gostaria de *comprar* a seguinte peça do catálogo:`,
+    ``,
+    `🛍️ *Produto:* ${product.name}`,
+    `💰 *Valor:* R$ ${priceFormatted}`,
+    `📏 *Tamanho:* ${sizeText}`,
+    `🎨 *Cor:* ${product.color}`,
+    `🧵 *Tecido/Detalhe:* ${product.fabric}`,
+    `🏷️ *Referência:* #${product.id}`,
+    ``,
+    `Por favor, me confirme a disponibilidade para envio/retirada e a forma de pagamento! 🤍`,
+  ].join('\n');
+
+  return `https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+}
+
+/**
+ * Link para tirar dúvidas ou consultar uma peça específica no WhatsApp da loja
+ */
+export function buildProductConsultationWhatsAppLink(product: Product): string {
+  const priceFormatted = product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  const text = [
+    `✨ *JÔ BOLSAS GLAMOUR* ✨`,
+    ``,
+    `Olá, *Josy*! Gostaria de consultar detalhes da peça *${product.name}* (R$ ${priceFormatted} - Ref #${product.id}).`,
+    `Gostaria de saber mais sobre caimento, medidas e disponibilidade. 🤍`,
+  ].join('\n');
+
+  return `https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 }
 
 /**
@@ -35,7 +78,7 @@ export function getClientOrderPlainText(order: MalaOrder): string {
 
   const isPickup = order.deliveryType === 'pickup' || !order.address || order.address.toLowerCase().includes('retirada');
   const locationLines = isPickup
-    ? [`📍 *Modalidade:* Retirada presencial na loja física (Jô Bolsas Glamour - Balcão)`]
+    ? [`📍 *Modalidade:* Retirada presencial na loja física (Jô Bolsas Glamour - Rua: Dr José Ranieri N 5-28, Bauru - SP)`]
     : [
         `📍 *Modalidade:* Entrega em domicílio`,
         `📍 *Endereço de Entrega:* ${order.address}${order.neighborhood ? `, ${order.neighborhood}` : ''}${order.city ? ` - ${order.city}` : ''}`,
@@ -97,7 +140,7 @@ export function getStylistOrderPlainText(order: MalaOrder, customLetter?: string
 
   const isPickup = order.deliveryType === 'pickup' || !order.address || order.address.toLowerCase().includes('retirada');
   const locationLines = isPickup
-    ? [`📍 *Modalidade:* Retirada presencial na loja física (Jô Bolsas Glamour - Balcão)`]
+    ? [`📍 *Modalidade:* Retirada presencial na loja física (Jô Bolsas Glamour - Rua: Dr José Ranieri N 5-28, Bauru - SP)`]
     : [
         `📍 *Modalidade:* Entrega em domicílio`,
         `📍 *Endereço de Entrega:* ${order.address}${order.neighborhood ? `, ${order.neighborhood}` : ''}${order.city ? ` - ${order.city}` : ''}`,
@@ -145,9 +188,9 @@ export function buildStylistToClientWhatsAppLink(
  * Link para a cliente falar com o atendimento da loja.
  */
 export function buildStoreConciergeWhatsAppLink(order?: MalaOrder): string {
-  const storePhone = '5511999998888';
+  const storePhone = STORE_WHATSAPP_NUMBER;
   if (!order) {
-    const defaultText = `Olá Josy da Jô Bolsas Glamour! Gostaria de informações sobre o serviço de Mala em Casa.`;
+    const defaultText = `Olá Josy da Jô Bolsas Glamour! Gostaria de tirar dúvidas sobre produtos, compras e provador em casa.`;
     return `https://wa.me/${storePhone}?text=${encodeURIComponent(defaultText)}`;
   }
   const text = `Olá Josy da Jô Bolsas Glamour! Gostaria de falar sobre a minha Mala N° ${order.id} agendada para ${order.scheduledDate}.`;

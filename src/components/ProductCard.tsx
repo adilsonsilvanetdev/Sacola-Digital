@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { ShoppingBag, Check, Eye, Pencil } from 'lucide-react';
 import { Product } from '../types';
+import { WhatsAppIcon } from './WhatsAppIcon';
+import { buildProductPurchaseWhatsAppLink, STORE_WHATSAPP_DISPLAY } from '../utils/whatsappHelper';
 
 interface ProductCardProps {
   product: Product;
@@ -21,7 +23,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   isMalaFull,
   onEditProduct,
 }) => {
-  const [selectedSize, setSelectedSize] = useState<string>(product.sizes[1] || product.sizes[0]);
+  const [selectedSize, setSelectedSize] = useState<string>(product.sizes[1] || product.sizes[0] || 'Único');
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -37,8 +39,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
+  const whatsappPurchaseUrl = buildProductPurchaseWhatsAppLink(product, selectedSize);
+  const installmentValue = (product.price / 3).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
   return (
-    <div className="group flex flex-col bg-white border border-[#F0D8DF] rounded-xl overflow-hidden hover:border-[#D87F95] hover:shadow-sm transition-all duration-200">
+    <div className="group flex flex-col bg-white border border-[#F0D8DF] rounded-xl overflow-hidden hover:border-[#D87F95] hover:shadow-md transition-all duration-200">
       {/* Product Image Container */}
       <div className="relative aspect-[3/4] bg-[#FAF3F5] overflow-hidden">
         {!imageError ? (
@@ -68,7 +73,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <span>Ver Detalhes & Fotos</span>
         </button>
 
-        {/* Edit Button for Seller */}
+        {/* Edit Button for Seller (if authenticated) */}
         {onEditProduct && (
           <button
             type="button"
@@ -96,24 +101,32 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       {/* Product Info Section */}
       <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
         <div>
-          {/* Clean Unboxed Metadata */}
-          <div className="flex items-center gap-1.5 text-xs text-[#9E6170] font-medium">
-            <span>{product.category}</span>
-            <span aria-hidden="true">·</span>
-            <span>{product.color}</span>
+          {/* Category & Color */}
+          <div className="flex items-center justify-between text-xs text-[#9E6170] font-medium">
+            <div className="flex items-center gap-1.5">
+              <span>{product.category}</span>
+              <span aria-hidden="true">·</span>
+              <span>{product.color}</span>
+            </div>
+            <span className="text-[10px] text-[#7A6B73] bg-[#FAF6F7] px-1.5 py-0.5 rounded border border-[#F2DEE4]">
+              Pronta Entrega
+            </span>
           </div>
 
-          <h3 className="font-editorial text-lg font-medium text-[#181316] mt-1 line-clamp-1 group-hover:text-[#B84E67] transition-colors">
+          <h3 className="font-editorial text-lg font-medium text-[#181316] mt-1.5 line-clamp-1 group-hover:text-[#B84E67] transition-colors">
             {product.name}
           </h3>
 
-          <div className="mt-1 flex items-baseline justify-between">
-            <span className="text-sm font-semibold text-[#181316] tabular-nums">
-              R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </span>
-            <span className="text-[11px] text-[#8C7A82]">
-              Valor consignado
-            </span>
+          {/* Pricing with Installments */}
+          <div className="mt-1.5 pt-1 border-t border-[#F7E6EB]">
+            <div className="flex items-baseline justify-between">
+              <span className="text-base font-bold text-[#181316] tabular-nums">
+                R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </span>
+              <span className="text-[11px] text-[#7A6B73]">
+                À vista ou 3x de R$ {installmentValue}
+              </span>
+            </div>
           </div>
 
           <p className="text-xs text-[#5A4D54] line-clamp-2 mt-1.5">
@@ -124,7 +137,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Size Selection */}
         <div className="pt-2 border-t border-[#F2DEE4]">
           <div className="flex items-center justify-between text-[11px] text-[#7A6B73] mb-1.5">
-            <span>Tamanho para provar:</span>
+            <span>Tamanho desejado:</span>
             <button
               onClick={() => onOpenQuickView(product)}
               className="text-[#B84E67] underline hover:text-[#8F2E45] cursor-pointer"
@@ -151,27 +164,44 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         </div>
 
-        {/* Action Button */}
-        <div className="pt-1">
+        {/* Double Action Buttons: 1) Comprar no WhatsApp & 2) Colocar na Mala Digital */}
+        <div className="pt-2 space-y-2">
+          {/* Botão de Compra Direta pelo WhatsApp com ícone (14) 99722-4065 */}
+          <a
+            href={whatsappPurchaseUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`Comprar ${product.name} diretamente pelo WhatsApp ${STORE_WHATSAPP_DISPLAY}`}
+            className="w-full py-2.5 px-3 text-xs font-semibold bg-[#25D366] hover:bg-[#20ba59] text-white rounded-lg transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer group/wa"
+          >
+            <WhatsAppIcon className="w-4 h-4 text-white shrink-0 group-hover/wa:scale-110 transition-transform" />
+            <span>Comprar no WhatsApp</span>
+            <span className="text-[10px] font-normal opacity-90 hidden sm:inline">
+              · {STORE_WHATSAPP_DISPLAY}
+            </span>
+          </a>
+
+          {/* Botão de Adicionar à Mala Digital (Provador 48h em Casa) */}
           {isInMala ? (
             <button
               onClick={handleToggleMala}
-              className="w-full py-2.5 text-xs font-medium bg-[#FAF2F4] text-[#B84E67] border border-[#F0D5DD] rounded-lg hover:bg-[#FDE8ED] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full py-2.5 px-3 text-xs font-medium bg-[#FAF2F4] text-[#B84E67] border border-[#F0D5DD] rounded-lg hover:bg-[#FDE8ED] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              <span>Remover da Mala</span>
+              <Check className="w-3.5 h-3.5 text-[#B84E67]" />
+              <span>Na sua Mala (Clique para Remover)</span>
             </button>
           ) : (
             <button
               onClick={handleToggleMala}
               disabled={isMalaFull}
-              className={`w-full py-2.5 text-xs font-medium rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`w-full py-2.5 px-3 text-xs font-medium rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                 isMalaFull
                   ? 'bg-stone-200 text-stone-400 cursor-not-allowed'
                   : 'bg-[#181316] text-[#FAF6F7] hover:bg-[#2A2025] border border-[#F2BAC7]/30 shadow-xs'
               }`}
             >
               <ShoppingBag className="w-3.5 h-3.5 text-[#F5BAC7]" />
-              <span>Colocar na Mala (Tam. {selectedSize})</span>
+              <span>Experimentar na Mala (Tam. {selectedSize})</span>
             </button>
           )}
         </div>
