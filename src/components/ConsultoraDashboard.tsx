@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Package, Clock, CheckCircle2, User, MapPin, Sparkles, MessageCircle, 
   FileText, Send, RefreshCw, ArrowLeft, Plus, ExternalLink, Copy, Store, 
@@ -48,6 +48,13 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
   const [isChangingPin, setIsChangingPin] = useState(false);
   const [newPinValue, setNewPinValue] = useState('');
   const [pinChangeSuccess, setPinChangeSuccess] = useState(false);
+
+  // Ao abrir a área da vendedora ou alternar abas, garante que inicie sempre no topo superior
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [activeTab]);
 
   // Edit / Add product modal states
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);

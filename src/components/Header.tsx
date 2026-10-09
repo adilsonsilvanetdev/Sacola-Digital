@@ -83,7 +83,10 @@ export const Header: React.FC<HeaderProps> = ({
             {/* If in dashboard mode, show return to store */}
             {activeView === 'dashboard' ? (
               <button
-                onClick={() => setActiveView('store')}
+                onClick={() => {
+                  window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                  setActiveView('store');
+                }}
                 className="text-xs font-semibold px-3 py-2 bg-[#181316] text-[#FAF6F7] rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />

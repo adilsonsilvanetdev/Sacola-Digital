@@ -155,6 +155,9 @@ export default function App() {
   // Handle Opening Seller Area (Protected by Password/PIN)
   const handleOpenSellerArea = () => {
     if (isSellerAuthenticated) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
       setActiveView('dashboard');
     } else {
       setIsAuthModalOpen(true);
@@ -165,8 +168,20 @@ export default function App() {
     setIsSellerAuthenticated(true);
     sessionStorage.setItem('jb_seller_auth', 'true');
     setIsAuthModalOpen(false);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
     setActiveView('dashboard');
   };
+
+  // Ao alternar para a área da vendedora, garante que a página esteja no topo absoluto
+  useEffect(() => {
+    if (activeView === 'dashboard') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+  }, [activeView]);
 
   const handleLogoutSeller = () => {
     setIsSellerAuthenticated(false);
@@ -283,9 +298,11 @@ export default function App() {
     setIsStoreEditModalOpen(true);
   };
 
-  // Ao abrir a página, foca/rola automaticamente para 'Acesse a Loja' exibindo os produtos à venda
+  // Ao abrir a página, foca/rola automaticamente para 'Acesse a Loja' exibindo os produtos à venda (apenas na loja)
   useEffect(() => {
+    if (activeView !== 'store') return;
     const scrollToStore = () => {
+      if (activeView !== 'store') return;
       const el = document.getElementById('colecao');
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
@@ -387,7 +404,10 @@ export default function App() {
         <ConsultoraDashboard
           orders={orders}
           onUpdateOrderStatus={handleUpdateOrderStatus}
-          onReturnToStore={() => setActiveView('store')}
+          onReturnToStore={() => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            setActiveView('store');
+          }}
           onCreateOrderByStylist={(newOrder) => setOrders((prev) => [newOrder, ...prev])}
           onLogout={handleLogoutSeller}
           currentPin={sellerPin}
