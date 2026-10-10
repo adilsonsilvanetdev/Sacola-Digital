@@ -59,8 +59,14 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
   // Edit / Add product modal states
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [productManagerSearch, setProductManagerSearch] = useState('');
   const [productManagerCategory, setProductManagerCategory] = useState('Todas');
+
+  // Garante que se uma peça for excluída, ela é removida da mala em montagem
+  useEffect(() => {
+    setSelectedItems((prev) => prev.filter((item) => products.some((p) => p.id === item.product.id)));
+  }, [products]);
 
   // Selected order for inspection in 'orders' tab
   const [selectedOrderId, setSelectedOrderId] = useState<string>(orders[0]?.id || '');
@@ -670,6 +676,19 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                             >
                               <Pencil className="w-3 h-3" />
                             </button>
+                            {onDeleteProduct && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setProductToDelete(prod);
+                                }}
+                                title={`Excluir apenas "${prod.name}" do catálogo`}
+                                className="p-1 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer border border-stone-200"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            )}
                             <span className="text-[11px] text-[#5A4D54]">
                               {prod.dimensionsCm ? `CM: ${prod.dimensionsCm}` : prod.sizes.join(', ')}
                             </span>
@@ -1041,7 +1060,7 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
               </div>
 
               <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
-                {['Todas', 'Bolsas', 'Vestidos', 'Blazers & Alfaiataria', 'Camisas & Blusas', 'Calças & Shorts', 'Conjuntos & Tricot', 'Casacos'].map((cat) => (
+                {['Todas', 'Promoções', 'Bolsas', 'Carteiras', 'Vestidos', 'Blazers & Alfaiataria', 'Camisas & Blusas', 'Calças & Shorts', 'Conjuntos & Tricot', 'Casacos'].map((cat) => (
                   <button
                     key={cat}
                     type="button"
@@ -1086,6 +1105,21 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                         </div>
                         <span>Substituir Foto & Dados</span>
                       </button>
+
+                      {/* Botão rápido para excluir apenas esta peça */}
+                      {onDeleteProduct && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProductToDelete(prod);
+                          }}
+                          className="absolute top-2.5 left-2.5 z-20 w-8 h-8 rounded-lg bg-white/95 text-stone-500 hover:text-red-600 hover:bg-red-50 flex items-center justify-center shadow-sm border border-[#F2DEE4] cursor-pointer transition-colors"
+                          title={`Excluir apenas "${prod.name}"`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                        </button>
+                      )}
 
                       {/* Stock badge */}
                       <div className="absolute top-2.5 right-2.5">
@@ -1152,6 +1186,17 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                       <Pencil className="w-3.5 h-3.5" />
                       <span>Substituir Foto, Descrição & Valor</span>
                     </button>
+                    {onDeleteProduct && (
+                      <button
+                        type="button"
+                        onClick={() => setProductToDelete(prod)}
+                        className="py-2 px-3 bg-white hover:bg-red-50 text-stone-500 hover:text-red-600 border border-[#F0D5DD] hover:border-red-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+                        title={`Excluir apenas "${prod.name}" do catálogo`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                        <span className="hidden sm:inline">Excluir</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -1488,22 +1533,100 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
 
       {/* Modal para Substituir Foto, Descrição e Valores */}
       <EditProductModal
+        key={editingProduct ? editingProduct.id : 'new-product'}
         product={editingProduct}
         isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingProduct(null);
+        }}
         onSaveProduct={(savedProd) => {
           if (editingProduct && onUpdateProduct) {
             onUpdateProduct(savedProd);
           } else if (onAddProduct) {
             onAddProduct(savedProd);
           }
+          setIsEditModalOpen(false);
+          setEditingProduct(null);
         }}
         onDeleteProduct={(id) => {
           if (onDeleteProduct) {
             onDeleteProduct(id);
           }
+          setIsEditModalOpen(false);
+          setEditingProduct(null);
         }}
       />
+
+      {/* Modal Seguro de Confirmação para Excluir Apenas a Peça Escolhida */}
+      {productToDelete && (
+        <div className="fixed inset-0 z-50 bg-stone-900/70 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-red-100 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-stone-900 text-base">
+                  Excluir Peça do Catálogo
+                </h3>
+                <p className="text-xs text-stone-500">
+                  Confirmação de exclusão individual
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-[#FAF6F7] p-3.5 rounded-xl border border-[#F0D5DD] flex items-center gap-3">
+              <img
+                src={productToDelete.image}
+                alt={productToDelete.name}
+                className="w-14 h-16 object-cover rounded-lg bg-stone-100 shrink-0 border border-stone-200"
+              />
+              <div className="min-w-0 flex-1">
+                <span className="text-[10px] font-bold uppercase text-[#B84E67] block">
+                  {productToDelete.category}
+                </span>
+                <h4 className="text-xs font-bold text-stone-900 truncate" title={productToDelete.name}>
+                  {productToDelete.name}
+                </h4>
+                <div className="text-[11px] text-stone-500">
+                  Cor: {productToDelete.color}
+                </div>
+                <div className="text-xs font-extrabold text-[#B84E67] mt-0.5">
+                  R$ {productToDelete.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              </div>
+            </div>
+
+            <p className="text-xs text-stone-600 leading-relaxed">
+              Você tem certeza de que deseja excluir <strong className="text-stone-900">somente esta peça</strong> do catálogo? Ao confirmar, ela será removida imediatamente da loja e o catálogo será atualizado na página.
+            </p>
+
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setProductToDelete(null)}
+                className="flex-1 py-2.5 px-4 text-xs font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (onDeleteProduct && productToDelete) {
+                    onDeleteProduct(productToDelete.id);
+                  }
+                  setProductToDelete(null);
+                }}
+                className="flex-1 py-2.5 px-4 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Sim, Excluir Esta Peça</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

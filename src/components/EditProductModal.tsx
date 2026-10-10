@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   X, Upload, Link as LinkIcon, Sparkles, Check, 
   Trash2, AlertCircle, RefreshCw, Image as ImageIcon, Flame, Ruler
@@ -51,8 +51,8 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
   const [name, setName] = useState(product?.name || '');
   const [category, setCategory] = useState(product?.category || 'Bolsas');
   const [customCategory, setCustomCategory] = useState('');
-  const [price, setPrice] = useState<number | string>(product?.price || 0);
-  const [originalPrice, setOriginalPrice] = useState<number | string>(product?.originalPrice || '');
+  const [price, setPrice] = useState<number | string>(product?.price ?? 0);
+  const [originalPrice, setOriginalPrice] = useState<number | string>(product?.originalPrice ?? '');
   const [isPromotion, setIsPromotion] = useState<boolean>(product?.isPromotion || false);
   const [promotionTag, setPromotionTag] = useState<string>(product?.promotionTag || 'Oferta Especial');
 
@@ -81,6 +81,55 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sincroniza o estado do formulário sempre que o produto selecionado mudar
+  useEffect(() => {
+    if (product) {
+      setName(product.name || '');
+      setCategory(product.category || 'Bolsas');
+      setCustomCategory('');
+      setPrice(product.price ?? 0);
+      setOriginalPrice(product.originalPrice ?? '');
+      setIsPromotion(Boolean(product.isPromotion));
+      setPromotionTag(product.promotionTag || 'Oferta Especial');
+      setDescription(product.description || '');
+      setFabric(product.fabric || '');
+      setFitTip(product.fitTip || '');
+      setColor(product.color || '');
+      setColorHex(product.colorHex || '#181316');
+      setImage(product.image || '');
+      setSecondaryImage(product.secondaryImage || '');
+      const isBagWallet = isCategoryBagOrWallet(product.category || '');
+      const isCm = Boolean(product.dimensionsCm || isBagWallet || product.sizes?.includes('CM'));
+      setMeasurementType(isCm ? 'cm' : 'clothing');
+      setSizes(
+        product.sizes && product.sizes.some((s) => CLOTHING_SIZES.includes(s))
+          ? product.sizes.filter((s) => CLOTHING_SIZES.includes(s))
+          : ['P', 'M', 'G1', 'G2', 'G3']
+      );
+      setDimensionsCm(product.dimensionsCm || '');
+      setInStock(product.inStock !== false);
+    } else {
+      setName('');
+      setCategory('Bolsas');
+      setCustomCategory('');
+      setPrice('');
+      setOriginalPrice('');
+      setIsPromotion(false);
+      setPromotionTag('Oferta Especial');
+      setDescription('');
+      setFabric('');
+      setFitTip('');
+      setColor('');
+      setColorHex('#181316');
+      setImage('');
+      setSecondaryImage('');
+      setMeasurementType('cm');
+      setSizes(['P', 'M', 'G1', 'G2', 'G3']);
+      setDimensionsCm('38cm x 28cm x 14cm');
+      setInStock(true);
+    }
+  }, [product, isOpen]);
 
   // Check if original demo product exists for resetting
   const originalDemo = SAMPLE_PRODUCTS.find((p) => p.id === product?.id);
@@ -717,19 +766,20 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
                   Restaurar dados originais de fábrica
                 </button>
               )}
-              {onDeleteProduct && !isNew && (
+              {onDeleteProduct && !isNew && product && (
                 <button
                   type="button"
                   onClick={() => {
-                    if (window.confirm(`Tem certeza que deseja excluir "${name}" do catálogo?`)) {
+                    const targetName = product.name || name || 'esta peça';
+                    if (window.confirm(`Tem certeza de que deseja excluir permanentemente "${targetName}" do catálogo?\n\nApenas esta peça escolhida será removida e a página será atualizada.`)) {
                       onDeleteProduct(product.id);
                       onClose();
                     }
                   }}
-                  className="text-xs text-red-600 hover:text-red-800 flex items-center gap-1 cursor-pointer underline mt-1"
+                  className="text-xs text-red-600 hover:text-red-800 font-medium flex items-center gap-1.5 cursor-pointer underline mt-1.5 py-1"
                 >
-                  <Trash2 className="w-3 h-3" />
-                  Excluir este produto do catálogo
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Excluir apenas este produto ({product.name}) do catálogo</span>
                 </button>
               )}
             </div>

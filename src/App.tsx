@@ -282,11 +282,34 @@ export default function App() {
   };
 
   const handleDeleteProduct = (productId: string) => {
-    const next = deleteStoredProduct(productId);
+    const cleanId = String(productId).trim();
+    const next = deleteStoredProduct(cleanId);
     setProducts(next);
-    setMalaItems((prev) => prev.filter((item) => item.product.id !== productId));
-    showToast('Produto removido do catálogo.');
+    setMalaItems((prev) => prev.filter((item) => String(item.product.id).trim() !== cleanId));
+    if (storeEditProduct && String(storeEditProduct.id).trim() === cleanId) {
+      setStoreEditProduct(null);
+      setIsStoreEditModalOpen(false);
+    }
+    showToast('Peça excluída do catálogo com sucesso.');
   };
+
+  // Sincroniza em tempo real o catálogo de produtos e atualizações de página
+  useEffect(() => {
+    const handleProductsUpdated = (e: Event) => {
+      const customEvent = e as CustomEvent<Product[]>;
+      if (customEvent.detail && Array.isArray(customEvent.detail)) {
+        setProducts(customEvent.detail);
+      } else {
+        setProducts(getStoredProducts());
+      }
+    };
+    window.addEventListener('jb_products_updated', handleProductsUpdated);
+    window.addEventListener('storage', handleProductsUpdated);
+    return () => {
+      window.removeEventListener('jb_products_updated', handleProductsUpdated);
+      window.removeEventListener('storage', handleProductsUpdated);
+    };
+  }, []);
 
   const handleResetProducts = () => {
     const next = resetStoredProducts();
@@ -457,7 +480,9 @@ export default function App() {
                   Coleção Jô Bolsas Glamour
                 </h2>
                 <p className="text-[#5A4D54] text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
-                  Consulte nosso catálogo completo com fotos, descrições detalhadas e valores transparentes. Compre diretamente pelo WhatsApp com a Josy ou selecione até {MAX_MALA_ITEMS} peças para provar em casa por 48 horas!
+                  Peças exclusivas, qualidade e beleza em cada detalhe. Descubra uma moda feminina que valoriza sua personalidade e transforma cada escolha em um momento especial.
+                  <br className="hidden sm:inline" />
+                  {' '}Explore nossa coleção e encontre seus novos favoritos!
                 </p>
               </div>
 
@@ -494,7 +519,10 @@ export default function App() {
                     Compre na hora direto no WhatsApp
                   </h3>
                   <p className="text-xs sm:text-sm text-[#4A5D50] mt-1.5 leading-relaxed">
-                    Cada produto possui o botão <strong className="text-[#0d6832]">"Comprar no WhatsApp"</strong> com link que preenche a peça, cor e tamanho. Atendimento direto com a Josy para entrega rápida ou retirada no balcão!
+                    <span className="block mb-1">
+                      Atendimento direto com a Josy para entrega rápida ou retirada no balcão!
+                    </span>
+                    É rápido, prático e seguro! Tire suas dúvidas, receba fotos e detalhes das peças, escolha a sua favorita e finalize sua compra direto pelo WhatsApp!
                   </p>
                 </div>
                 <div className="pt-3.5 mt-3.5 border-t border-[#DDF4E4] flex items-center justify-between text-xs text-[#2F523B]">
@@ -796,11 +824,23 @@ export default function App() {
 
       {/* Modal de Edição de Produto direto da Loja (quando logada como Josy) */}
       <EditProductModal
+        key={storeEditProduct ? storeEditProduct.id : 'store-new'}
         product={storeEditProduct}
         isOpen={isStoreEditModalOpen}
-        onClose={() => setIsStoreEditModalOpen(false)}
-        onSaveProduct={handleUpdateProduct}
-        onDeleteProduct={handleDeleteProduct}
+        onClose={() => {
+          setIsStoreEditModalOpen(false);
+          setStoreEditProduct(null);
+        }}
+        onSaveProduct={(saved) => {
+          handleUpdateProduct(saved);
+          setIsStoreEditModalOpen(false);
+          setStoreEditProduct(null);
+        }}
+        onDeleteProduct={(id) => {
+          handleDeleteProduct(id);
+          setIsStoreEditModalOpen(false);
+          setStoreEditProduct(null);
+        }}
       />
     </div>
   );

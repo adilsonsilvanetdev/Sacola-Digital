@@ -3,41 +3,94 @@ import { SAMPLE_PRODUCTS } from '../data/products';
 
 export const PRODUCTS_STORAGE_KEY = 'jb_products_catalog';
 export const PRODUCTS_STORAGE_VERSION_KEY = 'jb_products_version';
+export const DELETED_PRODUCTS_STORAGE_KEY = 'jb_deleted_product_ids';
 export const CURRENT_PRODUCTS_VERSION = 'v3_pmg_cm_promos';
 
 /**
+ * Obtém a lista de IDs de produtos explicitamente excluídos pelo usuário.
+ * Impede que produtos excluídos voltem ao atualizar a página.
+ */
+export function getDeletedProductIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(DELETED_PRODUCTS_STORAGE_KEY);
+    if (!raw) return new Set();
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return new Set(parsed.map((id) => String(id).trim()));
+    }
+  } catch (err) {
+    console.error('Erro ao ler IDs excluídos:', err);
+  }
+  return new Set();
+}
+
+/**
+ * Registra um ID como permanentemente excluído no localStorage.
+ */
+export function addDeletedProductId(productId: string): void {
+  try {
+    const set = getDeletedProductIds();
+    set.add(String(productId).trim());
+    localStorage.setItem(DELETED_PRODUCTS_STORAGE_KEY, JSON.stringify(Array.from(set)));
+  } catch (err) {
+    console.error('Erro ao salvar ID excluído:', err);
+  }
+}
+
+/**
+ * Desduplica uma lista de produtos por ID garantindo unicidade absoluta.
+ */
+function deduplicateProducts(list: Product[], deletedIds: Set<string>): Product[] {
+  const seen = new Set<string>();
+  const result: Product[] = [];
+  for (const item of list) {
+    if (!item || !item.id) continue;
+    const cleanId = String(item.id).trim();
+    if (deletedIds.has(cleanId)) continue;
+    if (seen.has(cleanId)) continue;
+    seen.add(cleanId);
+    result.push(item);
+  }
+  return result;
+}
+
+/**
  * Carrega a lista atualizada de produtos do localStorage.
- * Garante que a migração para tamanhos P, M, G1, G2, G3, CM e Promoções ocorra suavemente.
+ * Garante que produtos excluídos NÃO voltem e que não haja IDs duplicados.
  */
 export function getStoredProducts(): Product[] {
   try {
+    const deletedIds = getDeletedProductIds();
     const version = localStorage.getItem(PRODUCTS_STORAGE_VERSION_KEY);
     const raw = localStorage.getItem(PRODUCTS_STORAGE_KEY);
 
     if (!raw || version !== CURRENT_PRODUCTS_VERSION) {
-      // Migração suave: se houver produtos customizados salvos pelo usuário, preserva-os
+      // Migração suave: preserva produtos customizados salvos pelo usuário
       let customProducts: Product[] = [];
       if (raw) {
         try {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed)) {
-            customProducts = parsed.filter((p: Product) => p.isCustom);
+            customProducts = parsed.filter((p: Product) => p && p.isCustom);
           }
         } catch {
           // ignore
         }
       }
-      const initialList = [...SAMPLE_PRODUCTS, ...customProducts];
+      const initialCombined = [...SAMPLE_PRODUCTS, ...customProducts];
+      const initialList = deduplicateProducts(initialCombined, deletedIds);
       saveStoredProducts(initialList);
       localStorage.setItem(PRODUCTS_STORAGE_VERSION_KEY, CURRENT_PRODUCTS_VERSION);
       return initialList;
     }
 
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
+    if (Array.isArray(parsed)) {
+      const cleanList = deduplicateProducts(parsed, deletedIds);
+      return cleanList;
     }
-    return SAMPLE_PRODUCTS;
+
+    return deduplicateProducts(SAMPLE_PRODUCTS, deletedIds);
   } catch (err) {
     console.error('Erro ao ler produtos do localStorage:', err);
     return SAMPLE_PRODUCTS;
@@ -49,9 +102,11 @@ export function getStoredProducts(): Product[] {
  */
 export function saveStoredProducts(products: Product[]): void {
   try {
-    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+    const deletedIds = getDeletedProductIds();
+    const clean = deduplicateProducts(products, deletedIds);
+    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(clean));
     localStorage.setItem(PRODUCTS_STORAGE_VERSION_KEY, CURRENT_PRODUCTS_VERSION);
-    window.dispatchEvent(new CustomEvent('jb_products_updated', { detail: products }));
+    window.dispatchEvent(new CustomEvent('jb_products_updated', { detail: clean }));
   } catch (err) {
     console.error('Erro ao salvar produtos no localStorage:', err);
   }
@@ -74,18 +129,40 @@ export function updateStoredProduct(updatedProduct: Product): Product[] {
  * Adiciona um novo produto ao catálogo.
  */
 export function addStoredProduct(newProduct: Product): Product[] {
+  // Se o ID estava na lista de excluídos, remove-o de lá
+  try {
+    const deleted = getDeletedProductIds();
+    if (deleted.has(newProduct.id)) {
+      deleted.delete(newProduct.id);
+      localStorage.setItem(DELETED_PRODUCTS_STORAGE_KEY, JSON.stringify(Array.from(deleted)));
+    }
+  } catch {
+    // ignore
+  }
+
   const current = getStoredProducts();
-  const nextList = [newProduct, ...current];
+  const filtered = current.filter((p) => p.id !== newProduct.id);
+  const nextList = [newProduct, ...filtered];
   saveStoredProducts(nextList);
   return nextList;
 }
 
 /**
- * Remove um produto do catálogo.
+ * Remove com precisão cirúrgica APENAS o produto selecionado do catálogo.
+ * O ID é registrado permanentemente para não retornar ao atualizar a página.
  */
 export function deleteStoredProduct(productId: string): Product[] {
+  if (!productId) return getStoredProducts();
+  const cleanId = String(productId).trim();
+
+  // 1. Marca permanentemente o ID nos excluídos
+  addDeletedProductId(cleanId);
+
+  // 2. Filtra estritamente APENAS o produto correspondente
   const current = getStoredProducts();
-  const nextList = current.filter((p) => p.id !== productId);
+  const nextList = current.filter((p) => String(p.id).trim() !== cleanId);
+
+  // 3. Salva a nova lista sem a peça excluída
   saveStoredProducts(nextList);
   return nextList;
 }
@@ -94,6 +171,11 @@ export function deleteStoredProduct(productId: string): Product[] {
  * Restaura o catálogo para os produtos originais de fábrica.
  */
 export function resetStoredProducts(): Product[] {
+  try {
+    localStorage.removeItem(DELETED_PRODUCTS_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
   saveStoredProducts(SAMPLE_PRODUCTS);
   return SAMPLE_PRODUCTS;
 }
