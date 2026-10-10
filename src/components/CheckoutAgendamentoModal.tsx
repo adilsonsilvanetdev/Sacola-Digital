@@ -133,7 +133,7 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
           <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
             <div className="bg-[#FDF2F4] border border-[#F2DEE4] p-3.5 rounded-xl text-xs text-[#5A4D54] leading-relaxed">
               <span className="font-semibold text-[#9C384E]">Como funciona o provador? </span>
-              A mala é preparada sem cobrança prévia das peças e bolsas. Você tem 48 horas para experimentar tudo com tranquilidade no conforto do seu quarto. O que não gostar, você devolve, e acerta apenas o que decidir ficar!
+              A mala é preparada sem cobrança prévia das peças e bolsas. Você tem 48 horas para experimentar tudo com tranquilidade no conforto da sua casa. O que não gostar, você devolve, e acerta apenas o que decidir ficar!
             </div>
 
             {/* Personal Details */}

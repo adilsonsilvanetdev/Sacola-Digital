@@ -96,8 +96,9 @@ export const Footer: React.FC<FooterProps> = () => {
                 </a>
               </li>
               <li>
-                <a href="#depoimentos" className="hover:text-[#F5BAC7] transition-colors">
-                  Experiência no Quarto
+                <a href="#promocoes" className="hover:text-[#F5BAC7] transition-colors flex items-center gap-1.5 font-semibold text-[#F5BAC7]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#E11D48]" />
+                  Promoções & Peças Especiais
                 </a>
               </li>
               <li>

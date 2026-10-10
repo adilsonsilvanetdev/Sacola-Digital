@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, Lock, ArrowLeft, Check } from 'lucide-react';
+import { ShoppingBag, Lock, ArrowLeft, Check, Flame } from 'lucide-react';
 import { MalaItem } from '../types';
 import { MAX_MALA_ITEMS } from '../data/products';
 import { JoBolsasLogo } from './JoBolsasLogo';
@@ -28,7 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Slim service top-bar notice with luxury onyx & blush accent */}
       <div className="bg-[#141113] text-[#F9D6DF] text-xs py-1.5 px-4 text-center tracking-wide border-b border-[#2A2025]">
         <span className="font-light">
-          Mala Delivery Exclusiva · Experimente até {MAX_MALA_ITEMS} bolsas e peças por 48h no seu quarto sem compromisso
+          Mala Delivery Exclusiva · Experimente até {MAX_MALA_ITEMS} bolsas e peças por 48h sem compromisso
         </span>
       </div>
 
@@ -45,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           {/* Zone 2: Customer Navigation links (Strictly customer-facing) */}
-          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-[#5A4D54]">
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-[#5A4D54]">
             <button
               onClick={() => {
                 setActiveView('store');
@@ -66,15 +66,22 @@ export const Header: React.FC<HeaderProps> = ({
             >
               Mala/Sacola Digital
             </button>
+            
+            {/* Promoções com cor em destaque para colocar produtos especiais */}
             <button
               onClick={() => {
                 setActiveView('store');
-                const el = document.getElementById('depoimentos');
+                const el = document.getElementById('promocoes');
                 el?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="hover:text-[#B84E67] transition-colors cursor-pointer"
+              className="group flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#E11D48] via-[#BE123C] to-[#9F1239] text-white text-xs font-bold shadow-sm hover:from-[#BE123C] hover:to-[#881337] transition-all cursor-pointer ring-2 ring-[#FFE4E6]/80 hover:scale-105 active:scale-95"
+              title="Acesse produtos especiais e promoções em destaque"
             >
-              Experiência no Quarto
+              <Flame className="w-3.5 h-3.5 text-amber-300 fill-amber-300 animate-pulse" />
+              <span>Promoções</span>
+              <span className="text-[10px] bg-white/20 text-white px-1.5 py-0.2 rounded-full font-bold">
+                Especiais
+              </span>
             </button>
           </nav>
 

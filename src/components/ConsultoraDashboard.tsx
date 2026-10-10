@@ -122,13 +122,15 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
   const [createdSuccessOrder, setCreatedSuccessOrder] = useState<MalaOrder | null>(null);
 
   // Filtered products for Josy to browse
-  const categories = ['Todas', 'Bolsas', 'Vestidos', 'Blazers & Alfaiataria', 'Camisas & Blusas', 'Calças & Shorts', 'Conjuntos & Tricot', 'Casacos'];
+  const categories = ['Todas', 'Promoções', 'Bolsas', 'Carteiras', 'Vestidos', 'Blazers & Alfaiataria', 'Camisas & Blusas', 'Calças & Shorts', 'Conjuntos & Tricot', 'Casacos'];
 
   const filteredProducts = useMemo(() => {
     return products.filter((prod) => {
       const matchesCategory =
         catalogCategory === 'Todas' ||
+        (catalogCategory === 'Promoções' && (prod.isPromotion || (prod.originalPrice && prod.originalPrice > prod.price))) ||
         (catalogCategory === 'Bolsas' && (prod.category.toLowerCase().includes('bolsa') || prod.name.toLowerCase().includes('bolsa'))) ||
+        (catalogCategory === 'Carteiras' && (prod.category.toLowerCase().includes('carteira') || prod.name.toLowerCase().includes('carteira'))) ||
         prod.category.toLowerCase().includes(catalogCategory.toLowerCase());
 
       const matchesSearch =
@@ -147,7 +149,9 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
     return products.filter((prod) => {
       const matchesCategory =
         productManagerCategory === 'Todas' ||
+        (productManagerCategory === 'Promoções' && (prod.isPromotion || (prod.originalPrice && prod.originalPrice > prod.price))) ||
         (productManagerCategory === 'Bolsas' && (prod.category.toLowerCase().includes('bolsa') || prod.name.toLowerCase().includes('bolsa'))) ||
+        (productManagerCategory === 'Carteiras' && (prod.category.toLowerCase().includes('carteira') || prod.name.toLowerCase().includes('carteira'))) ||
         prod.category.toLowerCase().includes(productManagerCategory.toLowerCase());
 
       const matchesSearch =
@@ -667,7 +671,7 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                               <Pencil className="w-3 h-3" />
                             </button>
                             <span className="text-[11px] text-[#5A4D54]">
-                              {prod.sizes.join(', ')}
+                              {prod.dimensionsCm ? `CM: ${prod.dimensionsCm}` : prod.sizes.join(', ')}
                             </span>
                           </div>
 
@@ -1122,9 +1126,16 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                       </p>
 
                       <div className="pt-1 text-[10px] text-[#7A6B73] flex items-center gap-1">
-                        <span className="font-semibold text-stone-700">Tamanhos:</span>
-                        <span>{prod.sizes.join(', ')}</span>
+                        <span className="font-semibold text-stone-700">Medidas:</span>
+                        <span>{prod.dimensionsCm ? `CM (${prod.dimensionsCm})` : prod.sizes.join(', ')}</span>
                       </div>
+                      {prod.isPromotion && (
+                        <div className="mt-1">
+                          <span className="bg-[#E11D48] text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                            🔥 {prod.promotionTag || 'Promoção'}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 

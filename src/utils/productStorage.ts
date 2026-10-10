@@ -2,18 +2,37 @@ import { Product } from '../types';
 import { SAMPLE_PRODUCTS } from '../data/products';
 
 export const PRODUCTS_STORAGE_KEY = 'jb_products_catalog';
+export const PRODUCTS_STORAGE_VERSION_KEY = 'jb_products_version';
+export const CURRENT_PRODUCTS_VERSION = 'v3_pmg_cm_promos';
 
 /**
  * Carrega a lista atualizada de produtos do localStorage.
- * Se for a primeira vez ou estiver vazio, inicializa com SAMPLE_PRODUCTS.
+ * Garante que a migração para tamanhos P, M, G1, G2, G3, CM e Promoções ocorra suavemente.
  */
 export function getStoredProducts(): Product[] {
   try {
+    const version = localStorage.getItem(PRODUCTS_STORAGE_VERSION_KEY);
     const raw = localStorage.getItem(PRODUCTS_STORAGE_KEY);
-    if (!raw) {
-      saveStoredProducts(SAMPLE_PRODUCTS);
-      return SAMPLE_PRODUCTS;
+
+    if (!raw || version !== CURRENT_PRODUCTS_VERSION) {
+      // Migração suave: se houver produtos customizados salvos pelo usuário, preserva-os
+      let customProducts: Product[] = [];
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            customProducts = parsed.filter((p: Product) => p.isCustom);
+          }
+        } catch {
+          // ignore
+        }
+      }
+      const initialList = [...SAMPLE_PRODUCTS, ...customProducts];
+      saveStoredProducts(initialList);
+      localStorage.setItem(PRODUCTS_STORAGE_VERSION_KEY, CURRENT_PRODUCTS_VERSION);
+      return initialList;
     }
+
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length > 0) {
       return parsed;
@@ -31,6 +50,7 @@ export function getStoredProducts(): Product[] {
 export function saveStoredProducts(products: Product[]): void {
   try {
     localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+    localStorage.setItem(PRODUCTS_STORAGE_VERSION_KEY, CURRENT_PRODUCTS_VERSION);
     window.dispatchEvent(new CustomEvent('jb_products_updated', { detail: products }));
   } catch (err) {
     console.error('Erro ao salvar produtos no localStorage:', err);
@@ -38,7 +58,7 @@ export function saveStoredProducts(products: Product[]): void {
 }
 
 /**
- * Atualiza um produto específico (substituindo fotos, valores, descrições, etc.).
+ * Atualiza um produto específico (substituindo fotos, valores, descrições, tamanhos, medidas CM, etc.).
  */
 export function updateStoredProduct(updatedProduct: Product): Product[] {
   const current = getStoredProducts();

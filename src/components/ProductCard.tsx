@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Check, Eye, Pencil } from 'lucide-react';
+import { ShoppingBag, Check, Eye, Pencil, Flame, Ruler } from 'lucide-react';
 import { Product } from '../types';
 import { WhatsAppIcon } from './WhatsAppIcon';
 import { buildProductPurchaseWhatsAppLink, STORE_WHATSAPP_DISPLAY } from '../utils/whatsappHelper';
@@ -23,7 +23,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   isMalaFull,
   onEditProduct,
 }) => {
-  const [selectedSize, setSelectedSize] = useState<string>(product.sizes[1] || product.sizes[0] || 'Único');
+  const isBagOrWallet =
+    product.category.toLowerCase().includes('bolsa') ||
+    product.category.toLowerCase().includes('carteira') ||
+    (product.sizes && product.sizes.includes('CM')) ||
+    Boolean(product.dimensionsCm);
+
+  const defaultSize = isBagOrWallet
+    ? 'CM'
+    : product.sizes[0] || 'M';
+
+  const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -35,15 +45,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         alert('Sua mala atingiu o limite de peças para esta entrega. Remova uma peça para adicionar outra.');
         return;
       }
-      onAddToMala(product, selectedSize);
+      onAddToMala(product, isBagOrWallet ? 'CM' : selectedSize);
     }
   };
 
-  const whatsappPurchaseUrl = buildProductPurchaseWhatsAppLink(product, selectedSize);
+  const whatsappPurchaseUrl = buildProductPurchaseWhatsAppLink(
+    product,
+    isBagOrWallet ? (product.dimensionsCm ? `CM (${product.dimensionsCm})` : 'CM') : selectedSize
+  );
+
   const installmentValue = (product.price / 3).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  const isPromo = product.isPromotion || (product.originalPrice && product.originalPrice > product.price);
 
   return (
-    <div className="group flex flex-col bg-white border border-[#F0D8DF] rounded-xl overflow-hidden hover:border-[#D87F95] hover:shadow-md transition-all duration-200">
+    <div className={`group flex flex-col bg-white rounded-xl overflow-hidden transition-all duration-200 border ${
+      isPromo
+        ? 'border-[#F8B4C4] hover:border-[#E11D48] shadow-sm hover:shadow-lg'
+        : 'border-[#F0D8DF] hover:border-[#D87F95] hover:shadow-md'
+    }`}>
       {/* Product Image Container */}
       <div className="relative aspect-[3/4] bg-[#FAF3F5] overflow-hidden">
         {!imageError ? (
@@ -64,13 +83,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
 
+        {/* Promo Highlight Badge */}
+        {isPromo && (
+          <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
+            <span className="bg-gradient-to-r from-[#E11D48] to-[#9F1239] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded shadow-md flex items-center gap-1">
+              <Flame className="w-3 h-3 text-amber-300 fill-amber-300" />
+              <span>{product.promotionTag || 'OFERTA ESPECIAL'}</span>
+            </span>
+          </div>
+        )}
+
         {/* Quick View Overlay Button */}
         <button
           onClick={() => onOpenQuickView(product)}
           className="absolute bottom-3 left-3 right-3 py-2 bg-white/95 backdrop-blur-sm text-[#181316] text-xs font-medium rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 hover:bg-[#FDF2F4] hover:text-[#B84E67] cursor-pointer"
         >
           <Eye className="w-3.5 h-3.5 text-[#B84E67]" />
-          <span>Ver Detalhes & Fotos</span>
+          <span>Ver Detalhes & Medidas</span>
         </button>
 
         {/* Edit Button for Seller (if authenticated) */}
@@ -81,8 +110,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               e.stopPropagation();
               onEditProduct(product);
             }}
-            title="Substituir foto, descrição ou valor desta peça"
-            className="absolute top-3 left-3 bg-white/95 hover:bg-[#FDF2F4] text-[#B84E67] text-[11px] font-bold px-2.5 py-1 rounded-md shadow border border-[#F2DEE4] flex items-center gap-1 cursor-pointer transition-all hover:scale-105 z-10"
+            title="Substituir foto, descrição, medidas ou valor desta peça"
+            className={`absolute ${isPromo ? 'top-10' : 'top-3'} left-3 bg-white/95 hover:bg-[#FDF2F4] text-[#B84E67] text-[11px] font-bold px-2.5 py-1 rounded-md shadow border border-[#F2DEE4] flex items-center gap-1 cursor-pointer transition-all hover:scale-105 z-10`}
           >
             <Pencil className="w-3 h-3 text-[#B84E67]" />
             <span>Editar Peça</span>
@@ -91,7 +120,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Subtle Indicator if already in Mala */}
         {isInMala && (
-          <div className="absolute top-3 right-3 bg-[#181316] text-[#FAF6F7] text-[11px] font-medium px-2.5 py-1 rounded-md shadow border border-[#F5BAC7]/40 flex items-center gap-1">
+          <div className="absolute top-3 right-3 bg-[#181316] text-[#FAF6F7] text-[11px] font-medium px-2.5 py-1 rounded-md shadow border border-[#F5BAC7]/40 flex items-center gap-1 z-10">
             <Check className="w-3 h-3 text-[#F5BAC7]" />
             <span>Na sua Mala</span>
           </div>
@@ -117,12 +146,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             {product.name}
           </h3>
 
-          {/* Pricing with Installments */}
-          <div className="mt-1.5 pt-1 border-t border-[#F7E6EB]">
+          {/* Pricing with Installments & Promo Highlight */}
+          <div className={`mt-1.5 pt-1.5 border-t ${isPromo ? 'border-[#FCE4EC] bg-[#FFF5F7] p-2 rounded-lg' : 'border-[#F7E6EB]'}`}>
             <div className="flex items-baseline justify-between">
-              <span className="text-base font-bold text-[#181316] tabular-nums">
-                R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </span>
+              <div>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <span className="text-[11px] text-stone-400 line-through block">
+                    De R$ {product.originalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                )}
+                <span className={`text-base font-extrabold tabular-nums ${isPromo ? 'text-[#E11D48]' : 'text-[#181316]'}`}>
+                  {product.originalPrice && product.originalPrice > product.price ? 'Por ' : ''}
+                  R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
               <span className="text-[11px] text-[#7A6B73]">
                 À vista ou 3x de R$ {installmentValue}
               </span>
@@ -134,34 +171,64 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </p>
         </div>
 
-        {/* Size Selection */}
+        {/* Size Selection OR CM Dimensions */}
         <div className="pt-2 border-t border-[#F2DEE4]">
-          <div className="flex items-center justify-between text-[11px] text-[#7A6B73] mb-1.5">
-            <span>Tamanho desejado:</span>
-            <button
-              onClick={() => onOpenQuickView(product)}
-              className="text-[#B84E67] underline hover:text-[#8F2E45] cursor-pointer"
-            >
-              Guia de medidas
-            </button>
-          </div>
+          {isBagOrWallet ? (
+            /* Bolsas e Carteiras: Mostra CM onde está incluída a medida */
+            <div>
+              <div className="flex items-center justify-between text-[11px] text-[#7A6B73] mb-1">
+                <span className="font-semibold text-stone-700 flex items-center gap-1">
+                  <Ruler className="w-3 h-3 text-[#B84E67]" />
+                  Medida do Produto (CM):
+                </span>
+                <span className="text-[10px] font-bold text-[#B84E67] bg-[#FDF2F4] px-1.5 py-0.2 rounded border border-[#F2DEE4]">
+                  CM
+                </span>
+              </div>
+              <div className="p-2 rounded-lg bg-[#FAF6F7] border border-[#F0D5DD] flex items-center justify-between">
+                <span className="text-xs font-semibold text-[#181316]">
+                  {product.dimensionsCm || 'Medidas sob consulta'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onOpenQuickView(product)}
+                  className="text-[11px] text-[#B84E67] underline hover:text-[#8F2E45] cursor-pointer"
+                >
+                  Ver detalhes
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Roupas: Medidas padronizadas P, M, G1, G2, G3 */
+            <div>
+              <div className="flex items-center justify-between text-[11px] text-[#7A6B73] mb-1.5">
+                <span>Tamanho desejado (P, M, G1, G2, G3):</span>
+                <button
+                  onClick={() => onOpenQuickView(product)}
+                  className="text-[#B84E67] underline hover:text-[#8F2E45] cursor-pointer text-[11px]"
+                >
+                  Tabela
+                </button>
+              </div>
 
-          <div className="flex flex-wrap gap-1.5">
-            {product.sizes.map((size) => (
-              <button
-                key={size}
-                type="button"
-                onClick={() => setSelectedSize(size)}
-                className={`text-xs px-2.5 py-1 rounded-md border transition-colors cursor-pointer ${
-                  selectedSize === size
-                    ? 'border-[#B84E67] bg-[#B84E67] text-white font-medium shadow-2xs'
-                    : 'border-[#F0D5DD] bg-white text-[#5A4D54] hover:border-[#D87F95] hover:bg-[#FDF2F4]'
-                }`}
-              >
-                {size}
-              </button>
-            ))}
-          </div>
+              <div className="flex flex-wrap gap-1.5">
+                {product.sizes.map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => setSelectedSize(size)}
+                    className={`text-xs px-2.5 py-1 rounded-md border transition-colors cursor-pointer ${
+                      selectedSize === size
+                        ? 'border-[#B84E67] bg-[#B84E67] text-white font-bold shadow-2xs'
+                        : 'border-[#F0D5DD] bg-white text-[#5A4D54] hover:border-[#D87F95] hover:bg-[#FDF2F4]'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Double Action Buttons: 1) Comprar no WhatsApp & 2) Colocar na Mala Digital */}
@@ -201,7 +268,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               }`}
             >
               <ShoppingBag className="w-3.5 h-3.5 text-[#F5BAC7]" />
-              <span>Experimentar na Mala (Tam. {selectedSize})</span>
+              <span>
+                {isBagOrWallet
+                  ? 'Experimentar na Mala (Medida CM)'
+                  : `Experimentar na Mala (Tam. ${selectedSize})`}
+              </span>
             </button>
           )}
         </div>

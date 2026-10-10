@@ -7,7 +7,7 @@ import { ProductQuickViewModal } from './components/ProductQuickViewModal';
 import { MalaDrawer } from './components/MalaDrawer';
 import { CheckoutAgendamentoModal } from './components/CheckoutAgendamentoModal';
 import { ConsultoraDashboard } from './components/ConsultoraDashboard';
-import { TestimonialsExperience } from './components/TestimonialsExperience';
+import { PromotionsSection } from './components/PromotionsSection';
 import { Footer } from './components/Footer';
 import { FloatingMalaBar } from './components/FloatingMalaBar';
 import { FloatingWhatsAppButton } from './components/FloatingWhatsAppButton';
@@ -35,7 +35,8 @@ import {
   X, 
   DollarSign, 
   ArrowUpDown, 
-  Tag 
+  Tag,
+  Flame 
 } from 'lucide-react';
 
 export default function App() {
@@ -314,7 +315,7 @@ export default function App() {
   }, []);
 
   // Filter products
-  const categories = ['Todas', 'Bolsas', 'Vestidos', 'Blazers & Alfaiataria', 'Camisas & Blusas', 'Calças & Shorts', 'Conjuntos & Tricot', 'Casacos'];
+  const categories = ['Todas', 'Promoções', 'Bolsas', 'Carteiras', 'Vestidos', 'Blazers & Alfaiataria', 'Camisas & Blusas', 'Calças & Shorts', 'Conjuntos & Tricot', 'Casacos'];
   const styles = ['Todos', 'Alfaiataria Sofisticada', 'Casual Elegante', 'Romântica & Fluida', 'Moderna & Minimalista', 'Festiva & Noite'];
 
   const filteredProducts = useMemo(() => {
@@ -334,9 +335,15 @@ export default function App() {
 
       // Category filter
       if (selectedCategory !== 'Todas') {
-        if (selectedCategory === 'Bolsas') {
+        if (selectedCategory === 'Promoções') {
+          const isPromo = product.isPromotion || (product.originalPrice && product.originalPrice > product.price);
+          if (!isPromo) return false;
+        } else if (selectedCategory === 'Bolsas') {
           const isBag = product.category.toLowerCase().includes('bolsa') || product.name.toLowerCase().includes('bolsa');
           if (!isBag) return false;
+        } else if (selectedCategory === 'Carteiras') {
+          const isWallet = product.category.toLowerCase().includes('carteira') || product.name.toLowerCase().includes('carteira');
+          if (!isWallet) return false;
         } else if (product.category !== selectedCategory) {
           return false;
         }
@@ -598,19 +605,28 @@ export default function App() {
                   <SlidersHorizontal className="w-3.5 h-3.5 text-[#B84E67]" />
                   Categorias:
                 </span>
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`text-xs px-3.5 py-1.5 rounded-full transition-all shrink-0 cursor-pointer ${
-                      selectedCategory === cat
-                        ? 'bg-[#181316] text-[#F5BAC7] font-semibold shadow-2xs'
-                        : 'bg-white text-[#5A4D54] border border-[#F0D5DD] hover:bg-[#FAF6F7]'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
+                {categories.map((cat) => {
+                  const isPromoCat = cat === 'Promoções';
+                  const isSelected = selectedCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`text-xs px-3.5 py-1.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                        isPromoCat
+                          ? isSelected
+                            ? 'bg-gradient-to-r from-[#E11D48] to-[#9F1239] text-white font-black shadow-sm ring-2 ring-[#FFE4E6]'
+                            : 'bg-[#FFF1F2] text-[#E11D48] border border-[#FECDD3] hover:bg-[#FFE4E6] font-bold'
+                          : isSelected
+                            ? 'bg-[#181316] text-[#F5BAC7] font-semibold shadow-2xs'
+                            : 'bg-white text-[#5A4D54] border border-[#F0D5DD] hover:bg-[#FAF6F7]'
+                      }`}
+                    >
+                      {isPromoCat && <Flame className="w-3.5 h-3.5 text-amber-300 fill-amber-300 animate-pulse" />}
+                      <span>{cat}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Linha 3: Estilos + Contador de Resultados + Botão Limpar */}
@@ -713,8 +729,13 @@ export default function App() {
             )}
           </section>
 
-          {/* Testimonials & Experience Section */}
-          <TestimonialsExperience />
+          {/* Seção Promoções & Produtos Especiais (Cor em destaque) */}
+          <PromotionsSection
+            products={products}
+            onOpenQuickView={(prod) => setQuickViewProduct(prod)}
+            onAddToMala={(prod, size) => handleAddToMala(prod, size || 'M')}
+            isInMala={(id) => malaItems.some((it) => it.product.id === id)}
+          />
         </main>
       )}
 

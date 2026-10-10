@@ -24,19 +24,32 @@ export function cleanPhoneNumber(rawPhone: string): string {
  * Link para COMPRA DIRETA de uma peça específica pelo WhatsApp da loja (14) 99722-4065
  */
 export function buildProductPurchaseWhatsAppLink(product: Product, selectedSize?: string): string {
-  const sizeText = selectedSize || (product.sizes && product.sizes.length === 1 ? product.sizes[0] : 'Único');
+  const isBagOrWallet =
+    product.category.toLowerCase().includes('bolsa') ||
+    product.category.toLowerCase().includes('carteira') ||
+    Boolean(product.dimensionsCm) ||
+    (product.sizes && product.sizes.includes('CM'));
+
+  const sizeText = isBagOrWallet
+    ? `Medidas em CM (${product.dimensionsCm || selectedSize || 'CM'})`
+    : `Tam. ${selectedSize || product.sizes[0] || 'M'}`;
+
   const priceFormatted = product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-  
+  const isPromo = product.isPromotion || (product.originalPrice && product.originalPrice > product.price);
+  const promoLine = isPromo && product.originalPrice
+    ? `💰 *Valor Promocional:* R$ ${priceFormatted} (De R$ ${product.originalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} - ${product.promotionTag || 'Oferta Especial'})`
+    : `💰 *Valor:* R$ ${priceFormatted}`;
+
   const text = [
     `✨ *JÔ BOLSAS GLAMOUR* ✨`,
     ``,
     `Olá, *Josy*! Gostaria de *comprar* a seguinte peça do catálogo:`,
     ``,
     `🛍️ *Produto:* ${product.name}`,
-    `💰 *Valor:* R$ ${priceFormatted}`,
-    `📏 *Tamanho:* ${sizeText}`,
+    promoLine,
+    `📏 *Tamanho / Medida:* ${sizeText}`,
     `🎨 *Cor:* ${product.color}`,
-    `🧵 *Tecido/Detalhe:* ${product.fabric}`,
+    `🧵 *Tecido/Material:* ${product.fabric}`,
     `🏷️ *Referência:* #${product.id}`,
     ``,
     `Por favor, me confirme a disponibilidade para envio/retirada e a forma de pagamento! 🤍`,
@@ -67,11 +80,17 @@ export function buildProductConsultationWhatsAppLink(product: Product): string {
 export function getClientOrderPlainText(order: MalaOrder): string {
   const itemsList = order.items.map((item, idx) => {
     const p = item.product;
-    const sizeInfo = item.requestSecondarySize && item.secondarySize
-      ? `${item.selectedSize} (reserva: ${item.secondarySize})`
-      : item.selectedSize;
+    const isBagOrWallet =
+      p.category.toLowerCase().includes('bolsa') ||
+      p.category.toLowerCase().includes('carteira') ||
+      Boolean(p.dimensionsCm) ||
+      (p.sizes && p.sizes.includes('CM'));
 
-    return `${idx + 1}. *${p.name}*\n   Cor: ${p.color} · Tam: ${sizeInfo} · R$ ${p.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    const sizeDisplay = isBagOrWallet
+      ? `Medida: ${p.dimensionsCm ? `CM (${p.dimensionsCm})` : 'CM'}`
+      : `Tam: ${item.requestSecondarySize && item.secondarySize ? `${item.selectedSize} (reserva: ${item.secondarySize})` : item.selectedSize}`;
+
+    return `${idx + 1}. *${p.name}*\n   Cor: ${p.color} · ${sizeDisplay} · R$ ${p.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   }).join('\n\n');
 
   const totalValue = order.items.reduce((acc, it) => acc + it.product.price, 0);
@@ -120,15 +139,19 @@ export function buildClientConfirmationWhatsAppLink(order: MalaOrder): string {
  * A mensagem inicial identifica a vendedora JOSY com dados idênticos de entrega ou retirada!
  */
 export function getStylistOrderPlainText(order: MalaOrder, customLetter?: string): string {
-  const firstName = order.customerName ? order.customerName.trim().split(' ')[0] : 'querida';
-
   const itemsList = order.items.map((item, idx) => {
     const p = item.product;
-    const sizeInfo = item.requestSecondarySize && item.secondarySize
-      ? `${item.selectedSize} (reserva: ${item.secondarySize})`
-      : item.selectedSize;
+    const isBagOrWallet =
+      p.category.toLowerCase().includes('bolsa') ||
+      p.category.toLowerCase().includes('carteira') ||
+      Boolean(p.dimensionsCm) ||
+      (p.sizes && p.sizes.includes('CM'));
 
-    return `${idx + 1}. *${p.name}*\n   Cor: ${p.color} · Tam: ${sizeInfo} · R$ ${p.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    const sizeDisplay = isBagOrWallet
+      ? `Medida: ${p.dimensionsCm ? `CM (${p.dimensionsCm})` : 'CM'}`
+      : `Tam: ${item.requestSecondarySize && item.secondarySize ? `${item.selectedSize} (reserva: ${item.secondarySize})` : item.selectedSize}`;
+
+    return `${idx + 1}. *${p.name}*\n   Cor: ${p.color} · ${sizeDisplay} · R$ ${p.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   }).join('\n\n');
 
   const totalValue = order.items.reduce((acc, it) => acc + it.product.price, 0);

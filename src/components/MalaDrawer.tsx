@@ -131,40 +131,51 @@ export const MalaDrawer: React.FC<MalaDrawerProps> = ({
                         R$ {item.product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </div>
 
-                      <div className="mt-1.5 flex items-center gap-2">
-                        <label className="text-[11px] text-[#5A4D54]">Tam:</label>
-                        <select
-                          value={item.selectedSize}
-                          onChange={(e) => onUpdateSize(item.product.id, e.target.value)}
-                          className="text-xs bg-white border border-[#F0D5DD] rounded-md px-1.5 py-0.5 font-medium text-[#181316] focus:outline-none focus:border-[#B84E67] cursor-pointer"
-                        >
-                          {item.product.sizes.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                      {item.product.dimensionsCm || item.product.sizes.includes('CM') ? (
+                        <div className="mt-1.5 text-[11px] text-[#5A4D54]">
+                          <span className="font-semibold text-stone-700">Medida: </span>
+                          <span className="text-[#B84E67] font-bold bg-[#FDF2F4] px-1.5 py-0.5 rounded border border-[#F2DEE4]">
+                            {item.product.dimensionsCm ? `CM (${item.product.dimensionsCm})` : 'CM'}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="mt-1.5 flex items-center gap-2">
+                          <label className="text-[11px] text-[#5A4D54]">Tam:</label>
+                          <select
+                            value={item.selectedSize}
+                            onChange={(e) => onUpdateSize(item.product.id, e.target.value)}
+                            className="text-xs bg-white border border-[#F0D5DD] rounded-md px-1.5 py-0.5 font-bold text-[#181316] focus:outline-none focus:border-[#B84E67] cursor-pointer"
+                          >
+                            {item.product.sizes.map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Backup size checkbox */}
-                  <div className="pt-2 border-t border-[#F0D5DD] flex items-center justify-between text-[11px]">
-                    <label className="flex items-center gap-1.5 text-[#5A4D54] cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={item.requestSecondarySize || false}
-                        onChange={() => onToggleSecondarySize(item.product.id)}
-                        className="rounded border-[#F0D5DD] text-[#B84E67] focus:ring-0"
-                      />
-                      <span>Enviar tamanho reserva para provar</span>
-                    </label>
-                    {item.requestSecondarySize && item.secondarySize && (
-                      <span className="text-[#B84E67] bg-[#FDF2F4] px-1.5 py-0.5 rounded font-medium border border-[#F2DEE4]">
-                        Tam. {item.secondarySize}
-                      </span>
-                    )}
-                  </div>
+                  {/* Backup size checkbox (Apenas para roupas com múltiplos tamanhos) */}
+                  {!item.product.dimensionsCm && !item.product.sizes.includes('CM') && item.product.sizes.length > 1 && (
+                    <div className="pt-2 border-t border-[#F0D5DD] flex items-center justify-between text-[11px]">
+                      <label className="flex items-center gap-1.5 text-[#5A4D54] cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={item.requestSecondarySize || false}
+                          onChange={() => onToggleSecondarySize(item.product.id)}
+                          className="rounded border-[#F0D5DD] text-[#B84E67] focus:ring-0"
+                        />
+                        <span>Enviar tamanho reserva para provar</span>
+                      </label>
+                      {item.requestSecondarySize && item.secondarySize && (
+                        <span className="text-[#B84E67] bg-[#FDF2F4] px-1.5 py-0.5 rounded font-bold border border-[#F2DEE4]">
+                          Tam. {item.secondarySize}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))
             )}
