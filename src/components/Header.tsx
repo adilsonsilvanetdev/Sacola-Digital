@@ -25,12 +25,6 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-[#FAF6F7]/95 backdrop-blur-md border-b border-[#F2DEE4]">
-      {/* Slim service top-bar notice with luxury onyx & blush accent */}
-      <div className="bg-[#141113] text-[#F9D6DF] text-xs py-1.5 px-4 text-center tracking-wide border-b border-[#2A2025]">
-        <span className="font-light">
-          Mala Delivery Exclusiva · Experimente até {MAX_MALA_ITEMS} bolsas e peças por 48h sem compromisso
-        </span>
-      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-3 sm:py-4 min-h-[120px]">
