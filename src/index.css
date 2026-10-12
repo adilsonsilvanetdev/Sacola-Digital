@@ -30,3 +30,61 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #A8A29E;
 }
+
+/* Animações sutis para Janela Promocional de Datas Especiais */
+@keyframes jb-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+
+@keyframes jb-sparkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes jb-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes jb-pulse-subtle {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(245, 186, 199, 0.4);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px 4px rgba(245, 186, 199, 0.6);
+  }
+}
+
+.animate-jb-float {
+  animation: jb-float 3.5s ease-in-out infinite;
+}
+
+.animate-jb-sparkle {
+  animation: jb-sparkle 2.2s ease-in-out infinite;
+}
+
+.animate-jb-pulse-subtle {
+  animation: jb-pulse-subtle 2.8s ease-in-out infinite;
+}
+
+.animate-jb-shimmer {
+  background-size: 200% 100%;
+  animation: jb-shimmer 3s infinite linear;
+}

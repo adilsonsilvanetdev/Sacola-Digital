@@ -14,7 +14,7 @@ import { FloatingWhatsAppButton } from './components/FloatingWhatsAppButton';
 import { SellerAuthModal } from './components/SellerAuthModal';
 import { WhatsAppIcon } from './components/WhatsAppIcon';
 
-import { Product, MalaItem, MalaOrder } from './types';
+import { Product, MalaItem, MalaOrder, SpecialDatePromotion } from './types';
 import { SAMPLE_PRODUCTS, MAX_MALA_ITEMS } from './data/products';
 import { 
   getStoredProducts, 
@@ -23,6 +23,13 @@ import {
   deleteStoredProduct, 
   resetStoredProducts 
 } from './utils/productStorage';
+import { 
+  getStoredSpecialPromotion, 
+  saveStoredSpecialPromotion, 
+  isSpecialPromotionDismissedInSession, 
+  setSpecialPromotionDismissedInSession 
+} from './utils/specialDatesStorage';
+import { PromotionalSpecialModal, PromotionalSpecialBadge } from './components/PromotionalSpecialModal';
 import { STORE_WHATSAPP_DISPLAY, STORE_WHATSAPP_NUMBER } from './utils/whatsappHelper';
 import { EditProductModal } from './components/EditProductModal';
 import { 
@@ -66,6 +73,12 @@ export default function App() {
   const [isMalaOpen, setIsMalaOpen] = useState(false);
   const [isAgendamentoOpen, setIsAgendamentoOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+
+  // Janela Promocional de Datas Especiais (Pop-up Flutuante)
+  const [specialCampaign, setSpecialCampaign] = useState<SpecialDatePromotion>(() => {
+    return getStoredSpecialPromotion();
+  });
+  const [isSpecialModalOpen, setIsSpecialModalOpen] = useState(false);
 
   // Advanced Store Filters & Search (Consulta de Produtos e Valores)
   const [searchQuery, setSearchQuery] = useState('');
@@ -255,6 +268,43 @@ export default function App() {
     setTimeout(() => {
       setAddedToastMessage(null);
     }, 4500);
+  };
+
+  // Abertura suave e inteligente da Janela Promocional ao abrir a loja virtual
+  useEffect(() => {
+    if (activeView === 'store' && specialCampaign.isActive && !isSpecialPromotionDismissedInSession()) {
+      const timer = setTimeout(() => {
+        setIsSpecialModalOpen(true);
+      }, 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [activeView, specialCampaign.isActive]);
+
+  const handleCloseSpecialModal = () => {
+    setIsSpecialModalOpen(false);
+    setSpecialPromotionDismissedInSession();
+  };
+
+  const handleSaveSpecialCampaign = (campaign: SpecialDatePromotion) => {
+    setSpecialCampaign(campaign);
+    saveStoredSpecialPromotion(campaign);
+    showToast(`Campanha "${campaign.name}" salva com sucesso!`);
+  };
+
+  const handleTestLiveSpecialModal = () => {
+    setIsSpecialModalOpen(true);
+  };
+
+  const handleExplorePromotions = (categoryTarget?: string) => {
+    setIsSpecialModalOpen(false);
+    setSpecialPromotionDismissedInSession();
+    if (categoryTarget && categoryTarget !== 'Todas') {
+      setSelectedCategory(categoryTarget);
+    }
+    const targetElement = categoryTarget === 'Promoções'
+      ? document.getElementById('promocoes') || document.getElementById('colecao')
+      : document.getElementById('colecao');
+    targetElement?.scrollIntoView({ behavior: 'smooth' });
   };
 
   // Status update from dashboard
@@ -447,6 +497,9 @@ export default function App() {
           onAddProduct={handleAddProduct}
           onDeleteProduct={handleDeleteProduct}
           onResetProducts={handleResetProducts}
+          specialCampaign={specialCampaign}
+          onSaveSpecialCampaign={handleSaveSpecialCampaign}
+          onTestLiveSpecialModal={handleTestLiveSpecialModal}
         />
       ) : (
         /* Boutique Customer Storefront View */
@@ -776,6 +829,15 @@ export default function App() {
             onOpenAgendamento={() => setIsAgendamentoOpen(true)}
           />
           <FloatingWhatsAppButton hasActiveMalaItems={malaItems.length > 0} />
+          
+          {/* Selo Flutuante para Reabrir a Janela Promocional a qualquer momento */}
+          {specialCampaign.isActive && specialCampaign.showReopenBadge !== false && !isSpecialModalOpen && (
+            <PromotionalSpecialBadge
+              campaign={specialCampaign}
+              onOpen={() => setIsSpecialModalOpen(true)}
+              hasActiveMalaItems={malaItems.length > 0}
+            />
+          )}
         </>
       )}
 
@@ -841,6 +903,14 @@ export default function App() {
           setIsStoreEditModalOpen(false);
           setStoreEditProduct(null);
         }}
+      />
+
+      {/* Janela Promocional Flutuante de Datas Especiais (Pop-up Modal) */}
+      <PromotionalSpecialModal
+        campaign={specialCampaign}
+        isOpen={isSpecialModalOpen}
+        onClose={handleCloseSpecialModal}
+        onExplorePromotions={handleExplorePromotions}
       />
     </div>
   );

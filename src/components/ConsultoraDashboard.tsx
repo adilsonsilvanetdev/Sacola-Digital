@@ -5,7 +5,7 @@ import {
   Search, Trash2, Check, ShoppingBag, Eye, Calendar, Phone, Home, AlertCircle,
   Lock, KeyRound, Pencil, Tag, SlidersHorizontal
 } from 'lucide-react';
-import { MalaOrder, MalaItem, Product } from '../types';
+import { MalaOrder, MalaItem, Product, SpecialDatePromotion } from '../types';
 import { SAMPLE_PRODUCTS, MAX_MALA_ITEMS } from '../data/products';
 import { 
   buildStylistToClientWhatsAppLink, 
@@ -13,6 +13,8 @@ import {
   cleanPhoneNumber 
 } from '../utils/whatsappHelper';
 import { EditProductModal } from './EditProductModal';
+import { SpecialDatesManager } from './SpecialDatesManager';
+import { getStoredSpecialPromotion } from '../utils/specialDatesStorage';
 
 interface ConsultoraDashboardProps {
   orders: MalaOrder[];
@@ -27,6 +29,9 @@ interface ConsultoraDashboardProps {
   onAddProduct?: (product: Product) => void;
   onDeleteProduct?: (productId: string) => void;
   onResetProducts?: () => void;
+  specialCampaign?: SpecialDatePromotion;
+  onSaveSpecialCampaign?: (campaign: SpecialDatePromotion) => void;
+  onTestLiveSpecialModal?: () => void;
 }
 
 export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
@@ -42,9 +47,12 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
   onAddProduct,
   onDeleteProduct,
   onResetProducts,
+  specialCampaign = getStoredSpecialPromotion(),
+  onSaveSpecialCampaign,
+  onTestLiveSpecialModal,
 }) => {
-  // Navigation tabs: 'create' (Montar Mala), 'products' (Gerenciar Catálogo) or 'orders' (Gerenciar Malas)
-  const [activeTab, setActiveTab] = useState<'create' | 'products' | 'orders'>('create');
+  // Navigation tabs: 'create' (Montar Mala), 'products' (Gerenciar Catálogo), 'specialDates' (Datas Especiais) or 'orders' (Gerenciar Malas)
+  const [activeTab, setActiveTab] = useState<'create' | 'products' | 'specialDates' | 'orders'>('create');
   const [isChangingPin, setIsChangingPin] = useState(false);
   const [newPinValue, setNewPinValue] = useState('');
   const [pinChangeSuccess, setPinChangeSuccess] = useState(false);
@@ -420,6 +428,25 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
             <span>Gerenciar Produtos (Fotos, Preços & Descrições)</span>
             <span className="bg-[#FAF0F3] text-[#B84E67] border border-[#F2BAC7]/40 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
               {products.length} peças
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('specialDates')}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+              activeTab === 'specialDates'
+                ? 'bg-[#141113] text-white shadow-xs'
+                : 'text-[#5A4D54] hover:bg-[#FAF6F7] hover:text-[#141113]'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-[#F5BAC7]" />
+            <span>Janela Promocional & Datas Especiais</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+              specialCampaign?.isActive 
+                ? 'bg-emerald-600 text-white' 
+                : 'bg-zinc-200 text-zinc-700'
+            }`}>
+              {specialCampaign?.isActive ? 'Ativa' : 'Inativa'}
             </span>
           </button>
 
@@ -1442,6 +1469,25 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
             )}
 
           </div>
+        )}
+
+        {/* =============================================================== */}
+        {/* TAB 4: JANELA PROMOCIONAL & DATAS ESPECIAIS                     */}
+        {/* =============================================================== */}
+        {activeTab === 'specialDates' && (
+          <SpecialDatesManager
+            currentCampaign={specialCampaign}
+            onSaveCampaign={(camp) => {
+              if (onSaveSpecialCampaign) {
+                onSaveSpecialCampaign(camp);
+              }
+            }}
+            onTestLiveModal={() => {
+              if (onTestLiveSpecialModal) {
+                onTestLiveSpecialModal();
+              }
+            }}
+          />
         )}
 
       </div>

@@ -63,3 +63,37 @@ export interface MalaOrder {
   createdAt: string;
   returnDeadline?: string;
 }
+
+export type SpecialDateTheme = 
+  | 'natal' 
+  | 'reveillon' 
+  | 'mulheres' 
+  | 'maes' 
+  | 'namorados' 
+  | 'pais' 
+  | 'blackfriday' 
+  | 'aniversario' 
+  | 'ouro' 
+  | 'rose';
+
+export type SpecialDateAnimation = 'sparkles' | 'shimmer' | 'pulse' | 'gentle';
+
+export interface SpecialDatePromotion {
+  id: string;
+  name: string;
+  badge: string;
+  icon: string;
+  title: string;
+  subtitle: string;
+  couponCode?: string;
+  benefitText?: string;
+  ctaText: string;
+  secondaryCtaText?: string;
+  whatsappMessage?: string;
+  themeColor: SpecialDateTheme;
+  animationEffect: SpecialDateAnimation;
+  isActive: boolean;
+  highlightCategory?: string;
+  targetDateText?: string;
+  showReopenBadge?: boolean;
+}
