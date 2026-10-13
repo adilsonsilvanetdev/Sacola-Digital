@@ -2,6 +2,9 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 export const SUPABASE_STORAGE_CREDENTIALS_KEY = 'jb_supabase_credentials';
 
+export const DEFAULT_SUPABASE_URL = 'https://hxihnjkhtecebpimtatq.supabase.co';
+export const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4aWhuamtodGVjZWJwaW10YXRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4MzgxMjAsImV4cCI6MjEwNzQxNDEyMH0.SmLmssqUwj8KxFLzcvrayBSUzU9vZfO5h4GBRaUpJCg';
+
 export interface SupabaseConfig {
   url: string;
   anonKey: string;
@@ -16,9 +19,11 @@ let currentClientKey = '';
  * ou de credenciais inseridas pela Josy diretamente no painel administrativo.
  */
 export function getSupabaseConfig(): SupabaseConfig {
-  // 1. Verificar variáveis de ambiente Vite (.env central do projeto para acesso público global)
-  const envUrl = ((typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL) || (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_URL) || '').trim().replace(/\/+$/, '');
-  const envKey = ((typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_ANON_KEY) || (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_ANON_KEY) || '').trim();
+  // 1. Verificar variáveis de ambiente Vite ou padrão central garantido do projeto
+  const rawUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL) || (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_URL) || DEFAULT_SUPABASE_URL;
+  const rawKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_ANON_KEY) || (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_ANON_KEY) || DEFAULT_SUPABASE_ANON_KEY;
+  const envUrl = String(rawUrl).trim().replace(/\/+$/, '');
+  const envKey = String(rawKey).trim();
 
   if (envUrl.startsWith('https://') && envKey.length > 20 && !envUrl.includes('seu-projeto')) {
     return {
@@ -82,9 +87,9 @@ export function getSupabaseConfig(): SupabaseConfig {
   }
 
   return {
-    url: '',
-    anonKey: '',
-    source: 'none'
+    url: DEFAULT_SUPABASE_URL,
+    anonKey: DEFAULT_SUPABASE_ANON_KEY,
+    source: 'env'
   };
 }
 

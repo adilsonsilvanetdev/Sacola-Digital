@@ -305,6 +305,79 @@ export async function saveMalaOrderInSupabase(order: MalaOrder): Promise<boolean
 }
 
 /**
+ * Busca todos os pedidos de malas cadastradas no Supabase
+ */
+export async function fetchMalaOrdersFromSupabase(): Promise<MalaOrder[] | null> {
+  const client = getSupabaseClient();
+  if (!client) return null;
+
+  try {
+    const { data, error } = await client
+      .from('mala_orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('Erro ao buscar pedidos no Supabase:', error.message);
+      return null;
+    }
+
+    if (!data || !Array.isArray(data)) return [];
+    return data.map((row: any) => ({
+      id: String(row.id),
+      customerName: String(row.customer_name || ''),
+      customerPhone: String(row.customer_phone || ''),
+      deliveryType: (row.delivery_type as 'delivery' | 'pickup') || 'delivery',
+      address: String(row.address || ''),
+      neighborhood: String(row.neighborhood || ''),
+      city: String(row.city || ''),
+      street: row.street ? String(row.street) : undefined,
+      number: row.number ? String(row.number) : undefined,
+      complement: row.complement ? String(row.complement) : undefined,
+      deliveryInstructions: row.delivery_instructions ? String(row.delivery_instructions) : undefined,
+      scheduledDate: String(row.scheduled_date || ''),
+      scheduledTimeSlot: (row.scheduled_time_slot as MalaOrder['scheduledTimeSlot']) || 'Manhã (09h às 13h)',
+      items: Array.isArray(row.items) ? row.items : [],
+      curationMode: (row.curation_mode as 'self' | 'stylist') || 'self',
+      stylistQuiz: row.stylist_quiz || undefined,
+      stylistNote: row.stylist_note ? String(row.stylist_note) : undefined,
+      status: (row.status as MalaOrder['status']) || 'solicitada',
+      createdAt: row.created_at ? new Date(row.created_at).toLocaleString('pt-BR') : 'Recentemente',
+      returnDeadline: row.return_deadline ? String(row.return_deadline) : undefined,
+    }));
+  } catch (err) {
+    console.warn('Exceção ao buscar pedidos no Supabase:', err);
+    return null;
+  }
+}
+
+/**
+ * Atualiza o status de um pedido no Supabase
+ */
+export async function updateOrderStatusInSupabase(
+  orderId: string, 
+  newStatus: MalaOrder['status']
+): Promise<boolean> {
+  const client = getSupabaseClient();
+  if (!client) return false;
+
+  try {
+    const { error } = await client
+      .from('mala_orders')
+      .update({ status: newStatus, updated_at: new Date().toISOString() })
+      .eq('id', orderId);
+
+    if (error) {
+      console.warn('Erro ao atualizar status do pedido no Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Inscreve-se nas atualizações em tempo real (Supabase Realtime) da tabela 'products'
  */
 export function subscribeToProductsRealtime(onProductsChange: () => void): () => void {
@@ -319,6 +392,68 @@ export function subscribeToProductsRealtime(onProductsChange: () => void): () =>
         { event: '*', schema: 'public', table: 'products' },
         () => {
           onProductsChange();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      try {
+        client.removeChannel(channel);
+      } catch {
+        // ignore
+      }
+    };
+  } catch {
+    return () => {};
+  }
+}
+
+/**
+ * Inscreve-se nas atualizações em tempo real (Supabase Realtime) da tabela 'mala_orders'
+ */
+export function subscribeToOrdersRealtime(onOrdersChange: () => void): () => void {
+  const client = getSupabaseClient();
+  if (!client) return () => {};
+
+  try {
+    const channel = client
+      .channel('public:mala_orders:changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'mala_orders' },
+        () => {
+          onOrdersChange();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      try {
+        client.removeChannel(channel);
+      } catch {
+        // ignore
+      }
+    };
+  } catch {
+    return () => {};
+  }
+}
+
+/**
+ * Inscreve-se nas atualizações em tempo real da tabela 'special_promotions'
+ */
+export function subscribeToPromotionsRealtime(onPromoChange: () => void): () => void {
+  const client = getSupabaseClient();
+  if (!client) return () => {};
+
+  try {
+    const channel = client
+      .channel('public:special_promotions:changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'special_promotions' },
+        () => {
+          onPromoChange();
         }
       )
       .subscribe();

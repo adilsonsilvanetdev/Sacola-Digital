@@ -40,9 +40,13 @@ import {
   upsertProductInSupabase, 
   deleteProductFromSupabase, 
   saveMalaOrderInSupabase, 
+  fetchMalaOrdersFromSupabase,
+  updateOrderStatusInSupabase,
   fetchSpecialPromotionFromSupabase, 
   upsertSpecialPromotionInSupabase, 
-  subscribeToProductsRealtime 
+  subscribeToProductsRealtime,
+  subscribeToOrdersRealtime,
+  subscribeToPromotionsRealtime
 } from './services/supabaseService';
 import { 
   SlidersHorizontal, 
@@ -365,6 +369,13 @@ export default function App() {
     setOrders((prev) =>
       prev.map((ord) => (ord.id === orderId ? { ...ord, status: newStatus } : ord))
     );
+    if (isSupabaseConfigured()) {
+      updateOrderStatusInSupabase(orderId, newStatus).then((ok) => {
+        if (ok) {
+          showToast(`Status da mala ${orderId} atualizado no Supabase!`);
+        }
+      });
+    }
   };
 
   // Handlers for updating photos, descriptions, and values across the store
@@ -444,17 +455,25 @@ export default function App() {
     };
   }, []);
 
-  // Carrega catálogo e promoções da nuvem Supabase ao iniciar
+  // Carrega catálogo, pedidos e promoções da nuvem Supabase ao iniciar
   useEffect(() => {
     const initCloud = async () => {
       if (isSupabaseConfigured()) {
         try {
+          // 1. Produtos
           const cloudProducts = await fetchProductsFromSupabase();
           if (cloudProducts && cloudProducts.length > 0) {
             saveCloudProducts(cloudProducts);
             setProducts(cloudProducts);
           }
 
+          // 2. Pedidos
+          const cloudOrders = await fetchMalaOrdersFromSupabase();
+          if (cloudOrders && cloudOrders.length > 0) {
+            setOrders(cloudOrders);
+          }
+
+          // 3. Promoções e Datas Especiais
           const cloudPromo = await fetchSpecialPromotionFromSupabase();
           if (cloudPromo) {
             setSpecialCampaign(cloudPromo);
@@ -469,13 +488,33 @@ export default function App() {
     initCloud();
 
     // Inscreve-se para atualizações em tempo real se o Supabase estiver configurado
-    let unsubscribe: (() => void) | null = null;
+    let unsubProducts: (() => void) | null = null;
+    let unsubOrders: (() => void) | null = null;
+    let unsubPromo: (() => void) | null = null;
+
     if (isSupabaseConfigured()) {
-      unsubscribe = subscribeToProductsRealtime(() => {
+      unsubProducts = subscribeToProductsRealtime(() => {
         fetchProductsFromSupabase().then((latest) => {
           if (latest && latest.length > 0) {
             saveCloudProducts(latest);
             setProducts(latest);
+          }
+        });
+      });
+
+      unsubOrders = subscribeToOrdersRealtime(() => {
+        fetchMalaOrdersFromSupabase().then((latestOrders) => {
+          if (latestOrders && latestOrders.length > 0) {
+            setOrders(latestOrders);
+          }
+        });
+      });
+
+      unsubPromo = subscribeToPromotionsRealtime(() => {
+        fetchSpecialPromotionFromSupabase().then((latestPromo) => {
+          if (latestPromo) {
+            setSpecialCampaign(latestPromo);
+            saveStoredSpecialPromotion(latestPromo);
           }
         });
       });
@@ -487,7 +526,9 @@ export default function App() {
     window.addEventListener('jb_supabase_config_updated', handleConfigChange);
 
     return () => {
-      if (unsubscribe) unsubscribe();
+      if (unsubProducts) unsubProducts();
+      if (unsubOrders) unsubOrders();
+      if (unsubPromo) unsubPromo();
       window.removeEventListener('jb_supabase_config_updated', handleConfigChange);
     };
   }, []);

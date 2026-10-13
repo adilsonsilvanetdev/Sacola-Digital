@@ -18,9 +18,7 @@ import {
   Eye, 
   EyeOff,
   Server,
-  Layers,
-  Laptop,
-  Share2
+  Layers
 } from 'lucide-react';
 import { Product } from '../types';
 import { 
@@ -174,7 +172,6 @@ export const SupabaseSyncManager: React.FC<SupabaseSyncManagerProps> = ({
   const [isSyncingUp, setIsSyncingUp] = useState(false);
   const [isSyncingDown, setIsSyncingDown] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
-  const [copiedShareLink, setCopiedShareLink] = useState(false);
 
   useEffect(() => {
     const current = getSupabaseConfig();
@@ -281,18 +278,6 @@ export const SupabaseSyncManager: React.FC<SupabaseSyncManagerProps> = ({
     setTimeout(() => setCopiedSql(false), 3000);
   };
 
-  const handleCopyShareLink = () => {
-    if (!config.url || !config.anonKey) {
-      onShowToast('Conecte o Supabase primeiro para gerar o link de sincronização.');
-      return;
-    }
-    const shareUrl = `${window.location.origin}?sb_url=${encodeURIComponent(config.url)}&sb_key=${encodeURIComponent(config.anonKey)}`;
-    navigator.clipboard.writeText(shareUrl);
-    setCopiedShareLink(true);
-    onShowToast('Link de sincronização copiado! Abra no navegador do computador para conectar na hora.');
-    setTimeout(() => setCopiedShareLink(false), 3500);
-  };
-
   const isConnected = isSupabaseConfigured();
 
   return (
@@ -353,37 +338,6 @@ export const SupabaseSyncManager: React.FC<SupabaseSyncManagerProps> = ({
           </div>
         )}
       </div>
-
-      {/* Card de Sincronização entre Celular e Computador */}
-      {isConnected && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-stone-900 to-stone-900 border border-emerald-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
-              <Laptop className="w-5 h-5" />
-            </div>
-            <div>
-              <h5 className="text-sm font-semibold text-white flex items-center gap-2">
-                <span>Sincronizar no Computador ou Outro Aparelho</span>
-                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-bold uppercase tracking-wider">
-                  Recomendado
-                </span>
-              </h5>
-              <p className="text-xs text-stone-300 mt-0.5 leading-relaxed">
-                As credenciais do Supabase ficam salvas na memória local deste aparelho. Para conectar o computador e <strong>substituir as peças antigas de teste pelo acervo oficial</strong>, copie o link abaixo e abra no navegador do seu computador.
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleCopyShareLink}
-            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-xs whitespace-nowrap self-stretch md:self-auto justify-center hover:scale-[1.02] active:scale-[0.98]"
-          >
-            {copiedShareLink ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
-            <span>{copiedShareLink ? 'Link Copiado!' : 'Copiar Link para o Computador'}</span>
-          </button>
-        </div>
-      )}
 
       {/* Grid: Formulário de Credenciais + Ações Rápidas de Sincronização */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

@@ -140,6 +140,9 @@ export function getStoredProducts(): Product[] {
 
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
+      if (isCloudActive && parsed.length < 5) {
+        return SAMPLE_PRODUCTS;
+      }
       const cleanList = deduplicateProducts(parsed, deletedIds);
       return cleanList;
     }
