@@ -1,6 +1,7 @@
 import { Product } from '../types';
 
-export const HERO_IMAGE = '/images/hero_fashion_atelier_1791074034560.jpg';
+export const HERO_IMAGE = '/images/foto_principal_jo_bolsas.jpg';
+export const MALA_DIGITAL_IMAGE = '/images/jo_bolsas_boutique_hallway_1791846824164.jpg';
 
 export const SAMPLE_PRODUCTS: Product[] = [
   {

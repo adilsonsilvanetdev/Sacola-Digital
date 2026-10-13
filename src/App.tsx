@@ -18,6 +18,7 @@ import { Product, MalaItem, MalaOrder, SpecialDatePromotion } from './types';
 import { SAMPLE_PRODUCTS, MAX_MALA_ITEMS } from './data/products';
 import { 
   getStoredProducts, 
+  saveStoredProducts,
   updateStoredProduct, 
   addStoredProduct, 
   deleteStoredProduct, 
@@ -32,6 +33,16 @@ import {
 import { PromotionalSpecialModal, PromotionalSpecialBadge } from './components/PromotionalSpecialModal';
 import { STORE_WHATSAPP_DISPLAY, STORE_WHATSAPP_NUMBER } from './utils/whatsappHelper';
 import { EditProductModal } from './components/EditProductModal';
+import { isSupabaseConfigured } from './services/supabaseClient';
+import { 
+  fetchProductsFromSupabase, 
+  upsertProductInSupabase, 
+  deleteProductFromSupabase, 
+  saveMalaOrderInSupabase, 
+  fetchSpecialPromotionFromSupabase, 
+  upsertSpecialPromotionInSupabase, 
+  subscribeToProductsRealtime 
+} from './services/supabaseService';
 import { 
   SlidersHorizontal, 
   RotateCcw, 
@@ -260,6 +271,9 @@ export default function App() {
   // Order completed from customer checkout
   const handleOrderSuccess = (newOrder: MalaOrder) => {
     setOrders((prev) => [newOrder, ...prev]);
+    if (isSupabaseConfigured()) {
+      saveMalaOrderInSupabase(newOrder);
+    }
   };
 
   // Toast trigger
@@ -288,6 +302,9 @@ export default function App() {
   const handleSaveSpecialCampaign = (campaign: SpecialDatePromotion) => {
     setSpecialCampaign(campaign);
     saveStoredSpecialPromotion(campaign);
+    if (isSupabaseConfigured()) {
+      upsertSpecialPromotionInSupabase(campaign);
+    }
     showToast(`Campanha "${campaign.name}" salva com sucesso!`);
   };
 
@@ -322,13 +339,33 @@ export default function App() {
     setMalaItems((prev) =>
       prev.map((item) => (item.product.id === updated.id ? { ...item, product: updated } : item))
     );
-    showToast(`"${updated.name}" foi atualizado com sucesso!`);
+    if (isSupabaseConfigured()) {
+      upsertProductInSupabase(updated).then((saved) => {
+        if (saved) {
+          showToast(`"${updated.name}" atualizado e sincronizado no Supabase!`);
+        } else {
+          showToast(`"${updated.name}" foi atualizado com sucesso!`);
+        }
+      });
+    } else {
+      showToast(`"${updated.name}" foi atualizado com sucesso!`);
+    }
   };
 
   const handleAddProduct = (newProd: Product) => {
     const next = addStoredProduct(newProd);
     setProducts(next);
-    showToast(`"${newProd.name}" foi adicionado ao catálogo!`);
+    if (isSupabaseConfigured()) {
+      upsertProductInSupabase(newProd).then((saved) => {
+        if (saved) {
+          showToast(`"${newProd.name}" adicionado e salvo na nuvem Supabase!`);
+        } else {
+          showToast(`"${newProd.name}" foi adicionado ao catálogo!`);
+        }
+      });
+    } else {
+      showToast(`"${newProd.name}" foi adicionado ao catálogo!`);
+    }
   };
 
   const handleDeleteProduct = (productId: string) => {
@@ -340,7 +377,17 @@ export default function App() {
       setStoreEditProduct(null);
       setIsStoreEditModalOpen(false);
     }
-    showToast('Peça excluída do catálogo com sucesso.');
+    if (isSupabaseConfigured()) {
+      deleteProductFromSupabase(cleanId).then((del) => {
+        if (del) {
+          showToast('Peça excluída do catálogo e do Supabase.');
+        } else {
+          showToast('Peça excluída do catálogo com sucesso.');
+        }
+      });
+    } else {
+      showToast('Peça excluída do catálogo com sucesso.');
+    }
   };
 
   // Sincroniza em tempo real o catálogo de produtos e atualizações de página
@@ -360,6 +407,59 @@ export default function App() {
       window.removeEventListener('storage', handleProductsUpdated);
     };
   }, []);
+
+  // Carrega catálogo e promoções da nuvem Supabase ao iniciar
+  useEffect(() => {
+    const initCloud = async () => {
+      if (isSupabaseConfigured()) {
+        try {
+          const cloudProducts = await fetchProductsFromSupabase();
+          if (cloudProducts && cloudProducts.length > 0) {
+            saveStoredProducts(cloudProducts);
+            setProducts(cloudProducts);
+          }
+
+          const cloudPromo = await fetchSpecialPromotionFromSupabase();
+          if (cloudPromo) {
+            setSpecialCampaign(cloudPromo);
+            saveStoredSpecialPromotion(cloudPromo);
+          }
+        } catch (err) {
+          console.warn('Erro ao carregar dados do Supabase na inicialização:', err);
+        }
+      }
+    };
+
+    initCloud();
+
+    // Inscreve-se para atualizações em tempo real se o Supabase estiver configurado
+    let unsubscribe: (() => void) | null = null;
+    if (isSupabaseConfigured()) {
+      unsubscribe = subscribeToProductsRealtime(() => {
+        fetchProductsFromSupabase().then((latest) => {
+          if (latest && latest.length > 0) {
+            saveStoredProducts(latest);
+            setProducts(latest);
+          }
+        });
+      });
+    }
+
+    const handleConfigChange = () => {
+      initCloud();
+    };
+    window.addEventListener('jb_supabase_config_updated', handleConfigChange);
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+      window.removeEventListener('jb_supabase_config_updated', handleConfigChange);
+    };
+  }, []);
+
+  const handleProductsUpdatedFromCloud = (cloudProducts: Product[]) => {
+    saveStoredProducts(cloudProducts);
+    setProducts(cloudProducts);
+  };
 
   const handleResetProducts = () => {
     const next = resetStoredProducts();
@@ -500,6 +600,8 @@ export default function App() {
           specialCampaign={specialCampaign}
           onSaveSpecialCampaign={handleSaveSpecialCampaign}
           onTestLiveSpecialModal={handleTestLiveSpecialModal}
+          onProductsUpdatedFromCloud={handleProductsUpdatedFromCloud}
+          onShowToast={showToast}
         />
       ) : (
         /* Boutique Customer Storefront View */
@@ -523,34 +625,54 @@ export default function App() {
           {/* Catalog Section: 15 Fictional Women's Garments */}
           <section id="colecao" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-28">
             
-            {/* Catalog Section Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-              <div>
-                <span className="text-xs uppercase tracking-widest text-[#B84E67] font-semibold block mb-1">
-                  Bolsas & Peças Exclusivas · Pronta Entrega ou Provador 48h
-                </span>
-                <h2 className="font-editorial text-3xl sm:text-4xl text-[#181316] font-medium">
+            {/* Catalog Section Header with Showroom Photo alongside text */}
+            <div className="bg-gradient-to-br from-[#FFF9FA] via-[#FAF4F6] to-white rounded-3xl p-6 sm:p-10 lg:p-12 border border-[#F2DEE4] shadow-sm mb-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              <div className="lg:col-span-7 space-y-5 sm:space-y-6 flex flex-col justify-center">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#B84E67] font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-[#E594A7] animate-pulse" />
+                  <span>Bolsas & Peças Exclusivas · Pronta Entrega ou Provador 48h</span>
+                </div>
+
+                <h2 className="font-editorial text-4xl sm:text-5xl lg:text-6xl text-[#181316] font-medium leading-[1.12] tracking-tight">
                   Coleção Jô Bolsas Glamour
                 </h2>
-                <p className="text-[#5A4D54] text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
-                  Peças exclusivas, qualidade e beleza em cada detalhe. Descubra uma moda feminina que valoriza sua personalidade e transforma cada escolha em um momento especial.
-                  <br className="hidden sm:inline" />
-                  {' '}Explore nossa coleção e encontre seus novos favoritos!
-                </p>
+
+                <div className="space-y-3">
+                  <p className="text-base sm:text-lg lg:text-xl text-[#4A3E44] font-normal leading-relaxed">
+                    Peças exclusivas, qualidade e beleza em cada detalhe. Descubra uma moda feminina que valoriza sua personalidade e transforma cada escolha em um momento especial.
+                  </p>
+                  <p className="text-base sm:text-lg lg:text-xl text-[#B84E67] font-medium leading-relaxed">
+                    Explore nossa coleção e encontre seus novos favoritos!
+                  </p>
+                </div>
+
+                <div className="pt-2 flex flex-wrap items-center gap-3">
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#B84E67] text-xs sm:text-sm font-semibold border border-[#F2BAC7]/70 shadow-2xs">
+                    ✦ Showroom Físico Jô Bolsas Glamour
+                  </span>
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#5A4D54] text-xs sm:text-sm font-medium border border-[#E8D4DC] shadow-2xs">
+                    Curadoria Josy · Acervo Completo
+                  </span>
+                </div>
               </div>
 
-              {/* Counter Pill */}
-              <div className="flex items-center gap-3 shrink-0">
-                <button
-                  onClick={() => setIsMalaOpen(true)}
-                  className="bg-[#FAF6F7] hover:bg-[#FCEEF2] border border-[#F2DEE4] px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer transition-colors"
-                >
-                  <ShoppingBag className="w-4 h-4 text-[#B84E67]" />
-                  <span className="text-xs text-[#5A4D54]">Sua Mala:</span>
-                  <span className="text-xs font-semibold text-[#181316]">
-                    {malaItems.length} de {MAX_MALA_ITEMS} peças
-                  </span>
-                </button>
+              {/* Showroom entrance photo alongside the text */}
+              <div className="lg:col-span-5">
+                <div className="relative rounded-2xl overflow-hidden border border-[#F0D5DD] shadow-md bg-stone-900 aspect-[3/4] sm:aspect-[4/3] lg:aspect-[3/4] group select-none">
+                  <img
+                    src="/images/foto_principal_jo_bolsas.jpg"
+                    alt="Showroom Jô Bolsas Glamour com porta nobre e provador"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-102"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#141113]/70 to-transparent pointer-events-none" />
+                  <div className="absolute bottom-3 left-4 right-4 text-white">
+                    <div className="text-[11px] uppercase tracking-wider text-[#F5BAC7] font-semibold flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#F5BAC7] animate-pulse" />
+                      <span>Jô Bolsas · Glamour de Mulher</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -592,7 +714,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Opção 2: Mala Provador em Casa 48h */}
+              {/* Opção 2: Mala Provador em Casa 48h (Sem foto miniatura, limpo e simétrico) */}
               <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#FFF8FA] to-white border border-[#F2DEE4] flex flex-col justify-between shadow-2xs">
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2">
@@ -608,9 +730,13 @@ export default function App() {
                     Experimente no conforto do seu closet
                   </h3>
                   <p className="text-xs sm:text-sm text-[#5A4D54] mt-1.5 leading-relaxed">
-                    Escolha suas bolsas e roupas prediletas com <strong className="text-[#B84E67]">"Experimentar na Mala"</strong>. Enviamos tamanhos reservas, você prova por 48 horas com seus sapatos e só paga o que amar!
+                    <span className="block mb-1">
+                      Prove tudo no seu espelho com tranquilidade e estilo!
+                    </span>
+                    Escolha até 15 bolsas e roupas com <strong className="text-[#B84E67]">"Experimentar na Mala"</strong>. Enviamos tamanhos reservas, você prova por 48h e só paga o que amar!
                   </p>
                 </div>
+
                 <div className="pt-3.5 mt-3.5 border-t border-[#F8E2E8] flex items-center justify-between text-xs text-[#7A5B66]">
                   <span>{malaItems.length} de {MAX_MALA_ITEMS} peças na sua mala atual</span>
                   <button

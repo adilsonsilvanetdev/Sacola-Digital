@@ -3,7 +3,7 @@ import {
   Package, Clock, CheckCircle2, User, MapPin, Sparkles, MessageCircle, 
   FileText, Send, RefreshCw, ArrowLeft, Plus, ExternalLink, Copy, Store, 
   Search, Trash2, Check, ShoppingBag, Eye, Calendar, Phone, Home, AlertCircle,
-  Lock, KeyRound, Pencil, Tag, SlidersHorizontal
+  Lock, KeyRound, Pencil, Tag, SlidersHorizontal, Cloud, Database
 } from 'lucide-react';
 import { MalaOrder, MalaItem, Product, SpecialDatePromotion } from '../types';
 import { SAMPLE_PRODUCTS, MAX_MALA_ITEMS } from '../data/products';
@@ -14,7 +14,9 @@ import {
 } from '../utils/whatsappHelper';
 import { EditProductModal } from './EditProductModal';
 import { SpecialDatesManager } from './SpecialDatesManager';
+import { SupabaseSyncManager } from './SupabaseSyncManager';
 import { getStoredSpecialPromotion } from '../utils/specialDatesStorage';
+import { isSupabaseConfigured } from '../services/supabaseClient';
 
 interface ConsultoraDashboardProps {
   orders: MalaOrder[];
@@ -32,6 +34,8 @@ interface ConsultoraDashboardProps {
   specialCampaign?: SpecialDatePromotion;
   onSaveSpecialCampaign?: (campaign: SpecialDatePromotion) => void;
   onTestLiveSpecialModal?: () => void;
+  onProductsUpdatedFromCloud?: (cloudProducts: Product[]) => void;
+  onShowToast?: (message: string) => void;
 }
 
 export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
@@ -50,12 +54,23 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
   specialCampaign = getStoredSpecialPromotion(),
   onSaveSpecialCampaign,
   onTestLiveSpecialModal,
+  onProductsUpdatedFromCloud,
+  onShowToast,
 }) => {
-  // Navigation tabs: 'create' (Montar Mala), 'products' (Gerenciar Catálogo), 'specialDates' (Datas Especiais) or 'orders' (Gerenciar Malas)
-  const [activeTab, setActiveTab] = useState<'create' | 'products' | 'specialDates' | 'orders'>('create');
+  // Navigation tabs: 'create', 'products', 'specialDates', 'orders', 'supabase'
+  const [activeTab, setActiveTab] = useState<'create' | 'products' | 'specialDates' | 'orders' | 'supabase'>('create');
   const [isChangingPin, setIsChangingPin] = useState(false);
   const [newPinValue, setNewPinValue] = useState('');
   const [pinChangeSuccess, setPinChangeSuccess] = useState(false);
+  const [isCloudConnected, setIsCloudConnected] = useState(isSupabaseConfigured());
+
+  useEffect(() => {
+    const handleConfigChange = () => {
+      setIsCloudConnected(isSupabaseConfigured());
+    };
+    window.addEventListener('jb_supabase_config_updated', handleConfigChange);
+    return () => window.removeEventListener('jb_supabase_config_updated', handleConfigChange);
+  }, []);
 
   // Ao abrir a área da vendedora ou alternar abas, garante que inicie sempre no topo superior
   useEffect(() => {
@@ -460,6 +475,25 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
           >
             <Package className="w-4 h-4 text-[#F5BAC7]" />
             <span>Malas Ativas & Pedidos ({orders.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('supabase')}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+              activeTab === 'supabase'
+                ? 'bg-[#141113] text-white shadow-xs'
+                : 'text-[#5A4D54] hover:bg-[#FAF6F7] hover:text-[#141113]'
+            }`}
+          >
+            <Database className="w-4 h-4 text-[#F5BAC7]" />
+            <span>Nuvem & Supabase</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+              isCloudConnected 
+                ? 'bg-emerald-600 text-white' 
+                : 'bg-amber-100 text-amber-800 border border-amber-300'
+            }`}>
+              {isCloudConnected ? 'Conectado' : 'Configurar'}
+            </span>
           </button>
         </div>
       </div>
@@ -1485,6 +1519,25 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
             onTestLiveModal={() => {
               if (onTestLiveSpecialModal) {
                 onTestLiveSpecialModal();
+              }
+            }}
+          />
+        )}
+
+        {/* =============================================================== */}
+        {/* TAB 5: INTEGRAÇÃO SUPABASE & NUVEM                              */}
+        {/* =============================================================== */}
+        {activeTab === 'supabase' && (
+          <SupabaseSyncManager
+            products={products}
+            onProductsUpdatedFromCloud={(cloudProducts) => {
+              if (onProductsUpdatedFromCloud) {
+                onProductsUpdatedFromCloud(cloudProducts);
+              }
+            }}
+            onShowToast={(msg) => {
+              if (onShowToast) {
+                onShowToast(msg);
               }
             }}
           />

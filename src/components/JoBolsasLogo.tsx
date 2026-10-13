@@ -31,105 +31,103 @@ export const JoBolsasLogo: React.FC<JoBolsasLogoProps> = ({
   const PlaqueSVG = (
     <div
       style={{ width: dim, height: dim }}
-      className="relative shrink-0 rounded-full shadow-md group-hover:scale-102 transition-transform select-none"
+      className="relative shrink-0 rounded-full shadow-md group-hover:scale-105 transition-transform select-none"
       title="Jô Bolsas Glamour"
     >
       <svg
-        viewBox="0 0 200 200"
+        viewBox="0 0 500 500"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-full"
+        className="w-full h-full rounded-full"
         aria-hidden="true"
       >
         <defs>
-          <radialGradient id="plaqueGrad" cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stopColor="#251F23" />
-            <stop offset="70%" stopColor="#141113" />
-            <stop offset="100%" stopColor="#0D0B0D" />
-          </radialGradient>
-          <linearGradient id="roseMetallic" x1="20%" y1="0%" x2="80%" y2="100%">
-            <stop offset="0%" stopColor="#FDDFE5" />
-            <stop offset="45%" stopColor="#F5B8C7" />
-            <stop offset="100%" stopColor="#E28EA2" />
+          <linearGradient id="jbPlaqueRoseGold" x1="15%" y1="10%" x2="85%" y2="90%">
+            <stop offset="0%" stopColor="#FFF0F3" />
+            <stop offset="25%" stopColor="#F9D4DC" />
+            <stop offset="55%" stopColor="#EAB3BF" />
+            <stop offset="85%" stopColor="#D98E9F" />
+            <stop offset="100%" stopColor="#C97587" />
           </linearGradient>
-          <filter id="roseGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="1" stdDeviation="1.2" floodColor="#F5B8C7" floodOpacity="0.45" />
-          </filter>
+          <linearGradient id="jbScriptShine" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="30%" stopColor="#FDE4EA" />
+            <stop offset="70%" stopColor="#EBB3C0" />
+            <stop offset="100%" stopColor="#FFFFFF" />
+          </linearGradient>
         </defs>
 
-        {/* Circular Black Plaque Base */}
-        <circle
-          cx="100"
-          cy="100"
-          r="97"
-          fill="url(#plaqueGrad)"
-          stroke="#F5B8C7"
-          strokeWidth="2.5"
-          strokeOpacity="0.45"
-        />
+        {/* Circular Solid Black Onyx Disc */}
+        <circle cx="250" cy="250" r="250" fill="#000000" />
 
-        {/* Monogram 'JB' Entwined */}
-        <g filter="url(#roseGlow)">
-          {/* Serif Top & Loop of J */}
+        {/* Monograma JB Centralizado e Entrelaçado: 'J' 100% NÍTIDO E LEGÍVEL */}
+        <g>
+          {/* Topo / Serifa da Letra 'J' */}
           <path
-            d="M 68 34 L 95 34 L 95 38 L 88 38 L 88 68 C 88 77 82 83 73 83 C 65 83 60 78 60 73 C 60 67 66 64 70 66.5 C 72 68 73 70 73 72.5 C 73 75.5 70 77 68 77 C 71 79 76 79 79 76 C 82 73 83 68 83 63 L 83 38 L 68 38 Z"
-            fill="url(#roseMetallic)"
+            d="M 194 82 L 254 82 C 255.5 82 256.5 83 256.5 84.5 C 256.5 86 255.5 87 254 87 L 246 87 L 246 90 L 202 90 L 202 87 L 194 87 C 192.5 87 191.5 86 191.5 84.5 C 191.5 83 192.5 82 194 82 Z"
+            fill="url(#jbPlaqueRoseGold)"
           />
 
-          {/* Loops of B */}
+          {/* Haste Vertical e Gancho Curvo da Letra 'J' */}
           <path
-            d="M 92 38 C 98 38 116 38 122 43.5 C 127 48.5 127 55.5 122 59.5 C 119 62 113 63 108 63 C 116 63 126 64.5 130 70.5 C 134 76.5 133 84.5 125 89 C 118 93 104 93 92 93 L 92 87.5 C 100 87.5 113 87.5 117 84 C 121 80.5 121 74.5 117 71.5 C 113 67.5 103 67.5 95 67.5 L 95 63 C 101 63 110 63 113 59 C 116 55 115 50 112 47 C 108 43 99 43 92 43 Z"
-            fill="url(#roseMetallic)"
+            d="M 238 87 L 246 87 L 246 256 C 246 270 242 282 232 291 C 221 300 206 303 191 299 C 174 294 163 279 163 260 C 163 244 174 233 188 233 C 199 233 207 241 207 252 C 207 262 199 270 188 270 C 185 270 181 269 178 267 C 180 277 189 285 200 288 C 210 290 221 288 228 281 C 235 274 238 264 238 253 Z"
+            fill="url(#jbPlaqueRoseGold)"
+          />
+
+          {/* Base Horizontal do B */}
+          <path
+            d="M 228 290 L 272 290 C 273.5 290 274.5 291 274.5 292.5 C 274.5 294 273.5 295 272 295 L 228 295 C 226.5 295 225.5 294 225.5 292.5 C 225.5 291 226.5 290 228 290 Z"
+            fill="url(#jbPlaqueRoseGold)"
+          />
+
+          {/* Bojo Superior do B */}
+          <path
+            d="M 246 114 C 274 114 308 120 322 143 C 333 162 327 183 310 195 C 298 203 280 206 246 206 L 246 198 C 276 198 291 195 302 188 C 314 179 319 163 310 148 C 298 129 271 122 246 122 Z"
+            fill="url(#jbPlaqueRoseGold)"
+          />
+
+          {/* Bojo Inferior do B */}
+          <path
+            d="M 246 202 C 280 202 320 207 337 232 C 351 254 345 282 320 297 C 297 310 266 310 236 310 L 236 302 C 263 302 292 302 312 290 C 332 277 336 254 324 237 C 310 216 277 210 246 210 Z"
+            fill="url(#jbPlaqueRoseGold)"
           />
         </g>
 
-        {/* Brand Text 'JÔ BOLSAS' without alteration */}
+        {/* Tipografia 'J Ô  B O L S A S' */}
         <text
-          x="100"
-          y="122"
+          x="250"
+          y="346"
           textAnchor="middle"
-          fill="#F7C8D3"
+          fill="url(#jbPlaqueRoseGold)"
           fontFamily="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif"
-          fontWeight="700"
-          fontSize="16.5"
-          letterSpacing="4"
+          fontSize="33"
+          fontWeight="500"
+          letterSpacing="14"
         >
           JÔ BOLSAS
         </text>
 
-        {/* Hairline Divider with Center Heart */}
-        <line
-          x1="44"
-          y1="135"
-          x2="91"
-          y2="135"
-          stroke="#F5BAC7"
-          strokeWidth="1.2"
-          strokeOpacity="0.75"
-        />
+        {/* Divisória Fina com Coração Central '—— ♥ ——' */}
+        <line x1="168" y1="368" x2="236" y2="368" stroke="url(#jbPlaqueRoseGold)" strokeWidth="1.6" strokeLinecap="round" />
+        
+        {/* Mini Coração Central */}
         <path
-          d="M 100 139.5 C 100 139.5 95.8 135.5 94.2 133 C 92.5 130.3 94.5 128.3 96.8 128.3 C 98.8 128.3 99.6 130 100 130.8 C 100.4 130 101.2 128.3 103.2 128.3 C 105.5 128.3 107.5 130.3 105.8 133 C 104.2 135.5 100 139.5 100 139.5 Z"
-          fill="#F5BAC7"
-        />
-        <line
-          x1="109"
-          y1="135"
-          x2="156"
-          y2="135"
-          stroke="#F5BAC7"
-          strokeWidth="1.2"
-          strokeOpacity="0.75"
+          d="M 250 374.8 C 250 374.8 243.5 369 241.5 365.2 C 239.5 361.5 242 359 245.2 359 C 248 359 249.5 361.2 250 362.2 C 250.5 361.2 252 359 254.8 359 C 258 359 260.5 361.5 258.5 365.2 C 256.5 369 250 374.8 250 374.8 Z"
+          fill="url(#jbPlaqueRoseGold)"
         />
 
-        {/* Cursive Subtitle 'Glamour' without alteration */}
+        <line x1="264" y1="368" x2="332" y2="368" stroke="url(#jbPlaqueRoseGold)" strokeWidth="1.6" strokeLinecap="round" />
+
+        {/* Escrita Cursiva 'Glamour' */}
         <text
-          x="100"
-          y="170"
+          x="250"
+          y="426"
           textAnchor="middle"
-          fill="#FFFFFF"
+          fill="url(#jbScriptShine)"
           fontFamily="'Great Vibes', 'Cormorant Garamond', cursive"
-          fontSize="33"
+          fontSize="64"
           fontWeight="400"
+          fontStyle="italic"
         >
           Glamour
         </text>

@@ -83,24 +83,27 @@ export const Hero: React.FC<HeroProps> = ({ onExploreCatalog }) => {
             </div>
           </div>
 
-          {/* Right Column: Hero Fashion Visual Showcase */}
+          {/* Right Column: Hero Fashion Visual Showcase (Foto Principal ao lado da tela inicial) */}
           <div className="lg:col-span-6 relative">
-            <div className="relative rounded-xl overflow-hidden border border-[#F2DEE4] shadow-md bg-white aspect-[16/10] sm:aspect-[16/11]">
+            <div className="relative rounded-2xl overflow-hidden border border-[#F2DEE4] shadow-lg bg-stone-900 aspect-[4/3] group select-none">
               <img
                 src={HERO_IMAGE}
-                alt="Showroom Jô Bolsas Glamour com bolsas, malas e roupas para provador em casa"
+                alt="Foto principal da loja Jô Bolsas Glamour de Mulher"
                 referrerPolicy="no-referrer"
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-102"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#141113]/85 via-[#141113]/30 to-transparent pointer-events-none" />
               
-              <div className="absolute bottom-6 left-6 right-6 text-white">
-                <div className="text-xs uppercase tracking-wider text-[#F5BAC7] font-semibold flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#F5BAC7]" />
-                  <span>Jô Bolsas Glamour · Atendimento Personalizado</span>
+              {/* Subtle elegant gradient only at bottom */}
+              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#141113]/80 via-[#141113]/25 to-transparent pointer-events-none" />
+              
+              {/* Caption Tag */}
+              <div className="absolute bottom-4 left-4 right-4 sm:bottom-5 sm:left-5 sm:right-5 text-white">
+                <div className="text-[11px] sm:text-xs uppercase tracking-wider text-[#F5BAC7] font-semibold flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#F5BAC7] animate-pulse" />
+                  <span>Jô Bolsas · Glamour de Mulher</span>
                 </div>
-                <div className="font-editorial text-xl sm:text-2xl mt-1 text-white font-medium">
-                  Peças e bolsas selecionadas no cabide, higienizadas e prontas para você brilhar.
+                <div className="font-editorial text-base sm:text-xl mt-0.5 text-white font-medium leading-snug drop-shadow-xs">
+                  Nosso espaço exclusivo com acervo completo de bolsas e looks.
                 </div>
               </div>
             </div>

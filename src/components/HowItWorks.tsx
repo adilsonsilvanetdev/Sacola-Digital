@@ -76,32 +76,57 @@ export const HowItWorks: React.FC<HowItWorksProps> = ({ onExploreCatalog }) => {
           })}
         </div>
 
-        {/* Action Callout */}
-        <div className="mt-12 p-6 rounded-xl bg-[#FAF6F7] border border-[#F2DEE4] flex flex-col sm:flex-row items-center justify-between gap-6 shadow-2xs">
-          <div className="space-y-1 text-center sm:text-left">
-            <h4 className="text-base font-semibold text-[#181316]">
-              Pronta para montar a sua mala de provador?
-            </h4>
-            <p className="text-xs sm:text-sm text-[#5A4D54]">
-              Você seleciona até 15 peças para receber em casa ou retirar no balcão da loja física.
-            </p>
+        {/* Showcase Visual & Action Callout: Imagem 2 da Loja com a Experiência da Mala */}
+        <div className="mt-12 rounded-2xl overflow-hidden bg-gradient-to-br from-[#FFF9FA] to-[#FAF3F5] border border-[#F2DEE4] shadow-md grid grid-cols-1 lg:grid-cols-12 items-center">
+          <div className="lg:col-span-5 relative h-64 sm:h-72 lg:h-full min-h-[260px] overflow-hidden group">
+            <img
+              src="/images/jo_bolsas_boutique_hallway_1791846824164.jpg"
+              alt="Corredor do showroom Jô Bolsas Glamour de Mulher com vestidos, bolsas e balcão de atendimento"
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#141113]/70 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute bottom-4 left-4 right-4 text-white">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#F5BAC7] bg-[#141113]/70 backdrop-blur-xs px-2.5 py-1 rounded-full border border-[#F2BAC7]/30 inline-block mb-1">
+                Showroom Físico · Balcão & Acervo
+              </span>
+              <p className="text-xs text-white/90 font-medium">
+                Retire sua mala pronta ou solicite entrega no conforto da sua casa.
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={onExploreCatalog}
-              className="px-5 py-2.5 bg-[#181316] text-[#FAF6F7] rounded-lg text-xs font-semibold hover:bg-[#2A2025] border border-[#F2BAC7]/30 transition-colors cursor-pointer shadow-xs"
-            >
-              <span>Explorar Coleção & Bolsas</span>
-            </button>
-            <a
-              href={`https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá Josy! Gostaria de tirar uma dúvida sobre a Mala Jô Bolsas Glamour.')}`}
-              target="_blank"
-              rel="noreferrer"
-              className="px-4 py-2.5 bg-white text-[#B84E67] border border-[#F0D5DD] rounded-lg text-xs font-medium hover:bg-[#FDF2F4] transition-colors cursor-pointer flex items-center gap-1.5"
-            >
-              <MessageCircle className="w-3.5 h-3.5" />
-              <span>Tirar Dúvida no WhatsApp</span>
-            </a>
+
+          <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between gap-6">
+            <div className="space-y-2">
+              <span className="text-xs font-bold tracking-widest uppercase text-[#B84E67]">
+                Mala Provador Digital Particular
+              </span>
+              <h3 className="font-editorial text-2xl sm:text-3xl font-medium text-[#181316]">
+                Monte sua mala com até 15 peças e experimente sem compromisso por 48 horas.
+              </h3>
+              <p className="text-xs sm:text-sm text-[#5A4D54] leading-relaxed">
+                Todas as peças são higienizadas com carinho pela Josy, com tamanhos reservas e bolsas selecionadas. Experimente com seus próprios sapatos e acessórios antes de decidir.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-[#F0D5DD]">
+              <button
+                onClick={onExploreCatalog}
+                className="px-5 py-3 bg-[#181316] text-[#FAF6F7] rounded-xl text-xs font-semibold hover:bg-[#2A2025] border border-[#F2BAC7]/30 transition-colors cursor-pointer shadow-xs inline-flex items-center gap-2"
+              >
+                <ShoppingBag className="w-4 h-4 text-[#F5BAC7]" />
+                <span>Escolher Peças para a Mala</span>
+              </button>
+              <a
+                href={`https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá Josy! Gostaria de tirar uma dúvida sobre a Mala Jô Bolsas Glamour.')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="px-4 py-3 bg-white text-[#B84E67] border border-[#F0D5DD] rounded-xl text-xs font-medium hover:bg-[#FDF2F4] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>Tirar Dúvida no WhatsApp</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
