@@ -11,6 +11,7 @@ interface MalaDrawerProps {
   onUpdateSize: (productId: string, newSize: string) => void;
   onToggleSecondarySize: (productId: string) => void;
   onOpenAgendamento: () => void;
+  onExploreCatalog?: () => void;
 }
 
 export const MalaDrawer: React.FC<MalaDrawerProps> = ({
@@ -21,6 +22,7 @@ export const MalaDrawer: React.FC<MalaDrawerProps> = ({
   onUpdateSize,
   onToggleSecondarySize,
   onOpenAgendamento,
+  onExploreCatalog,
 }) => {
   if (!isOpen) return null;
 
@@ -90,10 +92,15 @@ export const MalaDrawer: React.FC<MalaDrawerProps> = ({
                   Sua mala ainda está vazia.
                 </p>
                 <button
-                  onClick={onClose}
-                  className="px-4 py-2 bg-[#181316] text-[#FAF6F7] rounded-lg text-xs font-medium hover:bg-[#2A2025] transition-colors cursor-pointer"
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onExploreCatalog?.();
+                  }}
+                  className="px-4 py-2.5 bg-[#181316] text-[#FAF6F7] rounded-lg text-xs font-semibold hover:bg-[#2A2025] transition-colors cursor-pointer inline-flex items-center gap-1.5"
                 >
-                  Explorar Bolsas & Roupas
+                  <span>Explorar Bolsas & Roupas</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-[#F5BAC7]" />
                 </button>
               </div>
             ) : (

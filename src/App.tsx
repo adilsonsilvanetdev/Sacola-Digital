@@ -268,12 +268,47 @@ export default function App() {
     );
   };
 
+  // Scroll directly to the photos of the pieces (vitrine de fotos das peças e bolsas)
+  const scrollToProductPhotos = () => {
+    if (activeView !== 'store') {
+      setActiveView('store');
+    }
+    setTimeout(() => {
+      const target = document.getElementById('fotos-pecas') || document.getElementById('vitrine-pecas-grid');
+      if (target) {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.getBoundingClientRect().height : 80;
+        const targetRect = target.getBoundingClientRect();
+        const offsetTop = targetRect.top + window.pageYOffset - (headerHeight + 20);
+        window.scrollTo({
+          top: Math.max(0, offsetTop),
+          behavior: 'smooth',
+        });
+      } else {
+        const fallback = document.getElementById('colecao');
+        fallback?.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 60);
+  };
+
   // Order completed from customer checkout
   const handleOrderSuccess = (newOrder: MalaOrder) => {
     setOrders((prev) => [newOrder, ...prev]);
     if (isSupabaseConfigured()) {
       saveMalaOrderInSupabase(newOrder);
     }
+    // Esvazia as peças da mala ao concluir o pedido para que o botão de agendamento feche
+    setMalaItems([]);
+    localStorage.removeItem('jobolsas_mala_items');
+  };
+
+  // Ao concluir o agendamento e clicar em voltar para a loja: fecha tudo e limpa o botão
+  const handleAgendamentoConcluded = () => {
+    setMalaItems([]);
+    localStorage.removeItem('jobolsas_mala_items');
+    setIsAgendamentoOpen(false);
+    setIsMalaOpen(false);
+    showToast('Agendamento concluído com sucesso! Sua mala foi reservada pela Josy.');
   };
 
   // Toast trigger
@@ -608,18 +643,12 @@ export default function App() {
         <main className="flex-1">
           {/* Hero Section */}
           <Hero
-            onExploreCatalog={() => {
-              const el = document.getElementById('colecao');
-              el?.scrollIntoView({ behavior: 'smooth' });
-            }}
+            onExploreCatalog={scrollToProductPhotos}
           />
 
           {/* How it works 4-step Section */}
           <HowItWorks
-            onExploreCatalog={() => {
-              const el = document.getElementById('colecao');
-              el?.scrollIntoView({ behavior: 'smooth' });
-            }}
+            onExploreCatalog={scrollToProductPhotos}
           />
 
           {/* Catalog Section: 15 Fictional Women's Garments */}
@@ -739,19 +768,31 @@ export default function App() {
 
                 <div className="pt-3.5 mt-3.5 border-t border-[#F8E2E8] flex items-center justify-between text-xs text-[#7A5B66]">
                   <span>{malaItems.length} de {MAX_MALA_ITEMS} peças na sua mala atual</span>
-                  <button
-                    onClick={() => setIsMalaOpen(true)}
-                    className="font-semibold text-[#B84E67] hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>Ver Minha Mala</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={scrollToProductPhotos}
+                      className="font-medium text-[#7A6B73] hover:text-[#B84E67] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>Ver Fotos das Peças</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                    {malaItems.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setIsMalaOpen(true)}
+                        className="font-semibold text-[#B84E67] hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Ver Minha Mala</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Barra de Pesquisa, Filtros de Categoria, Faixa de Preço e Ordenação */}
-            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#F0D5DD] shadow-2xs space-y-4 mb-8">
+            {/* Vitrine de Peças & Bolsas com Fotos e Filtros */}
+            <div id="fotos-pecas" className="bg-white p-4 sm:p-5 rounded-2xl border border-[#F0D5DD] shadow-2xs space-y-4 mb-8 scroll-mt-28">
               {/* Linha 1: Input de Busca + Faixa de Preço + Ordenação */}
               <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
                 {/* Search Input */}
@@ -873,8 +914,8 @@ export default function App() {
               </div>
             </div>
 
-            {/* Product Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {/* Product Grid (Vitrine de fotos das peças e bolsas) */}
+            <div id="vitrine-pecas-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 scroll-mt-28">
               {filteredProducts.map((product) => {
                 const isInMala = malaItems.some((item) => item.product.id === product.id);
 
@@ -982,6 +1023,7 @@ export default function App() {
           setIsMalaOpen(false);
           setIsAgendamentoOpen(true);
         }}
+        onExploreCatalog={scrollToProductPhotos}
       />
 
       <ProductQuickViewModal
@@ -997,6 +1039,7 @@ export default function App() {
       <CheckoutAgendamentoModal
         isOpen={isAgendamentoOpen}
         onClose={() => setIsAgendamentoOpen(false)}
+        onComplete={handleAgendamentoConcluded}
         malaItems={malaItems}
         curationMode="self"
         onSuccess={handleOrderSuccess}

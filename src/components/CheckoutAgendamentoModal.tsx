@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, MapPin, CheckCircle2, MessageCircle, ShieldCheck, ArrowRight, Sparkles, Send, Copy, ExternalLink, Store } from 'lucide-react';
 import { MalaItem, MalaOrder } from '../types';
 import { buildClientConfirmationWhatsAppLink, buildStoreConciergeWhatsAppLink, cleanPhoneNumber, getClientOrderPlainText } from '../utils/whatsappHelper';
@@ -10,6 +10,7 @@ interface CheckoutAgendamentoModalProps {
   curationMode: 'self' | 'stylist';
   stylistNote?: string;
   onSuccess: (order: MalaOrder) => void;
+  onComplete?: () => void;
 }
 
 export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> = ({
@@ -19,6 +20,7 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
   curationMode,
   stylistNote,
   onSuccess,
+  onComplete,
 }) => {
   const [deliveryType, setDeliveryType] = useState<'pickup' | 'delivery'>('pickup');
 
@@ -41,6 +43,29 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
   const [confirmedOrder, setConfirmedOrder] = useState<MalaOrder | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedText, setCopiedText] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setConfirmedOrder(null);
+    }
+  }, [isOpen]);
+
+  const handleFinishAndReturnToStore = () => {
+    setConfirmedOrder(null);
+    if (onComplete) {
+      onComplete();
+    } else {
+      onClose();
+    }
+  };
+
+  const handleModalClose = () => {
+    if (confirmedOrder) {
+      handleFinishAndReturnToStore();
+    } else {
+      onClose();
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -122,8 +147,10 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
             </h2>
           </div>
           <button
-            onClick={onClose}
+            type="button"
+            onClick={handleModalClose}
             className="p-1.5 text-stone-400 hover:text-stone-700 rounded-full cursor-pointer"
+            aria-label="Fechar janela"
           >
             <X className="w-5 h-5" />
           </button>
@@ -445,10 +472,12 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
               </div>
 
               <button
-                onClick={onClose}
-                className="w-full py-2 text-[#7A6B73] hover:text-[#181316] text-xs font-medium cursor-pointer"
+                type="button"
+                onClick={handleFinishAndReturnToStore}
+                className="w-full py-3 bg-[#181316] text-[#FAF6F7] hover:bg-[#2A2025] rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
               >
-                Concluir e Voltar à Loja
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>Concluir e Voltar à Loja</span>
               </button>
             </div>
           </div>

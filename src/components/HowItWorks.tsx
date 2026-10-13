@@ -52,10 +52,14 @@ export const HowItWorks: React.FC<HowItWorksProps> = ({ onExploreCatalog }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {steps.map((step) => {
             const Icon = step.icon;
+            const isFirstStep = step.num === '01';
             return (
               <div
                 key={step.num}
-                className="p-6 rounded-xl border border-[#F2DEE4] bg-[#FDF9FA] flex flex-col justify-between hover:border-[#E598A9] hover:shadow-xs transition-all"
+                onClick={isFirstStep ? onExploreCatalog : undefined}
+                className={`p-6 rounded-xl border border-[#F2DEE4] bg-[#FDF9FA] flex flex-col justify-between hover:border-[#E598A9] hover:shadow-xs transition-all ${
+                  isFirstStep ? 'cursor-pointer hover:bg-[#FFF5F7] group' : ''
+                }`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -70,6 +74,11 @@ export const HowItWorks: React.FC<HowItWorksProps> = ({ onExploreCatalog }) => {
                   <p className="text-xs sm:text-sm text-[#5A4D54] leading-relaxed">
                     {step.description}
                   </p>
+                  {isFirstStep && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#B84E67] mt-3 group-hover:underline">
+                      Ir direto para as fotos das peças →
+                    </span>
+                  )}
                 </div>
               </div>
             );
@@ -111,8 +120,9 @@ export const HowItWorks: React.FC<HowItWorksProps> = ({ onExploreCatalog }) => {
 
             <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-[#F0D5DD]">
               <button
+                type="button"
                 onClick={onExploreCatalog}
-                className="px-5 py-3 bg-[#181316] text-[#FAF6F7] rounded-xl text-xs font-semibold hover:bg-[#2A2025] border border-[#F2BAC7]/30 transition-colors cursor-pointer shadow-xs inline-flex items-center gap-2"
+                className="px-5 py-3.5 bg-[#181316] text-[#FAF6F7] rounded-xl text-xs sm:text-sm font-semibold hover:bg-[#2A2025] border border-[#F2BAC7]/30 transition-all cursor-pointer shadow-xs inline-flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <ShoppingBag className="w-4 h-4 text-[#F5BAC7]" />
                 <span>Escolher Peças para a Mala</span>

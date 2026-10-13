@@ -43,8 +43,10 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => {
                 setActiveView('store');
-                const el = document.getElementById('colecao');
-                el?.scrollIntoView({ behavior: 'smooth' });
+                setTimeout(() => {
+                  const el = document.getElementById('fotos-pecas') || document.getElementById('colecao');
+                  el?.scrollIntoView({ behavior: 'smooth' });
+                }, 50);
               }}
               className="hover:text-[#B84E67] transition-colors cursor-pointer"
             >
