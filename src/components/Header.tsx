@@ -27,7 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="sticky top-0 z-40 bg-[#FAF6F7]/95 backdrop-blur-md border-b border-[#F2DEE4]">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-3 sm:py-4 min-h-[120px]">
+        <div className="flex items-center justify-between py-2 sm:py-3 md:py-4 min-h-[72px] sm:min-h-[100px] md:min-h-[120px]">
           
           {/* Zone 1: Brand Wordmark with Emblem Icon on the upper-left */}
           <button
@@ -38,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
             <JoBolsasLogo variant="full" size="md" />
           </button>
 
-          {/* Zone 2: Customer Navigation links (Strictly customer-facing) */}
+          {/* Zone 2: Customer Navigation links (Desktop) */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-[#5A4D54]">
             <button
               onClick={() => {
@@ -82,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
 
           {/* Zone 3: Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* If in dashboard mode, show return to store */}
             {activeView === 'dashboard' ? (
               <button
@@ -110,17 +110,53 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Mala Bag Button */}
             <button
               onClick={onOpenMala}
-              className="relative flex items-center gap-2 px-4 py-2 bg-[#161214] text-[#FAF6F7] rounded-lg text-xs font-medium hover:bg-[#251E22] border border-[#F2BAC7]/30 transition-all shadow-sm cursor-pointer group"
+              className="relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-[#161214] text-[#FAF6F7] rounded-lg text-xs font-medium hover:bg-[#251E22] border border-[#F2BAC7]/30 transition-all shadow-sm cursor-pointer group"
               aria-label="Abrir Mala Digital"
             >
               <ShoppingBag className="w-4 h-4 text-[#F5BAC7] group-hover:scale-105 transition-transform" />
-              <span className="font-medium">Minha Mala</span>
+              <span className="font-medium whitespace-nowrap">Minha Mala</span>
               <span className="bg-[#B84E67] text-white rounded-full px-1.5 py-0.2 text-[11px] tabular-nums font-semibold">
                 {malaItems.length}/{MAX_MALA_ITEMS}
               </span>
             </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Strip (Garante opções 'Acesse a Loja', 'Mala Digital' e 'Promoções' sempre visíveis em celulares) */}
+        {activeView === 'store' && (
+          <nav aria-label="Navegação móvel" className="flex md:hidden items-center justify-between gap-1.5 pb-2.5 pt-0.5 border-t border-[#F2DEE4]/70">
+            <button
+              onClick={() => {
+                const el = document.getElementById('fotos-pecas') || document.getElementById('colecao');
+                el?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="flex-1 py-1.5 px-2 bg-white rounded-lg border border-[#F0D5DD] text-[11px] font-semibold text-[#181316] hover:bg-[#FAF6F7] hover:text-[#B84E67] transition-all flex items-center justify-center gap-1 shadow-2xs whitespace-nowrap active:scale-95"
+            >
+              <span>Acesse a Loja</span>
+            </button>
+
+            <button
+              onClick={() => {
+                const el = document.getElementById('como-funciona');
+                el?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="flex-1 py-1.5 px-2 bg-white rounded-lg border border-[#F0D5DD] text-[11px] font-semibold text-[#181316] hover:bg-[#FAF6F7] hover:text-[#B84E67] transition-all flex items-center justify-center gap-1 shadow-2xs whitespace-nowrap active:scale-95"
+            >
+              <span>Mala Digital</span>
+            </button>
+
+            <button
+              onClick={() => {
+                const el = document.getElementById('promocoes');
+                el?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="py-1.5 px-2.5 rounded-lg bg-gradient-to-r from-[#E11D48] via-[#BE123C] to-[#9F1239] text-white text-[11px] font-bold shadow-2xs flex items-center justify-center gap-1 whitespace-nowrap active:scale-95"
+            >
+              <Flame className="w-3 h-3 text-amber-300 fill-amber-300 animate-pulse" />
+              <span>Promoções</span>
+            </button>
+          </nav>
+        )}
       </div>
 
       {/* Floating feedback toast */}

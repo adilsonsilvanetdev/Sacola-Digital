@@ -16,7 +16,51 @@ let currentClientKey = '';
  * ou de credenciais inseridas pela Josy diretamente no painel administrativo.
  */
 export function getSupabaseConfig(): SupabaseConfig {
-  // 1. Verificar credenciais salvas no armazenamento local da vendedora
+  // 1. Verificar variáveis de ambiente Vite (.env central do projeto para acesso público global)
+  const envUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim().replace(/\/+$/, '');
+  const envKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+
+  if (envUrl.startsWith('https://') && envKey.length > 20 && !envUrl.includes('seu-projeto')) {
+    return {
+      url: envUrl,
+      anonKey: envKey,
+      source: 'env'
+    };
+  }
+
+  // 2. Sincronização automática via link compartilhado (Ex: celular para computador)
+  try {
+    if (typeof window !== 'undefined' && window.location.search) {
+      const params = new URLSearchParams(window.location.search);
+      const urlParam = params.get('sb_url');
+      const keyParam = params.get('sb_key');
+      if (urlParam && keyParam) {
+        const cleanUrl = decodeURIComponent(urlParam).trim().replace(/\/+$/, '');
+        const cleanKey = decodeURIComponent(keyParam).trim();
+        if (cleanUrl.startsWith('https://') && cleanKey.length > 20) {
+          localStorage.setItem(
+            SUPABASE_STORAGE_CREDENTIALS_KEY,
+            JSON.stringify({ url: cleanUrl, anonKey: cleanKey })
+          );
+          // Limpa os parâmetros da URL para discrição
+          const cleanPath = window.location.pathname;
+          window.history.replaceState({}, '', cleanPath);
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('jb_supabase_config_updated'));
+          }, 50);
+          return {
+            url: cleanUrl,
+            anonKey: cleanKey,
+            source: 'storage',
+          };
+        }
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // 3. Verificar credenciais salvas no armazenamento local da vendedora
   try {
     const raw = localStorage.getItem(SUPABASE_STORAGE_CREDENTIALS_KEY);
     if (raw) {
@@ -35,18 +79,6 @@ export function getSupabaseConfig(): SupabaseConfig {
     }
   } catch {
     // ignore
-  }
-
-  // 2. Verificar variáveis de ambiente Vite
-  const envUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim().replace(/\/+$/, '');
-  const envKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
-
-  if (envUrl.startsWith('https://') && envKey.length > 20 && !envUrl.includes('seu-projeto')) {
-    return {
-      url: envUrl,
-      anonKey: envKey,
-      source: 'env'
-    };
   }
 
   return {
