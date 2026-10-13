@@ -19,6 +19,7 @@ import { SAMPLE_PRODUCTS, MAX_MALA_ITEMS } from './data/products';
 import { 
   getStoredProducts, 
   saveStoredProducts,
+  saveCloudProducts,
   updateStoredProduct, 
   addStoredProduct, 
   deleteStoredProduct, 
@@ -450,7 +451,7 @@ export default function App() {
         try {
           const cloudProducts = await fetchProductsFromSupabase();
           if (cloudProducts && cloudProducts.length > 0) {
-            saveStoredProducts(cloudProducts);
+            saveCloudProducts(cloudProducts);
             setProducts(cloudProducts);
           }
 
@@ -473,7 +474,7 @@ export default function App() {
       unsubscribe = subscribeToProductsRealtime(() => {
         fetchProductsFromSupabase().then((latest) => {
           if (latest && latest.length > 0) {
-            saveStoredProducts(latest);
+            saveCloudProducts(latest);
             setProducts(latest);
           }
         });
@@ -492,7 +493,7 @@ export default function App() {
   }, []);
 
   const handleProductsUpdatedFromCloud = (cloudProducts: Product[]) => {
-    saveStoredProducts(cloudProducts);
+    saveCloudProducts(cloudProducts);
     setProducts(cloudProducts);
   };
 

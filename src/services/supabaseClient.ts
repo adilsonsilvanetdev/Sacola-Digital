@@ -17,8 +17,8 @@ let currentClientKey = '';
  */
 export function getSupabaseConfig(): SupabaseConfig {
   // 1. Verificar variáveis de ambiente Vite (.env central do projeto para acesso público global)
-  const envUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim().replace(/\/+$/, '');
-  const envKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+  const envUrl = ((typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL) || (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_URL) || '').trim().replace(/\/+$/, '');
+  const envKey = ((typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_ANON_KEY) || (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_ANON_KEY) || '').trim();
 
   if (envUrl.startsWith('https://') && envKey.length > 20 && !envUrl.includes('seu-projeto')) {
     return {

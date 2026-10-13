@@ -1,5 +1,6 @@
 import { Product } from '../types';
 import { SAMPLE_PRODUCTS } from '../data/products';
+import { isSupabaseConfigured } from '../services/supabaseClient';
 
 export const PRODUCTS_STORAGE_KEY = 'jb_products_catalog';
 export const PRODUCTS_STORAGE_VERSION_KEY = 'jb_products_version';
@@ -22,6 +23,17 @@ export function getDeletedProductIds(): Set<string> {
     console.error('Erro ao ler IDs excluídos:', err);
   }
   return new Set();
+}
+
+/**
+ * Limpa todos os IDs excluídos locais, permitindo ressincronização total com a nuvem.
+ */
+export function clearAllDeletedProductIds(): void {
+  try {
+    localStorage.removeItem(DELETED_PRODUCTS_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
 }
 
 /**
@@ -55,12 +67,54 @@ function deduplicateProducts(list: Product[], deletedIds: Set<string>): Product[
 }
 
 /**
+ * Salva produtos vindos da nuvem Supabase (fonte oficial e soberana).
+ * Limpa da lista local de excluídos qualquer ID presente na nuvem e
+ * persiste a lista completa no localStorage sem censura de IDs antigos.
+ */
+export function saveCloudProducts(products: Product[]): void {
+  try {
+    // 1. Remove os IDs dos produtos da nuvem da lista local de excluídos
+    const deleted = getDeletedProductIds();
+    let changed = false;
+    for (const p of products) {
+      if (p && p.id && deleted.has(String(p.id).trim())) {
+        deleted.delete(String(p.id).trim());
+        changed = true;
+      }
+    }
+    if (changed) {
+      localStorage.setItem(DELETED_PRODUCTS_STORAGE_KEY, JSON.stringify(Array.from(deleted)));
+    }
+
+    // 2. Desduplica estritamente por ID sem aplicar deletedIds
+    const seen = new Set<string>();
+    const clean: Product[] = [];
+    for (const item of products) {
+      if (!item || !item.id) continue;
+      const cleanId = String(item.id).trim();
+      if (seen.has(cleanId)) continue;
+      seen.add(cleanId);
+      clean.push(item);
+    }
+
+    // 3. Persiste no storage local e dispara o evento global
+    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(clean));
+    localStorage.setItem(PRODUCTS_STORAGE_VERSION_KEY, CURRENT_PRODUCTS_VERSION);
+    window.dispatchEvent(new CustomEvent('jb_products_updated', { detail: clean }));
+  } catch (err) {
+    console.error('Erro ao salvar produtos da nuvem:', err);
+  }
+}
+
+/**
  * Carrega a lista atualizada de produtos do localStorage.
  * Garante que produtos excluídos NÃO voltem e que não haja IDs duplicados.
  */
 export function getStoredProducts(): Product[] {
   try {
-    const deletedIds = getDeletedProductIds();
+    const isCloudActive = isSupabaseConfigured();
+    // Se o Supabase estiver ativo, os IDs excluídos locais antigos não devem censurar o catálogo da nuvem
+    const deletedIds = isCloudActive ? new Set<string>() : getDeletedProductIds();
     const version = localStorage.getItem(PRODUCTS_STORAGE_VERSION_KEY);
     const raw = localStorage.getItem(PRODUCTS_STORAGE_KEY);
 
