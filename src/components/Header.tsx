@@ -27,7 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="sticky top-0 z-40 bg-[#FAF6F7]/95 backdrop-blur-md border-b border-[#F2DEE4]">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-2 sm:py-3 md:py-4 min-h-[72px] sm:min-h-[100px] md:min-h-[120px]">
+        <div className="flex items-center justify-between py-2 sm:py-3 md:py-4 min-h-[60px] sm:min-h-[80px] md:min-h-[100px] gap-2">
           
           {/* Zone 1: Brand Wordmark with Emblem Icon on the upper-left */}
           <button
@@ -82,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
 
           {/* Zone 3: Actions */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* If in dashboard mode, show return to store */}
             {activeView === 'dashboard' ? (
               <button
@@ -96,14 +96,16 @@ export const Header: React.FC<HeaderProps> = ({
                 <span>Voltar à Loja</span>
               </button>
             ) : (
-              /* Discreet lock for seller Josy */
               <button
                 onClick={onOpenSellerAuth}
-                className="p-2 text-stone-400 hover:text-[#B84E67] hover:bg-[#FDF2F4] rounded-lg transition-colors cursor-pointer"
-                title="Acesso Vendedora"
-                aria-label="Acesso Vendedora"
+                className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-[#B84E67] via-[#C95973] to-[#A33D55] text-white hover:brightness-110 active:scale-95 rounded-lg shadow-sm border border-[#F2BAC7]/40 transition-all cursor-pointer"
+                title="Acesso Administrativo da Loja"
+                aria-label="Acesso Administrativo com Cadeado em Destaque"
               >
-                <Lock className="w-4 h-4" />
+                <Lock className="w-4 h-4 text-white" />
+                <span className="hidden sm:inline text-xs font-semibold tracking-wide">
+                  Painel
+                </span>
               </button>
             )}
 

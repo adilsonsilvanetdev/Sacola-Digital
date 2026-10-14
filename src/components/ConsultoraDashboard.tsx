@@ -63,6 +63,16 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
   const [newPinValue, setNewPinValue] = useState('');
   const [pinChangeSuccess, setPinChangeSuccess] = useState(false);
   const [isCloudConnected, setIsCloudConnected] = useState(isSupabaseConfigured());
+  // Senha específica para configuração do Banco de Dados
+  const [dbPin, setDbPin] = useState<string>(() => {
+    return localStorage.getItem('jb_db_pin') || 'admin123';
+  });
+  const [isDbUnlocked, setIsDbUnlocked] = useState(false);
+  const [dbPinInput, setDbPinInput] = useState('');
+  const [dbPinError, setDbPinError] = useState(false);
+  const [isChangingDbPin, setIsChangingDbPin] = useState(false);
+  const [newDbPinValue, setNewDbPinValue] = useState('');
+  const [dbPinChangeSuccess, setDbPinChangeSuccess] = useState(false);
 
   useEffect(() => {
     const handleConfigChange = () => {
@@ -385,10 +395,18 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
             <button
               onClick={() => setIsChangingPin(true)}
               className="px-3 py-2 bg-[#251E22] text-[#F0D5DD] hover:text-white hover:bg-[#32282E] border border-[#F2BAC7]/30 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
-              title="Alterar o PIN / Senha de acesso da vendedora"
+              title="Alterar o PIN / Senha de acesso da Josy"
             >
               <KeyRound className="w-3.5 h-3.5 text-[#F5BAC7]" />
-              <span>Alterar Senha</span>
+              <span>Senha da Josy</span>
+            </button>
+            <button
+              onClick={() => setIsChangingDbPin(true)}
+              className="px-3 py-2 bg-[#1f2937] text-cyan-200 hover:text-white hover:bg-[#374151] border border-cyan-500/30 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+              title="Alterar a Senha de Acesso às configurações do Banco de Dados"
+            >
+              <Database className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Senha do BD</span>
             </button>
 
             <button
@@ -413,88 +431,115 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
         </div>
       </div>
 
-      {/* Main Tab Controls */}
+      {/* Main Tab Controls - Grid Responsiva: Celular (2 colunas + BD destaque), Tablet (3 colunas) e PC (5 colunas lado a lado) */}
       <div className="bg-white border-b border-[#F2DEE4] sticky top-0 z-20 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-3 py-2.5">
-          <button
-            onClick={() => setActiveTab('create')}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-              activeTab === 'create'
-                ? 'bg-[#141113] text-white shadow-xs'
-                : 'text-[#5A4D54] hover:bg-[#FAF6F7] hover:text-[#141113]'
-            }`}
-          >
-            <Plus className="w-4 h-4 text-[#F5BAC7]" />
-            <span>Montar Mala para Cliente</span>
-            <span className="bg-[#B84E67] text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
-              {selectedItems.length}/{MAX_MALA_ITEMS}
-            </span>
-          </button>
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-2 sm:py-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 sm:gap-2">
+            
+            {/* Opção 1: Montar Mala */}
+            <button
+              onClick={() => setActiveTab('create')}
+              className={`px-2.5 py-2 sm:px-3 sm:py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between gap-1.5 transition-all cursor-pointer border ${
+                activeTab === 'create'
+                  ? 'bg-[#141113] text-white border-[#141113] shadow-xs'
+                  : 'bg-white text-[#5A4D54] border-[#F0D5DD] hover:bg-[#FAF6F7] hover:text-[#141113]'
+              }`}
+              title="Montar mala para cliente com até 15 peças"
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Plus className="w-3.5 h-3.5 text-[#F5BAC7] shrink-0" />
+                <span className="truncate">Montar Mala</span>
+              </div>
+              <span className="bg-[#B84E67] text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold shrink-0">
+                {selectedItems.length}/{MAX_MALA_ITEMS}
+              </span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('products')}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-              activeTab === 'products'
-                ? 'bg-[#141113] text-white shadow-xs'
-                : 'text-[#5A4D54] hover:bg-[#FAF6F7] hover:text-[#141113]'
-            }`}
-          >
-            <Tag className="w-4 h-4 text-[#F5BAC7]" />
-            <span>Gerenciar Produtos (Fotos, Preços & Descrições)</span>
-            <span className="bg-[#FAF0F3] text-[#B84E67] border border-[#F2BAC7]/40 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
-              {products.length} peças
-            </span>
-          </button>
+            {/* Opção 2: Gerenciar Produtos */}
+            <button
+              onClick={() => setActiveTab('products')}
+              className={`px-2.5 py-2 sm:px-3 sm:py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between gap-1.5 transition-all cursor-pointer border ${
+                activeTab === 'products'
+                  ? 'bg-[#141113] text-white border-[#141113] shadow-xs'
+                  : 'bg-white text-[#5A4D54] border-[#F0D5DD] hover:bg-[#FAF6F7] hover:text-[#141113]'
+              }`}
+              title="Gerenciar produtos, fotos, valores e descrições"
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Tag className="w-3.5 h-3.5 text-[#F5BAC7] shrink-0" />
+                <span className="truncate">Produtos</span>
+              </div>
+              <span className="bg-[#FAF0F3] text-[#B84E67] border border-[#F2BAC7]/40 text-[10px] px-1.5 py-0.5 rounded-full font-bold shrink-0">
+                {products.length}
+              </span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('specialDates')}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-              activeTab === 'specialDates'
-                ? 'bg-[#141113] text-white shadow-xs'
-                : 'text-[#5A4D54] hover:bg-[#FAF6F7] hover:text-[#141113]'
-            }`}
-          >
-            <Sparkles className="w-4 h-4 text-[#F5BAC7]" />
-            <span>Janela Promocional & Datas Especiais</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-              specialCampaign?.isActive 
-                ? 'bg-emerald-600 text-white' 
-                : 'bg-zinc-200 text-zinc-700'
-            }`}>
-              {specialCampaign?.isActive ? 'Ativa' : 'Inativa'}
-            </span>
-          </button>
+            {/* Opção 3: Promoções & Datas */}
+            <button
+              onClick={() => setActiveTab('specialDates')}
+              className={`px-2.5 py-2 sm:px-3 sm:py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between gap-1.5 transition-all cursor-pointer border ${
+                activeTab === 'specialDates'
+                  ? 'bg-[#141113] text-white border-[#141113] shadow-xs'
+                  : 'bg-white text-[#5A4D54] border-[#F0D5DD] hover:bg-[#FAF6F7] hover:text-[#141113]'
+              }`}
+              title="Janela promocional e campanhas de datas especiais"
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Sparkles className="w-3.5 h-3.5 text-[#F5BAC7] shrink-0" />
+                <span className="truncate">Promoções</span>
+              </div>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+                specialCampaign?.isActive 
+                  ? 'bg-emerald-600 text-white' 
+                  : 'bg-zinc-200 text-zinc-700'
+              }`}>
+                {specialCampaign?.isActive ? 'Ativa' : 'Inativa'}
+              </span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('orders')}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-              activeTab === 'orders'
-                ? 'bg-[#141113] text-white shadow-xs'
-                : 'text-[#5A4D54] hover:bg-[#FAF6F7] hover:text-[#141113]'
-            }`}
-          >
-            <Package className="w-4 h-4 text-[#F5BAC7]" />
-            <span>Malas Ativas & Pedidos ({orders.length})</span>
-          </button>
+            {/* Opção 4: Malas & Pedidos */}
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`px-2.5 py-2 sm:px-3 sm:py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between gap-1.5 transition-all cursor-pointer border ${
+                activeTab === 'orders'
+                  ? 'bg-[#141113] text-white border-[#141113] shadow-xs'
+                  : 'bg-white text-[#5A4D54] border-[#F0D5DD] hover:bg-[#FAF6F7] hover:text-[#141113]'
+              }`}
+              title="Visualizar malas agendadas e histórico de provadores"
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Package className="w-3.5 h-3.5 text-[#F5BAC7] shrink-0" />
+                <span className="truncate">Malas & Pedidos</span>
+              </div>
+              <span className="bg-[#FAF0F3] text-[#B84E67] border border-[#F2BAC7]/40 text-[10px] px-1.5 py-0.5 rounded-full font-bold shrink-0">
+                {orders.length}
+              </span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('supabase')}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-              activeTab === 'supabase'
-                ? 'bg-[#141113] text-white shadow-xs'
-                : 'text-[#5A4D54] hover:bg-[#FAF6F7] hover:text-[#141113]'
-            }`}
-          >
-            <Database className="w-4 h-4 text-[#F5BAC7]" />
-            <span>Nuvem & Supabase</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-              isCloudConnected 
-                ? 'bg-emerald-600 text-white' 
-                : 'bg-amber-100 text-amber-800 border border-amber-300'
-            }`}>
-              {isCloudConnected ? 'Conectado' : 'Configurar'}
-            </span>
-          </button>
+            {/* Opção 5: Banco de Dados - Sempre Visível no Celular, Tablet e PC */}
+            <button
+              onClick={() => setActiveTab('supabase')}
+              className={`px-2.5 py-2 sm:px-3 sm:py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between gap-1.5 transition-all cursor-pointer border col-span-2 sm:col-span-1 lg:col-span-1 ${
+                activeTab === 'supabase'
+                  ? 'bg-[#0f172a] text-cyan-200 border-cyan-500/50 shadow-xs ring-1 ring-cyan-500/40'
+                  : 'bg-white text-cyan-800 border-cyan-200 hover:bg-cyan-50/50 hover:text-cyan-900'
+              }`}
+              title="Configurações e sincronização do Banco de Dados em nuvem"
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Database className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                <span className="truncate font-bold">Banco de dados</span>
+              </div>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+                isCloudConnected 
+                  ? 'bg-emerald-600 text-white' 
+                  : 'bg-amber-100 text-amber-900 border border-amber-300'
+              }`}>
+                {isCloudConnected ? 'Conectado' : 'Configurar'}
+              </span>
+            </button>
+
+          </div>
         </div>
       </div>
 
@@ -639,7 +684,7 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                           />
                           <div className="min-w-0 flex-1 space-y-1">
                             <div className="flex items-start justify-between gap-1">
-                              <h4 className="text-xs font-semibold text-[#181316] truncate">
+                              <h4 className="text-xs font-semibold text-[#181316] break-words leading-snug">
                                 {item.product.name}
                               </h4>
                               <button
@@ -654,7 +699,7 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                             <div className="flex items-center justify-between text-[11px]">
                               <span className="text-[#7A6B73]">Cor: {item.product.color}</span>
                               <span className="font-semibold text-[#181316]">
-                                R$ {item.product.price}
+                                R$ {item.product.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                               </span>
                             </div>
 
@@ -1356,10 +1401,10 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                         </a>
                       </div>
 
-                      <div className="mt-3 pt-2 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-600">
-                        <span>{order.items.length}/{MAX_MALA_ITEMS} peças</span>
-                        <span className="font-semibold text-stone-800">
-                          {order.createdAt || 'Ativa'}
+                      <div className="mt-3 pt-2 border-t border-stone-100 flex items-center justify-between text-[11px]">
+                        <span className="text-[#B84E67] font-semibold">{order.items.length} peças · R$ {order.items.reduce((acc, it) => acc + it.product.price, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        <span className="font-medium text-stone-700 bg-stone-100 px-1.5 py-0.5 rounded text-[10px]">
+                          {order.scheduledDate || order.createdAt || 'Ativa'}
                         </span>
                       </div>
                     </div>
@@ -1431,24 +1476,54 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                     </div>
                   </div>
 
-                  {/* Customer Details Box */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-[#FAF9F5] border border-stone-200 text-xs">
+                  {/* Customer Details Box - Informações Completas da Mala Sem Cortar */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 p-4 rounded-xl bg-[#FAF9F5] border border-stone-200 text-xs">
                     <div>
-                      <span className="text-stone-500 block mb-0.5">Destinatária:</span>
-                      <strong className="text-stone-900 text-sm">{selectedOrder.customerName}</strong>
-                      <div className="text-stone-600 mt-0.5">{selectedOrder.customerPhone}</div>
+                      <span className="text-stone-500 block text-[11px] font-semibold uppercase tracking-wider mb-0.5">Destinatária & Contato:</span>
+                      <strong className="text-stone-900 text-sm block">{selectedOrder.customerName}</strong>
+                      <div className="text-stone-700 font-mono mt-0.5">{selectedOrder.customerPhone}</div>
+                      <span className="text-[10px] text-stone-500 mt-1 block">Protocolo: #{selectedOrder.id}</span>
                     </div>
+
                     <div>
-                      <span className="text-stone-500 block mb-0.5">Modalidade & Endereço:</span>
-                      <div className="text-stone-900 font-medium">{selectedOrder.address}</div>
-                      <div className="text-stone-600">{selectedOrder.neighborhood}, {selectedOrder.city}</div>
+                      <span className="text-stone-500 block text-[11px] font-semibold uppercase tracking-wider mb-0.5">Modalidade & Local:</span>
+                      <div className="text-stone-900 font-medium leading-snug">
+                        {selectedOrder.address.toLowerCase().includes("retirada") 
+                          ? "🛍️ Retirada Física no Balcão da Loja"
+                          : `🚚 Entrega: ${selectedOrder.address}`}
+                      </div>
+                      <div className="text-stone-600 mt-0.5">
+                        {selectedOrder.neighborhood ? `Bairro: ${selectedOrder.neighborhood}` : ""}
+                        {selectedOrder.city ? ` · ${selectedOrder.city}` : ""}
+                      </div>
+                      {selectedOrder.deliveryInstructions && (
+                        <div className="text-[11px] text-stone-600 italic mt-1 bg-white/70 p-1.5 rounded border border-stone-200">
+                          Ref: {selectedOrder.deliveryInstructions}
+                        </div>
+                      )}
                     </div>
+
                     <div>
-                      <span className="text-stone-500 block mb-0.5">Data & Turno:</span>
-                      <div className="text-stone-900 font-medium">{selectedOrder.scheduledDate}</div>
+                      <span className="text-stone-500 block text-[11px] font-semibold uppercase tracking-wider mb-0.5">Data, Turno & Prazos:</span>
+                      <div className="text-stone-900 font-semibold">{selectedOrder.scheduledDate}</div>
                       <div className="text-emerald-800 font-medium">{selectedOrder.scheduledTimeSlot}</div>
+                      <div className="text-[11px] text-[#B84E67] font-semibold mt-1">
+                        ⏱️ Prazo de prova: {selectedOrder.returnDeadline || "48 horas"}
+                      </div>
                     </div>
                   </div>
+
+                  {/* Recadinho da Josy / Nota de Estilo */}
+                  {selectedOrder.stylistNote && (
+                    <div className="p-3.5 rounded-xl bg-[#FDF2F4] border border-[#F2DEE4] text-xs">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-[#B84E67] block mb-1">
+                        💌 Recadinho da Josy incluído nesta mala:
+                      </span>
+                      <p className="text-stone-800 italic leading-relaxed">
+                        "{selectedOrder.stylistNote}"
+                      </p>
+                    </div>
+                  )}
 
                   {/* Items in the Bag */}
                   <div>
@@ -1457,7 +1532,7 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                         Peças na Mala ({selectedOrder.items.length} de {MAX_MALA_ITEMS})
                       </h3>
                       <span className="text-xs text-stone-600 font-medium">
-                        Total consignado: R$ {selectedOrder.items.reduce((acc, it) => acc + it.product.price, 0).toLocaleString('pt-BR')}
+                        Total consignado: R$ {selectedOrder.items.reduce((acc, it) => acc + it.product.price, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </span>
                     </div>
 
@@ -1473,7 +1548,7 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                             className="w-14 h-18 object-cover rounded-lg bg-stone-200 shrink-0"
                           />
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-xs font-semibold text-stone-900 truncate">
+                            <h4 className="text-xs font-semibold text-stone-900 break-words leading-snug">
                               {item.product.name}
                             </h4>
                             <div className="text-[11px] text-stone-500 mt-0.5">
@@ -1490,7 +1565,7 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                               )}
                             </div>
                             <div className="text-xs font-medium text-stone-900 mt-1 tabular-nums">
-                              R$ {item.product.price.toLocaleString('pt-BR')}
+                              R$ {item.product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </div>
                           </div>
                         </div>
@@ -1656,6 +1731,88 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
           setEditingProduct(null);
         }}
       />
+
+            {/* Modal para Alterar Senha do Banco de Dados */}
+      {isChangingDbPin && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-[#F2DEE4] space-y-4 animate-fadeIn">
+            <div className="flex items-center justify-between border-b border-[#F2DEE4] pb-3">
+              <div className="flex items-center gap-2">
+                <Database className="w-5 h-5 text-cyan-600" />
+                <h3 className="font-editorial text-lg font-medium text-[#181316]">
+                  Nova Senha do Banco de Dados
+                </h3>
+              </div>
+              <button
+                onClick={() => {
+                  setIsChangingDbPin(false);
+                  setDbPinChangeSuccess(false);
+                }}
+                className="text-stone-400 hover:text-stone-700 text-xs font-semibold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-xs text-[#5A4D54]">
+              Defina uma senha exclusiva para proteger a área de configuração e sincronização do Banco de Dados.
+            </p>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (newDbPinValue.trim().length < 3) {
+                  alert('A senha do BD deve ter pelo menos 3 caracteres.');
+                  return;
+                }
+                const clean = newDbPinValue.trim();
+                setDbPin(clean);
+                localStorage.setItem('jb_db_pin', clean);
+                setDbPinChangeSuccess(true);
+                setTimeout(() => {
+                  setDbPinChangeSuccess(false);
+                  setIsChangingDbPin(false);
+                  setNewDbPinValue('');
+                  setIsDbUnlocked(true);
+                }, 1500);
+              }}
+              className="space-y-3"
+            >
+              <div>
+                <label className="block text-xs font-semibold text-[#181316] mb-1">
+                  Nova Senha do Banco de Dados
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Ex: nova_senha_bd_2026"
+                  value={newDbPinValue}
+                  onChange={(e) => setNewDbPinValue(e.target.value)}
+                  className="w-full text-sm px-3.5 py-2.5 border border-[#F0D5DD] rounded-xl focus:outline-none focus:border-[#B84E67]"
+                />
+              </div>
+              {dbPinChangeSuccess && (
+                <div className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 p-2 rounded-lg text-center font-medium">
+                  Senha do Banco de Dados atualizada com sucesso!
+                </div>
+              )}
+              <div className="flex items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsChangingDbPin(false)}
+                  className="flex-1 py-2 text-xs text-stone-600 border border-stone-200 rounded-lg hover:bg-stone-50 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2 text-xs font-semibold text-white bg-[#141113] hover:bg-[#251E22] rounded-lg transition-colors cursor-pointer shadow-xs"
+                >
+                  Salvar Senha
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Modal Seguro de Confirmação para Excluir Apenas a Peça Escolhida */}
       {productToDelete && (

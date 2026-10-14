@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, MapPin, CheckCircle2, MessageCircle, ShieldCheck, ArrowRight, Sparkles, Send, Copy, ExternalLink, Store } from 'lucide-react';
 import { MalaItem, MalaOrder } from '../types';
-import { buildClientConfirmationWhatsAppLink, buildStoreConciergeWhatsAppLink, cleanPhoneNumber, getClientOrderPlainText } from '../utils/whatsappHelper';
+import { buildClientConfirmationWhatsAppLink, buildStoreConciergeWhatsAppLink, buildClientToStoreWhatsAppLink, getClientToStoreOrderPlainText, STORE_WHATSAPP_DISPLAY, cleanPhoneNumber, getClientOrderPlainText } from '../utils/whatsappHelper';
 
 interface CheckoutAgendamentoModalProps {
   isOpen: boolean;
@@ -113,6 +113,7 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
     onSuccess(newOrder);
   };
 
+  const storeDirectWhatsAppLink = confirmedOrder ? buildClientToStoreWhatsAppLink(confirmedOrder) : '';
   const clientWhatsAppLink = confirmedOrder ? buildClientConfirmationWhatsAppLink(confirmedOrder) : '';
   const storeWhatsAppLink = confirmedOrder ? buildStoreConciergeWhatsAppLink(confirmedOrder) : '';
 
@@ -126,7 +127,7 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
 
   const handleCopyText = () => {
     if (confirmedOrder) {
-      const fullText = getClientOrderPlainText(confirmedOrder);
+      const fullText = getClientToStoreOrderPlainText(confirmedOrder);
       navigator.clipboard.writeText(fullText);
       setCopiedText(true);
       setTimeout(() => setCopiedText(false), 2500);
@@ -433,24 +434,24 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
             {/* Direct WhatsApp Buttons */}
             <div className="space-y-3 pt-2">
               <a
-                href={clientWhatsAppLink}
+                href={storeDirectWhatsAppLink}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-3.5 bg-[#181316] text-[#FAF6F7] hover:bg-[#2A2025] rounded-xl text-sm font-medium border border-[#F2BAC7]/40 transition-colors flex items-center justify-center gap-2 shadow cursor-pointer group"
+                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-md cursor-pointer group"
               >
-                <MessageCircle className="w-5 h-5 text-[#F5BAC7] group-hover:scale-110 transition-transform" />
-                <span>Abrir Resumo no WhatsApp da Cliente ({confirmedOrder.customerPhone})</span>
-                <ExternalLink className="w-4 h-4 text-[#F5BAC7]" />
+                <MessageCircle className="w-5 h-5 text-emerald-100 group-hover:scale-110 transition-transform" />
+                <span>Enviar Mala para o WhatsApp da Loja ({STORE_WHATSAPP_DISPLAY})</span>
+                <ExternalLink className="w-4 h-4 text-emerald-100" />
               </a>
 
               <a
-                href={storeWhatsAppLink}
+                href={clientWhatsAppLink}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full py-2.5 bg-white border border-[#F0D5DD] text-[#181316] rounded-xl text-xs font-medium hover:bg-[#FAF6F7] hover:text-[#B84E67] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#B84E67]" />
-                <span>Falar Diretamente com a Consultora da Loja</span>
+                <span>Abrir Comprovante no WhatsApp da Cliente ({confirmedOrder.customerPhone})</span>
               </a>
 
               {/* Copy WhatsApp text & link */}

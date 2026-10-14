@@ -549,20 +549,12 @@ export default function App() {
     setIsStoreEditModalOpen(true);
   };
 
-  // Ao abrir a página, foca/rola automaticamente para 'Acesse a Loja' exibindo os produtos à venda (apenas na loja)
+  // Inicia suavemente no topo sem saltos bruscos ou tela branca
   useEffect(() => {
-    if (activeView !== 'store') return;
-    const scrollToStore = () => {
-      if (activeView !== 'store') return;
-      const el = document.getElementById('colecao');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-    };
-
-    const timer = setTimeout(scrollToStore, 300);
-    return () => clearTimeout(timer);
-  }, []);
+    if (activeView === 'store') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+  }, [activeView]);
 
   // Filter products
   const categories = ['Todas', 'Promoções', 'Bolsas', 'Carteiras', 'Vestidos', 'Blazers & Alfaiataria', 'Camisas & Blusas', 'Calças & Shorts', 'Conjuntos & Tricot', 'Casacos'];
@@ -644,7 +636,7 @@ export default function App() {
   const isMalaFull = malaItems.length >= MAX_MALA_ITEMS;
 
   return (
-    <div className="min-h-screen bg-[#FAF9F5] text-stone-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#FAF9F5] text-stone-900 flex flex-col font-sans overflow-x-hidden w-full max-w-full">
       {/* Top Header */}
       <Header
         malaItems={malaItems}
@@ -682,7 +674,7 @@ export default function App() {
         />
       ) : (
         /* Boutique Customer Storefront View */
-        <main className="flex-1">
+        <main className="flex-1 w-full max-w-full overflow-x-hidden">
           {/* Hero Section */}
           <Hero
             onExploreCatalog={scrollToProductPhotos}
@@ -890,7 +882,7 @@ export default function App() {
               </div>
 
               {/* Linha 2: Categorias */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-1 border-t border-[#F7E8EC]">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pb-1 pt-1 border-t border-[#F7E8EC]">
                 <span className="text-xs font-semibold text-stone-500 mr-1 shrink-0 flex items-center gap-1">
                   <SlidersHorizontal className="w-3.5 h-3.5 text-[#B84E67]" />
                   Categorias:
@@ -921,7 +913,7 @@ export default function App() {
 
               {/* Linha 3: Estilos + Contador de Resultados + Botão Limpar */}
               <div className="flex items-center justify-between flex-wrap gap-2 text-xs pt-1">
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pb-1">
                   <span className="text-xs text-stone-400 mr-1 shrink-0">Estilos:</span>
                   {styles.map((st) => (
                     <button

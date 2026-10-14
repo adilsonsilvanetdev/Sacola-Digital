@@ -126,6 +126,64 @@ export function getClientOrderPlainText(order: MalaOrder): string {
 }
 
 /**
+ * Texto enviado pelo CLIENTE para o WhatsApp oficial da LOJA / JOSY ao agendar no site
+ */
+export function getClientToStoreOrderPlainText(order: MalaOrder): string {
+  const itemsList = order.items.map((item, idx) => {
+    const p = item.product;
+    const isBagOrWallet =
+      p.category.toLowerCase().includes("bolsa") ||
+      p.category.toLowerCase().includes("carteira") ||
+      Boolean(p.dimensionsCm) ||
+      (p.sizes && p.sizes.includes("CM"));
+
+    const sizeDisplay = isBagOrWallet
+      ? `Medida: ${p.dimensionsCm ? `CM (${p.dimensionsCm})` : "CM"}`
+      : `Tam: ${item.requestSecondarySize && item.secondarySize ? `${item.selectedSize} (reserva: ${item.secondarySize})` : item.selectedSize}`;
+
+    return `${idx + 1}. *${p.name}*\n   Cor: ${p.color} · ${sizeDisplay} · R$ ${p.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+  }).join("\n\n");
+
+  const totalValue = order.items.reduce((acc, it) => acc + it.product.price, 0);
+
+  const isPickup = order.deliveryType === "pickup" || !order.address || order.address.toLowerCase().includes("retirada");
+  const locationLines = isPickup
+    ? [`📍 *Modalidade:* Retirada presencial na loja física (Jô Bolsas Glamour - Rua: Dr José Ranieri N 5-28, Bauru - SP)`]
+    : [
+        `📍 *Modalidade:* Entrega em domicílio`,
+        `📍 *Endereço de Entrega:* ${order.address}${order.neighborhood ? `, ${order.neighborhood}` : ""}${order.city ? ` - ${order.city}` : ""}`,
+        ...(order.deliveryInstructions ? [`📍 *Ponto de Referência:* ${order.deliveryInstructions}`] : [])
+      ];
+
+  return [
+    `✨ *JÔ BOLSAS GLAMOUR - Novo Agendamento de Mala* ✨`,
+    ``,
+    `Olá, *Josy*! Me chamo *${order.customerName}* (WhatsApp: ${order.customerPhone}) e acabei de agendar minha mala pelo site! 🤍`,
+    ``,
+    `📋 *Protocolo da Mala:* N° ${order.id}`,
+    `🗓 *Data Agendada:* ${order.scheduledDate} (${order.scheduledTimeSlot})`,
+    ...locationLines,
+    `👜 *Quantidade:* ${order.items.length} itens na mala`,
+    ``,
+    `*ITENS SELECIONADOS NO SITE:*`,
+    itemsList || "Nenhum item selecionado.",
+    ``,
+    `💰 *Total Consignado:* R$ ${totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+    `ℹ️ *Modalidade:* Provador em casa por 48 horas (só acerto as peças que decidir ficar)`,
+    ``,
+    `Por favor, me confirme o recebimento do agendamento! Muito obrigada! 🤍`,
+  ].join("\n");
+}
+
+/**
+ * Link que envia o pedido da CLIENTE diretamente para o WhatsApp padrão da LOJA (Josy)
+ */
+export function buildClientToStoreWhatsAppLink(order: MalaOrder): string {
+  const text = getClientToStoreOrderPlainText(order);
+  return `https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+}
+
+/**
  * Link direcionado ao WhatsApp da CLIENTE quando a solicitação é finalizada.
  */
 export function buildClientConfirmationWhatsAppLink(order: MalaOrder): string {

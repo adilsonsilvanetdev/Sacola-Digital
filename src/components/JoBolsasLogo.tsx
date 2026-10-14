@@ -26,12 +26,17 @@ export const JoBolsasLogo: React.FC<JoBolsasLogoProps> = ({
   showPhrase = true,
 }) => {
   // Dimension of the circular plaque (sm: 48px, md: 108px, lg: 136px)
-  const dim = size === 'sm' ? 48 : size === 'lg' ? 136 : 108;
+  // Responsive dimension of the plaque: compact on mobile, full on desktop
+  const plaqueSizeClass =
+    size === 'sm'
+      ? 'w-9 h-9 sm:w-11 sm:h-11'
+      : size === 'lg'
+      ? 'w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32'
+      : 'w-12 h-12 sm:w-20 sm:h-20 md:w-24 md:h-24';
 
   const PlaqueSVG = (
     <div
-      style={{ width: dim, height: dim }}
-      className="relative shrink-0 rounded-full shadow-md group-hover:scale-105 transition-transform select-none"
+      className={`relative shrink-0 rounded-full shadow-md group-hover:scale-105 transition-transform select-none ${plaqueSizeClass}`}
       title="Jô Bolsas Glamour"
     >
       <svg
@@ -176,15 +181,19 @@ export const JoBolsasLogo: React.FC<JoBolsasLogoProps> = ({
 
   // Default: Full variant (plaque on the left, typography lockup with JÔ BOLSAS and underneath centralized glamour)
   return (
-    <div className={`flex items-center ${isSmall ? 'gap-2.5 sm:gap-3' : 'gap-4 sm:gap-5'} select-none ${className}`}>
+    <div className={`flex items-center ${isSmall ? "gap-2 sm:gap-3" : "gap-2 sm:gap-4"} select-none min-w-0 ${className}`}>
       {/* 1. Logo Plaque Oficial (igual à foto sem alteração) */}
       {PlaqueSVG}
 
       {/* 2. Textos: após o logo a palavra JÔ BOLSAS, embaixo centralizada a palavra glamour */}
-      <div className="flex flex-col items-center justify-center text-center">
+      <div className="flex flex-col items-center justify-center text-center min-w-0">
         <span
           className={`font-sans ${
-            isSmall ? 'tracking-[0.14em] text-xs' : isLarge ? 'tracking-[0.24em] text-2xl sm:text-3xl md:text-4xl' : 'tracking-[0.24em] text-xl sm:text-2xl md:text-3xl'
+            isSmall
+              ? "tracking-[0.10em] sm:tracking-[0.14em] text-[11px] sm:text-xs"
+              : isLarge
+              ? "tracking-[0.16em] sm:tracking-[0.24em] text-xl sm:text-3xl md:text-4xl"
+              : "tracking-[0.08em] sm:tracking-[0.18em] text-xs sm:text-xl md:text-2xl"
           } font-bold uppercase ${textColor} leading-tight text-center`}
           style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
         >
@@ -192,7 +201,11 @@ export const JoBolsasLogo: React.FC<JoBolsasLogoProps> = ({
         </span>
         <span
           className={`${accentColor} ${
-            isSmall ? 'text-base' : isLarge ? 'text-3xl sm:text-4xl md:text-5xl' : 'text-2xl sm:text-3xl md:text-4xl'
+            isSmall
+              ? "text-xs sm:text-base"
+              : isLarge
+              ? "text-2xl sm:text-4xl md:text-5xl"
+              : "text-base sm:text-2xl md:text-3xl"
           } italic font-normal leading-none mt-0.5 text-center`}
           style={{ fontFamily: "'Great Vibes', cursive" }}
         >

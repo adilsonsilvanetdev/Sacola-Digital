@@ -88,3 +88,10 @@ body {
   background-size: 200% 100%;
   animation: jb-shimmer 3s infinite linear;
 }
+
+/* Prevenção de rolagem horizontal e tela branca no celular */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}

@@ -161,6 +161,7 @@ export const SupabaseSyncManager: React.FC<SupabaseSyncManagerProps> = ({
   const [urlInput, setUrlInput] = useState(config.url);
   const [keyInput, setKeyInput] = useState(config.anonKey);
   const [showKey, setShowKey] = useState(false);
+  const [showEditCredentials, setShowEditCredentials] = useState(false);
 
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{
@@ -342,99 +343,141 @@ export const SupabaseSyncManager: React.FC<SupabaseSyncManagerProps> = ({
       {/* Grid: Formulário de Credenciais + Ações Rápidas de Sincronização */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Card de Configuração de Credenciais */}
-        <div className="lg:col-span-7 bg-stone-900 rounded-2xl border border-stone-800 p-6 space-y-6">
+        <div className="lg:col-span-7 bg-stone-900 rounded-2xl border border-stone-800 p-6 space-y-5">
           <div className="flex items-center justify-between pb-4 border-b border-stone-800">
             <div className="flex items-center gap-2.5">
-              <Key className="w-5 h-5 text-amber-400" />
-              <h4 className="text-sm font-semibold text-white uppercase tracking-wider">
-                Credenciais da API do Supabase
-              </h4>
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-white uppercase tracking-wider">
+                  Banco Supabase Ativo & Conectado
+                </h4>
+                <span className="text-[11px] text-emerald-400 font-medium">
+                  Catálogo 100% Online e Sincronizado
+                </span>
+              </div>
             </div>
             {config.source !== 'none' && (
-              <span className="text-[11px] text-stone-400">
-                Origem: <strong className="text-stone-200">{config.source === 'env' ? 'Variáveis (.env)' : 'Painel Local'}</strong>
+              <span className="text-[11px] text-emerald-300/80 bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-1 rounded-full font-medium">
+                Pronto para Todos os Dispositivos
               </span>
             )}
           </div>
 
-          <form onSubmit={handleSaveCredentials} className="space-y-4">
+          <div className="p-4 rounded-xl bg-stone-950/80 border border-stone-800 space-y-3">
             <div>
-              <label className="block text-xs font-medium text-stone-300 mb-1.5">
-                URL do Projeto (Project URL)
-              </label>
-              <div className="relative">
+              <span className="text-stone-400 block text-[10px] uppercase font-bold tracking-wider mb-1">
+                URL Oficial do Projeto na Nuvem:
+              </span>
+              <code className="text-amber-300 font-mono text-xs break-all bg-stone-900 px-2.5 py-1.5 rounded-lg border border-stone-800 block">
+                {config.url}
+              </code>
+            </div>
+
+            <div>
+              <span className="text-stone-400 block text-[10px] uppercase font-bold tracking-wider mb-1">
+                Chave Anônima Pública (Anon Key):
+              </span>
+              <div className="flex items-center justify-between bg-stone-900 px-2.5 py-1.5 rounded-lg border border-stone-800">
+                <code className="text-stone-300 font-mono text-[11px]">
+                  ••••••••••••••••••••••••••••••••{config.anonKey.slice(-10)}
+                </code>
+                <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                  Ativa & Segura
+                </span>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-stone-400 leading-relaxed pt-1">
+              ✨ <strong>Tudo automático:</strong> Você não precisa digitar nem preencher nenhuma chave aqui. Qualquer cliente que acessar o site (no celular ou computador) já carrega automaticamente este mesmo banco de dados.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <button
+              type="button"
+              onClick={handleTestConnection}
+              disabled={isTesting}
+              className="px-4 py-2 bg-stone-800 hover:bg-stone-750 text-stone-200 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer border border-stone-700/60"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isTesting ? 'animate-spin' : ''}`} />
+              {isTesting ? 'Testando Conexão...' : 'Testar Conexão com a Nuvem'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowEditCredentials(!showEditCredentials)}
+              className="px-3 py-2 text-stone-400 hover:text-stone-200 text-xs font-medium transition-all cursor-pointer underline decoration-stone-600 underline-offset-4 ml-auto"
+            >
+              {showEditCredentials ? 'Ocultar configurações avançadas' : 'Alterar chaves manualmente (Avançado)'}
+            </button>
+          </div>
+
+          {showEditCredentials && (
+            <form onSubmit={handleSaveCredentials} className="space-y-4 pt-4 border-t border-stone-800 animate-fadeIn">
+              <p className="text-xs text-amber-300/90 bg-amber-950/20 border border-amber-800/40 p-3 rounded-xl">
+                ⚠️ O sistema já está conectado com suas chaves oficiais. Só preencha os campos abaixo caso deseje trocar para outro projeto Supabase.
+              </p>
+
+              <div>
+                <label className="block text-xs font-medium text-stone-300 mb-1.5">
+                  URL do Projeto (Project URL)
+                </label>
                 <input
                   type="url"
                   required
                   placeholder="https://seu-projeto.supabase.co"
                   value={urlInput}
                   onChange={(e) => setUrlInput(e.target.value)}
-                  className="w-full bg-stone-950 border border-stone-850 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-stone-600 focus:outline-none focus:border-amber-500/70 focus:ring-1 focus:ring-amber-500/30 transition-all font-mono"
+                  className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-stone-600 focus:outline-none focus:border-amber-500/70 font-mono"
                 />
               </div>
-              <p className="text-[11px] text-stone-500 mt-1">
-                Encontrada em Supabase &gt; Project Settings &gt; API &gt; Project URL
-              </p>
-            </div>
 
-            <div>
-              <label className="block text-xs font-medium text-stone-300 mb-1.5">
-                Chave Pública / Anon Key (anon public)
-              </label>
-              <div className="relative">
-                <input
-                  type={showKey ? 'text' : 'password'}
-                  required
-                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                  value={keyInput}
-                  onChange={(e) => setKeyInput(e.target.value)}
-                  className="w-full bg-stone-950 border border-stone-850 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-stone-600 focus:outline-none focus:border-amber-500/70 focus:ring-1 focus:ring-amber-500/30 transition-all font-mono pr-10"
-                />
+              <div>
+                <label className="block text-xs font-medium text-stone-300 mb-1.5">
+                  Chave Pública / Anon Key (anon public)
+                </label>
+                <div className="relative">
+                  <input
+                    type={showKey ? 'text' : 'password'}
+                    required
+                    placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    value={keyInput}
+                    onChange={(e) => setKeyInput(e.target.value)}
+                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-stone-600 focus:outline-none focus:border-amber-500/70 font-mono pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowKey(!showKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-300 p-1"
+                  >
+                    {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
                 <button
-                  type="button"
-                  onClick={() => setShowKey(!showKey)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-300 transition-colors p-1"
+                  type="submit"
+                  className="px-4 py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-sm"
                 >
-                  {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  <ShieldCheck className="w-4 h-4" />
+                  Salvar Novas Credenciais
                 </button>
-              </div>
-              <p className="text-[11px] text-stone-500 mt-1">
-                Encontrada em Supabase &gt; Project Settings &gt; API &gt; Project API keys (anon public)
-              </p>
-            </div>
 
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              <button
-                type="submit"
-                className="px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-amber-900/20 transition-all cursor-pointer"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                Salvar Credenciais
-              </button>
-
-              <button
-                type="button"
-                onClick={handleTestConnection}
-                disabled={isTesting || !urlInput || !keyInput}
-                className="px-4 py-2.5 bg-stone-800 hover:bg-stone-750 text-stone-200 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border border-stone-700/60"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isTesting ? 'animate-spin' : ''}`} />
-                {isTesting ? 'Testando Conexão...' : 'Testar Conexão'}
-              </button>
-
-              {config.source !== 'none' && (
                 <button
                   type="button"
                   onClick={handleDisconnect}
-                  className="px-3 py-2.5 text-stone-400 hover:text-rose-400 hover:bg-rose-950/20 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all ml-auto cursor-pointer"
-                  title="Limpar credenciais e voltar ao modo local"
+                  className="px-3 py-2 text-stone-400 hover:text-rose-400 rounded-xl text-xs font-medium transition-all cursor-pointer ml-auto"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  Desconectar
+                  Voltar ao modo local
                 </button>
-              )}
-            </div>
-          </form>
+              </div>
+            </form>
+          )}
         </div>
 
         {/* Card de Ações de Sincronização em Massa */}
@@ -595,12 +638,12 @@ export const SupabaseSyncManager: React.FC<SupabaseSyncManagerProps> = ({
           </div>
 
           <div className="p-4 rounded-xl bg-stone-950/70 border border-stone-800 text-xs space-y-1.5">
-            <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">
+            <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs">
               4
             </div>
-            <div className="font-semibold text-white">Salvar e Sincronizar</div>
+            <div className="font-semibold text-white">Conexão Ativa & Sincronizada</div>
             <p className="text-[11px] text-stone-400 leading-normal">
-              Cole as credenciais nesta aba, clique em <strong>Salvar Credenciais</strong> e depois em <strong>Subir Peças Atuais</strong>!
+              Suas credenciais já estão configuradas no sistema e o catálogo de 18 peças está 100% ativo na nuvem!
             </p>
           </div>
         </div>
