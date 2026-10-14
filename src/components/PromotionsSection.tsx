@@ -9,6 +9,7 @@ interface PromotionsSectionProps {
   onOpenQuickView: (product: Product) => void;
   onAddToMala: (product: Product, selectedSize?: string) => void;
   isInMala: (productId: string) => boolean;
+  onViewAllProducts?: () => void;
 }
 
 export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
@@ -16,6 +17,7 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
   onOpenQuickView,
   onAddToMala,
   isInMala,
+  onViewAllProducts,
 }) => {
   // Filtra produtos especiais marcados como promoção ou com preço original superior
   const promoProducts = products.filter(
@@ -204,15 +206,28 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
               </p>
             </div>
           </div>
-          <a
-            href="https://wa.me/5514997224065?text=Ol%C3%A1%20Josy!%20Gostaria%20de%20consultar%20as%20pe%C3%A7as%20em%20promo%C3%A7%C3%A3o%20especial%20da%20J%C3%B4%20Bolsas%20Glamour."
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-5 py-3 rounded-xl bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-bold transition-all flex items-center gap-2 shrink-0 shadow-sm cursor-pointer whitespace-nowrap"
-          >
-            <span>Falar com a Josy sobre Promoções</span>
-            <ArrowRight className="w-4 h-4" />
-          </a>
+          <div className="flex items-center flex-wrap gap-2.5">
+            {onViewAllProducts && (
+              <button
+                type="button"
+                onClick={onViewAllProducts}
+                className="px-4 py-3 rounded-xl bg-white hover:bg-[#FAF6F7] text-[#181316] border border-[#F0D5DD] text-xs font-semibold transition-all flex items-center gap-2 shrink-0 shadow-2xs cursor-pointer whitespace-nowrap"
+                title="Acessar todas as peças e categorias da loja"
+              >
+                <span>Ver Todas as Peças</span>
+                <ArrowRight className="w-4 h-4 text-[#B84E67]" />
+              </button>
+            )}
+            <a
+              href="https://wa.me/5514997224065?text=Ol%C3%A1%20Josy!%20Gostaria%20de%20consultar%20as%20pe%C3%A7as%20em%20promo%C3%A7%C3%A3o%20especial%20da%20J%C3%B4%20Bolsas%20Glamour."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-3 rounded-xl bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-bold transition-all flex items-center gap-2 shrink-0 shadow-sm cursor-pointer whitespace-nowrap"
+            >
+              <span>Falar com a Josy sobre Promoções</span>
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
         </div>
 
       </div>

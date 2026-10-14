@@ -5,6 +5,8 @@ import { STORE_WHATSAPP_NUMBER, STORE_WHATSAPP_DISPLAY } from '../utils/whatsapp
 
 interface FooterProps {
   onOpenSellerArea?: () => void;
+  onNavigateToStore?: () => void;
+  onScrollToPromotions?: () => void;
 }
 
 const InstagramIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
@@ -27,7 +29,7 @@ const PixIcon: React.FC<{ className?: string }> = ({ className = 'w-3.5 h-3.5' }
   </svg>
 );
 
-export const Footer: React.FC<FooterProps> = () => {
+export const Footer: React.FC<FooterProps> = ({ onNavigateToStore, onScrollToPromotions }) => {
   return (
     <footer className="bg-[#141113] text-[#F0D5DD] text-xs py-12 lg:py-14 border-t border-[#2A2025]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -91,15 +93,23 @@ export const Footer: React.FC<FooterProps> = () => {
                 </a>
               </li>
               <li>
-                <a href="#colecao" className="hover:text-[#F5BAC7] transition-colors">
+                <button
+                  type="button"
+                  onClick={onNavigateToStore}
+                  className="hover:text-[#F5BAC7] transition-colors cursor-pointer text-left"
+                >
                   Acesse a Loja & Catálogo
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#promocoes" className="hover:text-[#F5BAC7] transition-colors flex items-center gap-1.5 font-semibold text-[#F5BAC7]">
+                <button
+                  type="button"
+                  onClick={onScrollToPromotions}
+                  className="hover:text-[#F5BAC7] transition-colors flex items-center gap-1.5 font-semibold text-[#F5BAC7] cursor-pointer text-left"
+                >
                   <span className="w-1.5 h-1.5 rounded-full bg-[#E11D48]" />
                   Promoções & Peças Especiais
-                </a>
+                </button>
               </li>
               <li>
                 <span className="text-[#8E7C85]">Mala Delivery Particular</span>

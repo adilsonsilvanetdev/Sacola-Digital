@@ -273,11 +273,57 @@ export default function App() {
     );
   };
 
+  // Navegação para a loja garantindo a categoria 'Todas' e reset de filtros conforme solicitado
+  const handleNavigateToStore = (categoryTarget: string = 'Todas') => {
+    if (activeView !== 'store') {
+      setActiveView('store');
+    }
+    setSelectedCategory(categoryTarget);
+    setSelectedStyle('Todos');
+    setSearchQuery('');
+    setTimeout(() => {
+      const target = document.getElementById('fotos-pecas') || document.getElementById('colecao');
+      if (target) {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.getBoundingClientRect().height : 80;
+        const targetRect = target.getBoundingClientRect();
+        const offsetTop = targetRect.top + window.pageYOffset - (headerHeight + 16);
+        window.scrollTo({
+          top: Math.max(0, offsetTop),
+          behavior: 'smooth',
+        });
+      }
+    }, 60);
+  };
+
+  const handleScrollToPromotions = () => {
+    if (activeView !== 'store') {
+      setActiveView('store');
+    }
+    setTimeout(() => {
+      const targetElement = document.getElementById('promocoes') || 
+                            document.getElementById('fotos-pecas');
+      if (targetElement) {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.getBoundingClientRect().height : 80;
+        const targetRect = targetElement.getBoundingClientRect();
+        const offsetTop = targetRect.top + window.pageYOffset - (headerHeight + 16);
+        window.scrollTo({
+          top: Math.max(0, offsetTop),
+          behavior: 'smooth',
+        });
+      }
+    }, 60);
+  };
+
   // Scroll directly to the photos of the pieces (vitrine de fotos das peças e bolsas)
   const scrollToProductPhotos = () => {
     if (activeView !== 'store') {
       setActiveView('store');
     }
+    setSelectedCategory('Todas');
+    setSelectedStyle('Todos');
+    setSearchQuery('');
     setTimeout(() => {
       const target = document.getElementById('fotos-pecas') || document.getElementById('vitrine-pecas-grid');
       if (target) {
@@ -358,10 +404,22 @@ export default function App() {
     if (categoryTarget && categoryTarget !== 'Todas') {
       setSelectedCategory(categoryTarget);
     }
-    const targetElement = categoryTarget === 'Promoções'
-      ? document.getElementById('promocoes') || document.getElementById('colecao')
-      : document.getElementById('colecao');
-    targetElement?.scrollIntoView({ behavior: 'smooth' });
+    // Rola suavemente direto para a seção de promoções sem pular para o final da página
+    setTimeout(() => {
+      const targetElement = document.getElementById('promocoes') || 
+                            document.getElementById('fotos-pecas') || 
+                            document.getElementById('colecao');
+      if (targetElement) {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.getBoundingClientRect().height : 80;
+        const targetRect = targetElement.getBoundingClientRect();
+        const offsetTop = targetRect.top + window.pageYOffset - (headerHeight + 16);
+        window.scrollTo({
+          top: Math.max(0, offsetTop),
+          behavior: 'smooth',
+        });
+      }
+    }, 80);
   };
 
   // Status update from dashboard
@@ -646,6 +704,8 @@ export default function App() {
         onOpenSellerAuth={handleOpenSellerArea}
         isSellerAuthenticated={isSellerAuthenticated}
         addedToastMessage={addedToastMessage}
+        onNavigateToStore={handleNavigateToStore}
+        onScrollToPromotions={handleScrollToPromotions}
       />
 
       {activeView === 'dashboard' ? (
@@ -655,7 +715,7 @@ export default function App() {
           onUpdateOrderStatus={handleUpdateOrderStatus}
           onReturnToStore={() => {
             window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-            setActiveView('store');
+            handleNavigateToStore('Todas');
           }}
           onCreateOrderByStylist={(newOrder) => setOrders((prev) => [newOrder, ...prev])}
           onLogout={handleLogoutSeller}
@@ -683,6 +743,15 @@ export default function App() {
           {/* How it works 4-step Section */}
           <HowItWorks
             onExploreCatalog={scrollToProductPhotos}
+          />
+
+          {/* Seção Promoções & Produtos Especiais (Cor em destaque) - Posicionada em destaque no topo da vitrine */}
+          <PromotionsSection
+            products={products}
+            onOpenQuickView={(prod) => setQuickViewProduct(prod)}
+            onAddToMala={(prod, size) => handleAddToMala(prod, size || 'M')}
+            isInMala={(id) => malaItems.some((it) => it.product.id === id)}
+            onViewAllProducts={() => handleNavigateToStore('Todas')}
           />
 
           {/* Catalog Section: 15 Fictional Women's Garments */}
@@ -1011,13 +1080,7 @@ export default function App() {
             )}
           </section>
 
-          {/* Seção Promoções & Produtos Especiais (Cor em destaque) */}
-          <PromotionsSection
-            products={products}
-            onOpenQuickView={(prod) => setQuickViewProduct(prod)}
-            onAddToMala={(prod, size) => handleAddToMala(prod, size || 'M')}
-            isInMala={(id) => malaItems.some((it) => it.product.id === id)}
-          />
+
         </main>
       )}
 
@@ -1043,7 +1106,11 @@ export default function App() {
       )}
 
       {/* Footer */}
-      <Footer onOpenSellerArea={handleOpenSellerArea} />
+      <Footer
+        onOpenSellerArea={handleOpenSellerArea}
+        onNavigateToStore={() => handleNavigateToStore('Todas')}
+        onScrollToPromotions={handleScrollToPromotions}
+      />
 
       {/* Drawers & Modals */}
       <MalaDrawer
