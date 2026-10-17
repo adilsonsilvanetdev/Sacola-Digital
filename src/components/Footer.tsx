@@ -88,7 +88,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateToStore, onScrollToPro
             </h4>
             <ul className="space-y-2 text-[#BFA8B1]">
               <li>
-                <a href="#como-funciona" className="hover:text-[#F5BAC7] transition-colors">
+                <a href="#provador-info" className="hover:text-[#F5BAC7] transition-colors">
                   Mala/Sacola Digital (Provador 48h)
                 </a>
               </li>

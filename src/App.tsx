@@ -735,167 +735,10 @@ export default function App() {
       ) : (
         /* Boutique Customer Storefront View */
         <main className="flex-1 w-full max-w-full overflow-x-hidden">
-          {/* Hero Section */}
-          <Hero
-            onExploreCatalog={scrollToProductPhotos}
-          />
-
-          {/* How it works 4-step Section */}
-          <HowItWorks
-            onExploreCatalog={scrollToProductPhotos}
-          />
-
-          {/* Seção Promoções & Produtos Especiais (Cor em destaque) - Posicionada em destaque no topo da vitrine */}
-          <PromotionsSection
-            products={products}
-            onOpenQuickView={(prod) => setQuickViewProduct(prod)}
-            onAddToMala={(prod, size) => handleAddToMala(prod, size || 'M')}
-            isInMala={(id) => malaItems.some((it) => it.product.id === id)}
-            onViewAllProducts={() => handleNavigateToStore('Todas')}
-          />
-
-          {/* Catalog Section: 15 Fictional Women's Garments */}
-          <section id="colecao" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-28">
-            
-            {/* Catalog Section Header with Showroom Photo alongside text */}
-            <div className="bg-gradient-to-br from-[#FFF9FA] via-[#FAF4F6] to-white rounded-3xl p-6 sm:p-10 lg:p-12 border border-[#F2DEE4] shadow-sm mb-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-              <div className="lg:col-span-7 space-y-5 sm:space-y-6 flex flex-col justify-center">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#B84E67] font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-[#E594A7] animate-pulse" />
-                  <span>Bolsas & Peças Exclusivas · Pronta Entrega ou Provador 48h</span>
-                </div>
-
-                <h2 className="font-editorial text-4xl sm:text-5xl lg:text-6xl text-[#181316] font-medium leading-[1.12] tracking-tight">
-                  Coleção Jô Bolsas Glamour
-                </h2>
-
-                <div className="space-y-3">
-                  <p className="text-base sm:text-lg lg:text-xl text-[#4A3E44] font-normal leading-relaxed">
-                    Peças exclusivas, qualidade e beleza em cada detalhe. Descubra uma moda feminina que valoriza sua personalidade e transforma cada escolha em um momento especial.
-                  </p>
-                  <p className="text-base sm:text-lg lg:text-xl text-[#B84E67] font-medium leading-relaxed">
-                    Explore nossa coleção e encontre seus novos favoritos!
-                  </p>
-                </div>
-
-                <div className="pt-2 flex flex-wrap items-center gap-3">
-                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#B84E67] text-xs sm:text-sm font-semibold border border-[#F2BAC7]/70 shadow-2xs">
-                    ✦ Showroom Físico Jô Bolsas Glamour
-                  </span>
-                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#5A4D54] text-xs sm:text-sm font-medium border border-[#E8D4DC] shadow-2xs">
-                    Curadoria Josy · Acervo Completo
-                  </span>
-                </div>
-              </div>
-
-              {/* Showroom entrance photo alongside the text */}
-              <div className="lg:col-span-5">
-                <div className="relative rounded-2xl overflow-hidden border border-[#F0D5DD] shadow-md bg-stone-900 aspect-[3/4] sm:aspect-[4/3] lg:aspect-[3/4] group select-none">
-                  <img
-                    src="/images/foto_principal_jo_bolsas.jpg"
-                    alt="Showroom Jô Bolsas Glamour com porta nobre e provador"
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-102"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#141113]/70 to-transparent pointer-events-none" />
-                  <div className="absolute bottom-3 left-4 right-4 text-white">
-                    <div className="text-[11px] uppercase tracking-wider text-[#F5BAC7] font-semibold flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#F5BAC7] animate-pulse" />
-                      <span>Jô Bolsas · Glamour de Mulher</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 2 Opções de Experiência: 1) Venda Direta WhatsApp & 2) Mala Provador Digital */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
-              {/* Opção 1: Venda Direta WhatsApp */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#F5FBF6] to-white border border-[#CDEED5] flex flex-col justify-between shadow-2xs">
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-[11px] font-bold tracking-wider uppercase text-[#0d6832] flex items-center gap-1.5">
-                      <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
-                      Venda Direta · Envio ou Balcão
-                    </span>
-                    <span className="text-[11px] font-bold text-[#0d6832] bg-[#E3F9E9] px-2.5 py-0.5 rounded-full border border-[#B7F0C7]">
-                      {STORE_WHATSAPP_DISPLAY}
-                    </span>
-                  </div>
-                  <h3 className="font-editorial text-xl sm:text-2xl font-medium text-[#181316]">
-                    Compre na hora direto no WhatsApp
-                  </h3>
-                  <p className="text-xs sm:text-sm text-[#4A5D50] mt-1.5 leading-relaxed">
-                    <span className="block mb-1">
-                      Atendimento direto com a Josy para entrega rápida ou retirada no balcão!
-                    </span>
-                    É rápido, prático e seguro! Tire suas dúvidas, receba fotos e detalhes das peças, escolha a sua favorita e finalize sua compra direto pelo WhatsApp!
-                  </p>
-                </div>
-                <div className="pt-3.5 mt-3.5 border-t border-[#DDF4E4] flex items-center justify-between text-xs text-[#2F523B]">
-                  <span>Parcelamento em até 3x sem juros ou à vista</span>
-                  <a
-                    href={`https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá Josy! Gostaria de consultar os produtos da loja.')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold text-[#0d6832] hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>Falar no WhatsApp</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-
-              {/* Opção 2: Mala Provador em Casa 48h (Sem foto miniatura, limpo e simétrico) */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#FFF8FA] to-white border border-[#F2DEE4] flex flex-col justify-between shadow-2xs">
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-[11px] font-bold tracking-wider uppercase text-[#B84E67] flex items-center gap-1.5">
-                      <ShoppingBag className="w-4 h-4 text-[#B84E67]" />
-                      Provador em Casa · Mala 48 Horas
-                    </span>
-                    <span className="text-[11px] font-bold text-[#B84E67] bg-[#FDF2F4] px-2.5 py-0.5 rounded-full border border-[#F2DEE4]">
-                      Até {MAX_MALA_ITEMS} peças
-                    </span>
-                  </div>
-                  <h3 className="font-editorial text-xl sm:text-2xl font-medium text-[#181316]">
-                    Experimente no conforto do seu closet
-                  </h3>
-                  <p className="text-xs sm:text-sm text-[#5A4D54] mt-1.5 leading-relaxed">
-                    <span className="block mb-1">
-                      Prove tudo no seu espelho com tranquilidade e estilo!
-                    </span>
-                    Escolha até 15 bolsas e roupas com <strong className="text-[#B84E67]">"Experimentar na Mala"</strong>. Enviamos tamanhos reservas, você prova por 48h e só paga o que amar!
-                  </p>
-                </div>
-
-                <div className="pt-3.5 mt-3.5 border-t border-[#F8E2E8] flex items-center justify-between text-xs text-[#7A5B66]">
-                  <span>{malaItems.length} de {MAX_MALA_ITEMS} peças na sua mala atual</span>
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={scrollToProductPhotos}
-                      className="font-medium text-[#7A6B73] hover:text-[#B84E67] hover:underline flex items-center gap-1 cursor-pointer"
-                    >
-                      <span>Ver Fotos das Peças</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                    {malaItems.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setIsMalaOpen(true)}
-                        className="font-semibold text-[#B84E67] hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>Ver Minha Mala</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
+          {/* 1 - SEÇÃO COM TODAS AS FOTOS DAS PEÇAS E ACESSÓRIOS */}
+          <section id="fotos-pecas" className="pt-6 sm:pt-8 pb-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-28">
             {/* Vitrine de Peças & Bolsas com Fotos e Filtros */}
-            <div id="fotos-pecas" className="bg-white p-4 sm:p-5 rounded-2xl border border-[#F0D5DD] shadow-2xs space-y-4 mb-8 scroll-mt-28">
+            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#F0D5DD] shadow-2xs space-y-4 mb-8">
               {/* Linha 1: Input de Busca + Faixa de Preço + Ordenação */}
               <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
                 {/* Search Input */}
@@ -1078,6 +921,170 @@ export default function App() {
                 </button>
               </div>
             )}
+          </section>
+
+          {/* 2 - PROMOÇÕES JUNTAMENTE COM AS PEÇAS EM PROMOÇÕES */}
+          {/* Seção Promoções & Produtos Especiais (Cor em destaque) - Posicionada em destaque no topo da vitrine */}
+          <PromotionsSection
+            products={products}
+            onOpenQuickView={(prod) => setQuickViewProduct(prod)}
+            onAddToMala={(prod, size) => handleAddToMala(prod, size || 'M')}
+            isInMala={(id) => malaItems.some((it) => it.product.id === id)}
+            onViewAllProducts={() => handleNavigateToStore('Todas')}
+          />
+
+          {/* 3 - SEÇÃO DAS INFORMAÇÕES ONDE CONSTA COLEÇÃO JÔ BOLSAS GLAMOUR */}
+          {/* Catalog Section: 15 Fictional Women's Garments */}
+          <section id="colecao" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-28">
+            
+            {/* Catalog Section Header with Showroom Photo alongside text */}
+            <div className="bg-gradient-to-br from-[#FFF9FA] via-[#FAF4F6] to-white rounded-3xl p-6 sm:p-10 lg:p-12 border border-[#F2DEE4] shadow-sm mb-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              <div className="lg:col-span-7 space-y-5 sm:space-y-6 flex flex-col justify-center">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#B84E67] font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-[#E594A7] animate-pulse" />
+                  <span>Bolsas & Peças Exclusivas · Pronta Entrega ou Provador 48h</span>
+                </div>
+
+                <h2 className="font-editorial text-4xl sm:text-5xl lg:text-6xl text-[#181316] font-medium leading-[1.12] tracking-tight">
+                  Coleção Jô Bolsas Glamour
+                </h2>
+
+                <div className="space-y-3">
+                  <p className="text-base sm:text-lg lg:text-xl text-[#4A3E44] font-normal leading-relaxed">
+                    Peças exclusivas, qualidade e beleza em cada detalhe. Descubra uma moda feminina que valoriza sua personalidade e transforma cada escolha em um momento especial.
+                  </p>
+                  <p className="text-base sm:text-lg lg:text-xl text-[#B84E67] font-medium leading-relaxed">
+                    Explore nossa coleção e encontre seus novos favoritos!
+                  </p>
+                </div>
+
+                <div className="pt-2 flex flex-wrap items-center gap-3">
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#B84E67] text-xs sm:text-sm font-semibold border border-[#F2BAC7]/70 shadow-2xs">
+                    ✦ Showroom Físico Jô Bolsas Glamour
+                  </span>
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#5A4D54] text-xs sm:text-sm font-medium border border-[#E8D4DC] shadow-2xs">
+                    Curadoria Josy · Acervo Completo
+                  </span>
+                </div>
+              </div>
+
+              {/* Showroom entrance photo alongside the text */}
+              <div className="lg:col-span-5">
+                <div className="relative rounded-2xl overflow-hidden border border-[#F0D5DD] shadow-md bg-stone-900 aspect-[3/4] sm:aspect-[4/3] lg:aspect-[3/4] group select-none">
+                  <img
+                    src="/images/foto_principal_jo_bolsas.jpg"
+                    alt="Showroom Jô Bolsas Glamour com porta nobre e provador"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-102"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#141113]/70 to-transparent pointer-events-none" />
+                  <div className="absolute bottom-3 left-4 right-4 text-white">
+                    <div className="text-[11px] uppercase tracking-wider text-[#F5BAC7] font-semibold flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#F5BAC7] animate-pulse" />
+                      <span>Jô Bolsas · Glamour de Mulher</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 2 Opções de Experiência: 1) Venda Direta WhatsApp & 2) Mala Provador Digital */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
+              {/* Opção 1: Venda Direta WhatsApp */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#F5FBF6] to-white border border-[#CDEED5] flex flex-col justify-between shadow-2xs">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-[11px] font-bold tracking-wider uppercase text-[#0d6832] flex items-center gap-1.5">
+                      <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
+                      Venda Direta · Envio ou Balcão
+                    </span>
+                    <span className="text-[11px] font-bold text-[#0d6832] bg-[#E3F9E9] px-2.5 py-0.5 rounded-full border border-[#B7F0C7]">
+                      {STORE_WHATSAPP_DISPLAY}
+                    </span>
+                  </div>
+                  <h3 className="font-editorial text-xl sm:text-2xl font-medium text-[#181316]">
+                    Compre na hora direto no WhatsApp
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#4A5D50] mt-1.5 leading-relaxed">
+                    <span className="block mb-1">
+                      Atendimento direto com a Josy para entrega rápida ou retirada no balcão!
+                    </span>
+                    É rápido, prático e seguro! Tire suas dúvidas, receba fotos e detalhes das peças, escolha a sua favorita e finalize sua compra direto pelo WhatsApp!
+                  </p>
+                </div>
+                <div className="pt-3.5 mt-3.5 border-t border-[#DDF4E4] flex items-center justify-between text-xs text-[#2F523B]">
+                  <span>Parcelamento em até 3x sem juros ou à vista</span>
+                  <a
+                    href={`https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá Josy! Gostaria de consultar os produtos da loja.')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-[#0d6832] hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Falar no WhatsApp</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Opção 2: Mala Provador em Casa 48h (Sem foto miniatura, limpo e simétrico) */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#FFF8FA] to-white border border-[#F2DEE4] flex flex-col justify-between shadow-2xs">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-[11px] font-bold tracking-wider uppercase text-[#B84E67] flex items-center gap-1.5">
+                      <ShoppingBag className="w-4 h-4 text-[#B84E67]" />
+                      Provador em Casa · Mala 48 Horas
+                    </span>
+                    <span className="text-[11px] font-bold text-[#B84E67] bg-[#FDF2F4] px-2.5 py-0.5 rounded-full border border-[#F2DEE4]">
+                      Até {MAX_MALA_ITEMS} peças
+                    </span>
+                  </div>
+                  <h3 className="font-editorial text-xl sm:text-2xl font-medium text-[#181316]">
+                    Experimente no conforto do seu closet
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#5A4D54] mt-1.5 leading-relaxed">
+                    <span className="block mb-1">
+                      Prove tudo no seu espelho com tranquilidade e estilo!
+                    </span>
+                    Escolha até 15 bolsas e roupas com <strong className="text-[#B84E67]">"Experimentar na Mala"</strong>. Enviamos tamanhos reservas, você prova por 48h e só paga o que amar!
+                  </p>
+                </div>
+
+                <div className="pt-3.5 mt-3.5 border-t border-[#F8E2E8] flex items-center justify-between text-xs text-[#7A5B66]">
+                  <span>{malaItems.length} de {MAX_MALA_ITEMS} peças na sua mala atual</span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={scrollToProductPhotos}
+                      className="font-medium text-[#7A6B73] hover:text-[#B84E67] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>Escolher Peças na Coleção</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                    {malaItems.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setIsMalaOpen(true)}
+                        className="font-semibold text-[#B84E67] hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Ver Minha Mala</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 4 - SEÇÃO DAS INFORMAÇÕES DO PROVADOR DO TÍTULO "SUA MALA DE BOLSAS" EM DIANTE */}
+          <section id="provador-info" className="scroll-mt-28">
+            {/* Hero Section */}
+          <Hero
+            onExploreCatalog={scrollToProductPhotos}
+          />
+            {/* How it works 4-step Section */}
+          <HowItWorks
+            onExploreCatalog={scrollToProductPhotos}
+          />
           </section>
 
 

@@ -88,7 +88,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => {
                 setActiveView('store');
-                const el = document.getElementById('como-funciona');
+                const el = document.getElementById('provador-info') || document.getElementById('como-funciona');
                 el?.scrollIntoView({ behavior: 'smooth' });
               }}
               className="hover:text-[#B84E67] transition-colors cursor-pointer"
@@ -165,7 +165,7 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={() => {
-                const el = document.getElementById('como-funciona');
+                const el = document.getElementById('provador-info') || document.getElementById('como-funciona');
                 el?.scrollIntoView({ behavior: 'smooth' });
               }}
               className="flex-1 py-1.5 px-2 bg-white rounded-lg border border-[#F0D5DD] text-[11px] font-semibold text-[#181316] hover:bg-[#FAF6F7] hover:text-[#B84E67] transition-all flex items-center justify-center gap-1 shadow-2xs whitespace-nowrap active:scale-95"
