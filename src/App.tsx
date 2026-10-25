@@ -44,6 +44,7 @@ import {
   updateOrderStatusInSupabase,
   fetchSpecialPromotionFromSupabase, 
   upsertSpecialPromotionInSupabase, 
+  deleteMalaOrderFromSupabase,
   subscribeToProductsRealtime,
   subscribeToOrdersRealtime,
   subscribeToPromotionsRealtime
@@ -106,8 +107,16 @@ export default function App() {
   // Feedback Toast
   const [addedToastMessage, setAddedToastMessage] = useState<string | null>(null);
 
-  // Demo Orders for the Consultora Dashboard
-  const [orders, setOrders] = useState<MalaOrder[]>([
+  // Demo Orders for the Consultora Dashboard (Com suporte a persistência local)
+  const [orders, setOrders] = useState<MalaOrder[]>(() => {
+    const saved = localStorage.getItem('jobolsas_orders');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch {}
+    }
+    return [
     {
       id: 'JB-ML-7842',
       customerName: 'Mariana de Albuquerque',
@@ -180,7 +189,8 @@ export default function App() {
         },
       ],
     },
-  ]);
+  ];
+  });
 
   // Handle Opening Seller Area (Protected by Password/PIN)
   const handleOpenSellerArea = () => {
@@ -226,6 +236,11 @@ export default function App() {
 
   // Add Item to Mala
   const handleAddToMala = (product: Product, size: string) => {
+    if (product.inStock === false) {
+      alert();
+      return;
+    }
+
     if (malaItems.length >= MAX_MALA_ITEMS) {
       alert(`Sua mala atingiu o limite de ${MAX_MALA_ITEMS} peças.`);
       return;
@@ -344,10 +359,33 @@ export default function App() {
 
   // Order completed from customer checkout
   const handleOrderSuccess = (newOrder: MalaOrder) => {
-    setOrders((prev) => [newOrder, ...prev]);
+    setOrders((prev) => {
+      const next = [newOrder, ...prev];
+      localStorage.setItem('jobolsas_orders', JSON.stringify(next));
+      return next;
+    });
     if (isSupabaseConfigured()) {
       saveMalaOrderInSupabase(newOrder);
     }
+
+    // Marca as peças reservadas nesta mala como indisponíveis (inStock = false) para outros clientes
+    const reservedProductIds = new Set(newOrder.items.map((item) => String(item.product.id).trim()));
+
+    setProducts((prevProducts) => {
+      const updated = prevProducts.map((p) => {
+        if (reservedProductIds.has(String(p.id).trim())) {
+          const updatedProd = { ...p, inStock: false };
+          if (isSupabaseConfigured()) {
+            upsertProductInSupabase(updatedProd);
+          }
+          return updatedProd;
+        }
+        return p;
+      });
+      saveStoredProducts(updated);
+      return updated;
+    });
+
     // Esvazia as peças da mala ao concluir o pedido para que o botão de agendamento feche
     setMalaItems([]);
     localStorage.removeItem('jobolsas_mala_items');
@@ -424,15 +462,57 @@ export default function App() {
 
   // Status update from dashboard
   const handleUpdateOrderStatus = (orderId: string, newStatus: MalaOrder['status']) => {
-    setOrders((prev) =>
-      prev.map((ord) => (ord.id === orderId ? { ...ord, status: newStatus } : ord))
-    );
+    setOrders((prev) => {
+      const next = prev.map((ord) => (ord.id === orderId ? { ...ord, status: newStatus } : ord));
+      localStorage.setItem('jobolsas_orders', JSON.stringify(next));
+      return next;
+    });
     if (isSupabaseConfigured()) {
       updateOrderStatusInSupabase(orderId, newStatus).then((ok) => {
         if (ok) {
           showToast(`Status da mala ${orderId} atualizado no Supabase!`);
         }
       });
+    }
+  };
+
+  // Delete order from Consultora Dashboard (com opção de liberar peças no estoque)
+  const handleDeleteOrder = (orderId: string, restoreStock: boolean = true) => {
+    const orderToDelete = orders.find((o) => o.id === orderId);
+
+    const updatedOrders = orders.filter((o) => o.id !== orderId);
+    setOrders(updatedOrders);
+    localStorage.setItem('jobolsas_orders', JSON.stringify(updatedOrders));
+
+    // Se solicitado, libera as peças que estavam reservadas nesta mala de volta no estoque
+    if (restoreStock && orderToDelete) {
+      const orderItemIds = new Set(orderToDelete.items.map((it) => String(it.product.id).trim()));
+      setProducts((prevProducts) => {
+        const updated = prevProducts.map((p) => {
+          if (orderItemIds.has(String(p.id).trim())) {
+            const updatedProd = { ...p, inStock: true };
+            if (isSupabaseConfigured()) {
+              upsertProductInSupabase(updatedProd);
+            }
+            return updatedProd;
+          }
+          return p;
+        });
+        saveStoredProducts(updated);
+        return updated;
+      });
+    }
+
+    if (isSupabaseConfigured()) {
+      deleteMalaOrderFromSupabase(orderId).then((ok) => {
+        if (ok) {
+          showToast(`Mala #${orderId} excluída do banco de dados com sucesso!`);
+        } else {
+          showToast(`Mala #${orderId} excluída com sucesso!`);
+        }
+      });
+    } else {
+      showToast(`Mala #${orderId} excluída com sucesso!`);
     }
   };
 
@@ -713,6 +793,7 @@ export default function App() {
         <ConsultoraDashboard
           orders={orders}
           onUpdateOrderStatus={handleUpdateOrderStatus}
+          onDeleteOrder={handleDeleteOrder}
           onReturnToStore={() => {
             window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
             handleNavigateToStore('Todas');
@@ -861,7 +942,7 @@ export default function App() {
             </div>
 
             {/* Product Grid (Vitrine de fotos das peças e bolsas) */}
-            <div id="vitrine-pecas-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 scroll-mt-28">
+            <div id="vitrine-pecas-grid" className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-5 scroll-mt-28">
               {filteredProducts.map((product) => {
                 const isInMala = malaItems.some((item) => item.product.id === product.id);
 

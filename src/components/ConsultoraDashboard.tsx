@@ -21,6 +21,7 @@ import { isSupabaseConfigured } from '../services/supabaseClient';
 interface ConsultoraDashboardProps {
   orders: MalaOrder[];
   onUpdateOrderStatus: (orderId: string, newStatus: MalaOrder['status']) => void;
+  onDeleteOrder?: (orderId: string, restoreStock?: boolean) => void;
   onReturnToStore: () => void;
   onCreateOrderByStylist?: (order: MalaOrder) => void;
   onLogout?: () => void;
@@ -41,6 +42,7 @@ interface ConsultoraDashboardProps {
 export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
   orders,
   onUpdateOrderStatus,
+  onDeleteOrder,
   onReturnToStore,
   onCreateOrderByStylist,
   onLogout,
@@ -93,6 +95,8 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [orderToDelete, setOrderToDelete] = useState<MalaOrder | null>(null);
+  const [restoreStockOnDelete, setRestoreStockOnDelete] = useState<boolean>(true);
   const [productManagerSearch, setProductManagerSearch] = useState('');
   const [productManagerCategory, setProductManagerCategory] = useState('Todas');
 
@@ -1184,7 +1188,7 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {managedProducts.map((prod) => (
                 <div
                   key={prod.id}
@@ -1227,17 +1231,35 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                         </button>
                       )}
 
-                      {/* Stock badge */}
+                      {/* Stock badge / Quick Toggle */}
                       <div className="absolute top-2.5 right-2.5">
-                        {prod.inStock !== false ? (
-                          <span className="bg-emerald-600/90 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs">
-                            Ativo
-                          </span>
-                        ) : (
-                          <span className="bg-stone-600/90 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs">
-                            Esgotado
-                          </span>
-                        )}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const newInStock = prod.inStock === false;
+                            onUpdateProduct?.({ ...prod, inStock: newInStock });
+                            onShowToast?.(`"${prod.name}" marcado como ${newInStock ? 'Disponível no Estoque' : 'Reservado / Indisponível'}!`);
+                          }}
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1 cursor-pointer transition-all hover:scale-105 ${
+                            prod.inStock !== false
+                              ? 'bg-emerald-600/90 hover:bg-emerald-700 text-white'
+                              : 'bg-amber-600/90 hover:bg-amber-700 text-white'
+                          }`}
+                          title="Clique para alternar disponibilidade (Disponível / Reservado)"
+                        >
+                          {prod.inStock !== false ? (
+                            <>
+                              <Check className="w-3 h-3 text-white" />
+                              <span>Ativo</span>
+                            </>
+                          ) : (
+                            <>
+                              <Clock className="w-3 h-3 text-white" />
+                              <span>Reservado</span>
+                            </>
+                          )}
+                        </button>
                       </div>
 
                       {/* Category tag */}
@@ -1368,9 +1390,24 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                         <span className="text-xs font-bold text-stone-900 tracking-wider">
                           #{order.id}
                         </span>
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${statusMeta.color}`}>
-                          {statusMeta.label}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${statusMeta.color}`}>
+                            {statusMeta.label}
+                          </span>
+                          {onDeleteOrder && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOrderToDelete(order);
+                              }}
+                              className="p-1 rounded text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                              title={`Excluir pedido #${order.id}`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </div>
 
                       <div className="mt-2 flex items-center justify-between">
@@ -1434,20 +1471,34 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                       </p>
                     </div>
 
-                    {/* Status transition dropdown */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-stone-600 font-medium">Status:</span>
-                      <select
-                        value={selectedOrder.status}
-                        onChange={(e) => onUpdateOrderStatus(selectedOrder.id, e.target.value as MalaOrder['status'])}
-                        className="text-xs bg-stone-100 border border-stone-300 rounded px-2.5 py-1.5 font-medium text-stone-900 cursor-pointer focus:outline-none focus:border-stone-900"
-                      >
-                        <option value="solicitada">Solicitada pelo Site</option>
-                        <option value="em_separacao">Em Separação no Atelier</option>
-                        <option value="em_rota">Em Rota / Pronta p/ Retirada</option>
-                        <option value="em_provador_48h">Em Provador 48h (Com Cliente)</option>
-                        <option value="concluida">Finalizada / Faturada</option>
-                      </select>
+                    {/* Status transition dropdown & Delete Action */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-stone-600 font-medium">Status:</span>
+                        <select
+                          value={selectedOrder.status}
+                          onChange={(e) => onUpdateOrderStatus(selectedOrder.id, e.target.value as MalaOrder['status'])}
+                          className="text-xs bg-stone-100 border border-stone-300 rounded-lg px-2.5 py-1.5 font-medium text-stone-900 cursor-pointer focus:outline-none focus:border-stone-900"
+                        >
+                          <option value="solicitada">Solicitada pelo Site</option>
+                          <option value="em_separacao">Em Separação no Atelier</option>
+                          <option value="em_rota">Em Rota / Pronta p/ Retirada</option>
+                          <option value="em_provador_48h">Em Provador 48h (Com Cliente)</option>
+                          <option value="concluida">Finalizada / Faturada</option>
+                        </select>
+                      </div>
+
+                      {onDeleteOrder && (
+                        <button
+                          type="button"
+                          onClick={() => setOrderToDelete(selectedOrder)}
+                          className="py-1.5 px-3 bg-white hover:bg-red-50 text-stone-600 hover:text-red-600 border border-stone-200 hover:border-red-300 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                          title={`Excluir mala #${selectedOrder.id}`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                          <span>Excluir Pedido</span>
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -1527,13 +1578,34 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
 
                   {/* Items in the Bag */}
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-xs font-semibold text-stone-900 uppercase tracking-wider">
-                        Peças na Mala ({selectedOrder.items.length} de {MAX_MALA_ITEMS})
-                      </h3>
-                      <span className="text-xs text-stone-600 font-medium">
-                        Total consignado: R$ {selectedOrder.items.reduce((acc, it) => acc + it.product.price, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                      <div>
+                        <h3 className="text-xs font-semibold text-stone-900 uppercase tracking-wider">
+                          Peças na Mala ({selectedOrder.items.length} de {MAX_MALA_ITEMS})
+                        </h3>
+                        <span className="text-xs text-stone-600 font-medium">
+                          Total consignado: R$ {selectedOrder.items.reduce((acc, it) => acc + it.product.price, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const orderItemIds = new Set(selectedOrder.items.map((it) => String(it.product.id).trim()));
+                          let count = 0;
+                          products.forEach((p) => {
+                            if (orderItemIds.has(String(p.id).trim()) && p.inStock === false) {
+                              onUpdateProduct?.({ ...p, inStock: true });
+                              count++;
+                            }
+                          });
+                          onShowToast?.(`${count} peças da mala #${selectedOrder.id} foram liberadas de volta no estoque!`);
+                        }}
+                        className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors self-start sm:self-auto"
+                        title="Devolver peças desta mala de volta para pronta entrega no site"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5 text-emerald-700" />
+                        <span>Liberar Peças no Estoque</span>
+                      </button>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-1">
@@ -1810,6 +1882,95 @@ export const ConsultoraDashboard: React.FC<ConsultoraDashboardProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+            {/* Modal Seguro de Confirmação para Excluir Pedido de Mala */}
+      {orderToDelete && (
+        <div className="fixed inset-0 z-50 bg-stone-900/70 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-red-100 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-stone-900 text-base">
+                  Excluir Pedido de Mala
+                </h3>
+                <p className="text-xs text-stone-500">
+                  Protocolo #{orderToDelete.id}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-[#FAF9F5] p-3.5 rounded-xl border border-stone-200 text-xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Cliente:</span>
+                <strong className="text-stone-900">{orderToDelete.customerName}</strong>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">WhatsApp:</span>
+                <span className="text-stone-700">{orderToDelete.customerPhone}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Total de Peças:</span>
+                <span className="font-bold text-[#B84E67]">{orderToDelete.items.length} itens</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Status Atual:</span>
+                <span className="font-semibold text-stone-700">
+                  {statusLabels[orderToDelete.status]?.label || orderToDelete.status}
+                </span>
+              </div>
+            </div>
+
+            {/* Opção para devolver as peças da mala ao estoque */}
+            <label className="flex items-start gap-2.5 p-3 rounded-xl bg-emerald-50/70 border border-emerald-200 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={restoreStockOnDelete}
+                onChange={(e) => setRestoreStockOnDelete(e.target.checked)}
+                className="rounded text-emerald-600 focus:ring-emerald-500 mt-0.5"
+              />
+              <div className="text-xs">
+                <span className="font-bold text-emerald-950 block">Liberar peças no estoque da loja</span>
+                <span className="text-emerald-800 text-[11px] leading-tight block mt-0.5">
+                  Reativa automaticamente as peças desta mala para pronta entrega no site.
+                </span>
+              </div>
+            </label>
+
+            <p className="text-xs text-stone-600 leading-relaxed">
+              Tem certeza que deseja excluir o pedido <strong className="text-stone-900">#{orderToDelete.id}</strong>? Essa ação removerá o pedido da lista de malas.
+            </p>
+
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setOrderToDelete(null)}
+                className="flex-1 py-2.5 px-4 text-xs font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (onDeleteOrder && orderToDelete) {
+                    onDeleteOrder(orderToDelete.id, restoreStockOnDelete);
+                    if (selectedOrderId === orderToDelete.id) {
+                      const remaining = orders.filter((o) => o.id !== orderToDelete.id);
+                      setSelectedOrderId(remaining[0]?.id || '');
+                    }
+                  }
+                  setOrderToDelete(null);
+                }}
+                className="flex-1 py-2.5 px-4 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Sim, Excluir Pedido</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

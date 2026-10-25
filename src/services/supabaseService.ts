@@ -378,6 +378,29 @@ export async function updateOrderStatusInSupabase(
 }
 
 /**
+ * Exclui um pedido de mala no Supabase pelo ID
+ */
+export async function deleteMalaOrderFromSupabase(orderId: string): Promise<boolean> {
+  const client = getSupabaseClient();
+  if (!client) return false;
+
+  try {
+    const { error } = await client
+      .from('mala_orders')
+      .delete()
+      .eq('id', orderId);
+
+    if (error) {
+      console.warn('Erro ao excluir pedido no Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Inscreve-se nas atualizações em tempo real (Supabase Realtime) da tabela 'products'
  */
 export function subscribeToProductsRealtime(onProductsChange: () => void): () => void {

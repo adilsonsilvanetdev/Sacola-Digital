@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Check, Eye, Pencil, Flame, Ruler } from 'lucide-react';
+import { ShoppingBag, Check, Eye, Pencil, Flame, Ruler, Clock } from 'lucide-react';
 import { Product } from '../types';
 import { WhatsAppIcon } from './WhatsAppIcon';
-import { buildProductPurchaseWhatsAppLink, STORE_WHATSAPP_DISPLAY } from '../utils/whatsappHelper';
+import { buildProductPurchaseWhatsAppLink, STORE_WHATSAPP_DISPLAY, STORE_WHATSAPP_NUMBER } from '../utils/whatsappHelper';
 
 interface ProductCardProps {
   product: Product;
@@ -56,6 +56,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   const installmentValue = (product.price / 3).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
   const isPromo = product.isPromotion || (product.originalPrice && product.originalPrice > product.price);
+  const isAvailable = product.inStock !== false;
 
   return (
     <div className={`group flex flex-col bg-white rounded-xl overflow-hidden transition-all duration-200 border ${
@@ -72,7 +73,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             referrerPolicy="no-referrer"
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageError(true)}
-            className={`w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105 ${
+            className={`w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105 ${!isAvailable ? 'opacity-85 filter grayscale-[20%]' : ''} ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
           />
@@ -118,6 +119,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </button>
         )}
 
+        {/* Badge se peça estiver reservada na mala de outra cliente */}
+        {!isAvailable && (
+          <div className="absolute top-2.5 right-2.5 bg-amber-950/90 text-amber-200 text-[10px] font-bold px-2 py-0.5 rounded shadow-sm border border-amber-400/50 flex items-center gap-1 z-10 backdrop-blur-xs">
+            <Clock className="w-3 h-3 text-amber-300" />
+            <span>Reservada na Mala</span>
+          </div>
+        )}
+
         {/* Subtle Indicator if already in Mala */}
         {isInMala && (
           <div className="absolute top-3 right-3 bg-[#181316] text-[#FAF6F7] text-[11px] font-medium px-2.5 py-1 rounded-md shadow border border-[#F5BAC7]/40 flex items-center gap-1 z-10">
@@ -137,9 +146,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               <span aria-hidden="true">·</span>
               <span>{product.color}</span>
             </div>
-            <span className="text-[10px] text-[#7A6B73] bg-[#FAF6F7] px-1.5 py-0.5 rounded border border-[#F2DEE4]">
-              Pronta Entrega
-            </span>
+            {isAvailable ? (
+              <span className="text-[10px] text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 font-semibold">
+                Pronta Entrega
+              </span>
+            ) : (
+              <span className="text-[10px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 font-semibold flex items-center gap-1">
+                <Clock className="w-2.5 h-2.5 text-amber-600" />
+                Indisponível (Em Prova)
+              </span>
+            )}
           </div>
 
           <h3 className="font-editorial text-lg font-medium text-[#181316] mt-1.5 line-clamp-1 group-hover:text-[#B84E67] transition-colors">
@@ -232,36 +248,58 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </div>
 
         {/* Double Action Buttons: 1) Comprar no WhatsApp & 2) Colocar na Mala Digital */}
-        <div className="pt-2 space-y-2">
+        <div className="pt-2 space-y-1.5">
           {/* Botão de Compra Direta pelo WhatsApp com ícone (14) 99722-4065 */}
-          <a
-            href={whatsappPurchaseUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            title={`Comprar ${product.name} diretamente pelo WhatsApp ${STORE_WHATSAPP_DISPLAY}`}
-            className="w-full py-2.5 px-3 text-xs font-semibold bg-[#25D366] hover:bg-[#20ba59] text-white rounded-lg transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer group/wa"
-          >
-            <WhatsAppIcon className="w-4 h-4 text-white shrink-0 group-hover/wa:scale-110 transition-transform" />
-            <span>Comprar no WhatsApp</span>
-            <span className="text-[10px] font-normal opacity-90 hidden sm:inline">
-              · {STORE_WHATSAPP_DISPLAY}
-            </span>
-          </a>
+          {isAvailable ? (
+            <a
+              href={whatsappPurchaseUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`Comprar ${product.name} diretamente pelo WhatsApp ${STORE_WHATSAPP_DISPLAY}`}
+              className="w-full py-2 px-2.5 text-xs font-semibold bg-[#25D366] hover:bg-[#20ba59] text-white rounded-lg transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer group/wa"
+            >
+              <WhatsAppIcon className="w-3.5 h-3.5 text-white shrink-0 group-hover/wa:scale-110 transition-transform" />
+              <span>Comprar no WhatsApp</span>
+            </a>
+          ) : (
+            <a
+              href={`https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                `Olá Josy! Vi que a peça "${product.name}" está reservada na mala. Gostaria de saber se há previsão de retorno ou se posso entrar na fila de espera!`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`Consultar fila de espera para ${product.name} no WhatsApp`}
+              className="w-full py-2 px-2.5 text-xs font-semibold bg-stone-700 hover:bg-stone-800 text-white rounded-lg transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <WhatsAppIcon className="w-3.5 h-3.5 text-white shrink-0" />
+              <span>Consultar no WhatsApp</span>
+            </a>
+          )}
 
           {/* Botão de Adicionar à Mala Digital (Provador 48h em Casa) */}
-          {isInMala ? (
+          {!isAvailable ? (
+            <button
+              type="button"
+              disabled
+              className="w-full py-2 px-2.5 text-xs font-medium bg-stone-100 text-stone-500 border border-stone-200 rounded-lg cursor-not-allowed flex items-center justify-center gap-1.5 shadow-none"
+              title="Esta peça está reservada no momento para provador de outra cliente"
+            >
+              <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span>Indisponível (Reservada)</span>
+            </button>
+          ) : isInMala ? (
             <button
               onClick={handleToggleMala}
-              className="w-full py-2.5 px-3 text-xs font-medium bg-[#FAF2F4] text-[#B84E67] border border-[#F0D5DD] rounded-lg hover:bg-[#FDE8ED] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full py-2 px-2.5 text-xs font-medium bg-[#FAF2F4] text-[#B84E67] border border-[#F0D5DD] rounded-lg hover:bg-[#FDE8ED] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Check className="w-3.5 h-3.5 text-[#B84E67]" />
-              <span>Na sua Mala (Clique para Remover)</span>
+              <span>Na sua Mala (Remover)</span>
             </button>
           ) : (
             <button
               onClick={handleToggleMala}
               disabled={isMalaFull}
-              className={`w-full py-2.5 px-3 text-xs font-medium rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`w-full py-2 px-2.5 text-xs font-medium rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                 isMalaFull
                   ? 'bg-stone-200 text-stone-400 cursor-not-allowed'
                   : 'bg-[#181316] text-[#FAF6F7] hover:bg-[#2A2025] border border-[#F2BAC7]/30 shadow-xs'
@@ -270,8 +308,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               <ShoppingBag className="w-3.5 h-3.5 text-[#F5BAC7]" />
               <span>
                 {isBagOrWallet
-                  ? 'Experimentar na Mala (Medida CM)'
-                  : `Experimentar na Mala (Tam. ${selectedSize})`}
+                  ? 'Experimentar na Mala (CM)'
+                  : `Experimentar na Mala (${selectedSize})`}
               </span>
             </button>
           )}

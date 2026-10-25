@@ -1,8 +1,8 @@
 import React from 'react';
-import { Flame, Sparkles, Tag, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Flame, Sparkles, Tag, ShoppingBag, ArrowRight, Clock } from 'lucide-react';
 import { Product } from '../types';
 import { WhatsAppIcon } from './WhatsAppIcon';
-import { buildProductPurchaseWhatsAppLink } from '../utils/whatsappHelper';
+import { buildProductPurchaseWhatsAppLink, STORE_WHATSAPP_NUMBER } from '../utils/whatsappHelper';
 
 interface PromotionsSectionProps {
   products: Product[];
@@ -52,9 +52,10 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
         </div>
 
         {/* Promo Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
           {promoProducts.map((product) => {
             const inMala = isInMala(product.id);
+            const isAvailable = product.inStock !== false;
             const isBagOrWallet =
               product.category.toLowerCase().includes('bolsa') ||
               product.category.toLowerCase().includes('carteira') ||
@@ -85,7 +86,7 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                      className={`w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500 ${!isAvailable ? "opacity-85 filter grayscale-[20%]" : ""}`}
                       loading="lazy"
                     />
 
@@ -106,6 +107,14 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
                     <span className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-xs text-[#181316] text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-2xs">
                       {product.category}
                     </span>
+
+                    {/* Badge se estiver reservada */}
+                    {!isAvailable && (
+                      <div className="absolute top-9 right-2.5 bg-amber-950/90 text-amber-200 text-[10px] font-bold px-2 py-0.5 rounded shadow-sm border border-amber-400/50 flex items-center gap-1 z-10 backdrop-blur-xs">
+                        <Clock className="w-3 h-3 text-amber-300" />
+                        <span>Reservada</span>
+                      </div>
+                    )}
 
                     {/* Quick view button overlay */}
                     <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-center">
@@ -162,29 +171,54 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
                 {/* Card Actions */}
                 <div className="p-4 pt-0 space-y-2">
                   {/* Direct WhatsApp button */}
-                  <a
-                    href={buildProductPurchaseWhatsAppLink(product, defaultSize)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-2.5 bg-[#0d6832] hover:bg-[#094d25] text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
-                  >
-                    <WhatsAppIcon className="w-3.5 h-3.5 text-white" />
-                    <span>Garantir no WhatsApp</span>
-                  </a>
+                  {isAvailable ? (
+                    <a
+                      href={buildProductPurchaseWhatsAppLink(product, defaultSize)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2.5 bg-[#0d6832] hover:bg-[#094d25] text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <WhatsAppIcon className="w-3.5 h-3.5 text-white" />
+                      <span>Garantir no WhatsApp</span>
+                    </a>
+                  ) : (
+                    <a
+                      href={`https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                        `Olá Josy! Vi que a peça promocional "${product.name}" está reservada na mala. Gostaria de saber se há previsão de retorno ou modelos semelhantes!`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2.5 bg-stone-700 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <WhatsAppIcon className="w-3.5 h-3.5 text-white" />
+                      <span>Consultar no WhatsApp</span>
+                    </a>
+                  )}
 
                   {/* Mala Provador button */}
-                  <button
-                    type="button"
-                    onClick={() => onAddToMala(product, defaultSize)}
-                    className={`w-full py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${
-                      inMala
-                        ? 'bg-[#181316] text-[#F5BAC7] border-[#181316]'
-                        : 'bg-white hover:bg-[#FDF2F4] text-[#B84E67] border-[#F2DEE4]'
-                    }`}
-                  >
-                    <ShoppingBag className="w-3.5 h-3.5" />
-                    <span>{inMala ? 'Na Sua Mala ✓' : 'Provar na Mala'}</span>
-                  </button>
+                  {!isAvailable ? (
+                    <button
+                      type="button"
+                      disabled
+                      className="w-full py-2 rounded-xl text-xs font-semibold bg-stone-100 text-stone-500 border border-stone-200 flex items-center justify-center gap-1.5 cursor-not-allowed"
+                    >
+                      <Clock className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Indisponível (Reservada)</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onAddToMala(product, defaultSize)}
+                      className={`w-full py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${
+                        inMala
+                          ? 'bg-[#181316] text-[#F5BAC7] border-[#181316]'
+                          : 'bg-white hover:bg-[#FDF2F4] text-[#B84E67] border-[#F2DEE4]'
+                      }`}
+                    >
+                      <ShoppingBag className="w-3.5 h-3.5" />
+                      <span>{inMala ? 'Na Sua Mala ✓' : 'Provar na Mala'}</span>
+                    </button>
+                  )}
                 </div>
               </div>
             );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Trash2, Calendar, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
+import { X, Trash2, Calendar, ShieldCheck, ArrowRight, Sparkles, Clock } from 'lucide-react';
 import { MalaItem } from '../types';
 import { MAX_MALA_ITEMS } from '../data/products';
 
@@ -133,6 +133,12 @@ export const MalaDrawer: React.FC<MalaDrawerProps> = ({
                       <div className="text-[11px] text-[#7A6B73] mt-0.5">
                         Cor: {item.product.color}
                       </div>
+                      {item.product.inStock === false && (
+                        <span className="text-[10px] text-amber-900 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded font-bold flex items-center gap-1 w-fit mt-1">
+                          <Clock className="w-2.5 h-2.5 text-amber-700" />
+                          Reservada por outra cliente
+                        </span>
+                      )}
 
                       <div className="text-xs font-semibold text-[#181316] mt-1 tabular-nums">
                         R$ {item.product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}

@@ -76,6 +76,12 @@ export const CheckoutAgendamentoModal: React.FC<CheckoutAgendamentoModalProps> =
       return;
     }
 
+    const unavailableItem = malaItems.find((it) => it.product.inStock === false);
+    if (unavailableItem) {
+      alert(`Atenção: A peça "${unavailableItem.product.name}" está reservada para outra cliente. Por favor, remova-a da sua mala para prosseguir.`);
+      return;
+    }
+
     const orderId = `JB-ML-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const isPickup = deliveryType === 'pickup' || !formData.street.trim();

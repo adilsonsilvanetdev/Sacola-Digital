@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { X, ShoppingBag, Check, Ruler, Pencil, Flame, Info } from 'lucide-react';
+import { X, ShoppingBag, Check, Ruler, Pencil, Flame, Info, Clock } from 'lucide-react';
 import { Product } from '../types';
 import { WhatsAppIcon } from './WhatsAppIcon';
-import { buildProductPurchaseWhatsAppLink, STORE_WHATSAPP_DISPLAY } from '../utils/whatsappHelper';
+import { buildProductPurchaseWhatsAppLink, STORE_WHATSAPP_DISPLAY, STORE_WHATSAPP_NUMBER } from '../utils/whatsappHelper';
 
 interface ProductQuickViewModalProps {
   product: Product | null;
@@ -42,6 +42,7 @@ export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
 
   const installmentValue = (product.price / 3).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
   const isPromo = product.isPromotion || (product.originalPrice && product.originalPrice > product.price);
+  const isAvailable = product.inStock !== false;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -68,6 +69,12 @@ export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
               <span className="bg-[#141113]/85 text-[#F9D6DF] text-[11px] font-medium px-2.5 py-1 rounded-md backdrop-blur-xs">
                 Ref: #{product.id}
               </span>
+              {!isAvailable && (
+                <span className="bg-amber-950/90 text-amber-200 text-[11px] font-bold px-2.5 py-1 rounded-md shadow-sm border border-amber-400/50 flex items-center gap-1 backdrop-blur-xs">
+                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Reservada na Mala</span>
+                </span>
+              )}
               {isPromo && (
                 <span className="bg-gradient-to-r from-[#E11D48] to-[#9F1239] text-white text-[11px] font-bold px-2.5 py-1 rounded-md shadow-sm flex items-center gap-1">
                   <Flame className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
@@ -80,10 +87,22 @@ export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
           {/* Details Column */}
           <div className="p-6 md:p-8 flex flex-col justify-between space-y-4">
             <div>
-              <div className="flex items-center gap-1.5 text-xs text-[#9E6170] font-medium uppercase tracking-wider">
-                <span>{product.category}</span>
-                <span>·</span>
-                <span>{product.color}</span>
+              <div className="flex items-center justify-between text-xs text-[#9E6170] font-medium uppercase tracking-wider">
+                <div className="flex items-center gap-1.5">
+                  <span>{product.category}</span>
+                  <span>·</span>
+                  <span>{product.color}</span>
+                </div>
+                {isAvailable ? (
+                  <span className="text-[10px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-semibold normal-case">
+                    Pronta Entrega
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 font-semibold normal-case flex items-center gap-1">
+                    <Clock className="w-2.5 h-2.5 text-amber-600" />
+                    Indisponível (Em Prova)
+                  </span>
+                )}
               </div>
 
               <h2 className="font-editorial text-2xl sm:text-3xl font-medium text-[#181316] mt-1.5">
@@ -130,6 +149,18 @@ export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
                   <span className="text-[#5A4D54]">{product.fitTip}</span>
                 </div>
               </div>
+
+              {!isAvailable && (
+                <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-950 flex items-start gap-2.5">
+                  <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block text-amber-900">Peça Reservada na Mala de Outra Cliente</span>
+                    <span className="text-[11px] text-amber-800 leading-relaxed block mt-0.5">
+                      Esta peça está reservada em provador particular 48h no momento e não pode ser reservada em outra mala. Consulte a Josy no WhatsApp para fila de espera ou peças similares!
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Size Selection OR CM Dimensions */}
               <div className="mt-4">
@@ -248,18 +279,41 @@ export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
               )}
 
               {/* 1. Compra Direta no WhatsApp */}
-              <a
-                href={whatsappPurchaseUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3 px-4 text-sm font-semibold bg-[#25D366] hover:bg-[#20ba59] text-white rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer group/wa"
-              >
-                <WhatsAppIcon className="w-4 h-4 text-white group-hover/wa:scale-110 transition-transform" />
-                <span>Comprar pelo WhatsApp · {STORE_WHATSAPP_DISPLAY}</span>
-              </a>
+              {isAvailable ? (
+                <a
+                  href={whatsappPurchaseUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 px-4 text-sm font-semibold bg-[#25D366] hover:bg-[#20ba59] text-white rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer group/wa"
+                >
+                  <WhatsAppIcon className="w-4 h-4 text-white group-hover/wa:scale-110 transition-transform" />
+                  <span>Comprar pelo WhatsApp · {STORE_WHATSAPP_DISPLAY}</span>
+                </a>
+              ) : (
+                <a
+                  href={`https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                    `Olá Josy! Vi que a peça "${product.name}" está reservada na mala. Gostaria de entrar na fila de espera caso retorne ou verificar peças parecidas!`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 px-4 text-sm font-semibold bg-stone-800 hover:bg-stone-900 text-white rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <WhatsAppIcon className="w-4 h-4 text-white" />
+                  <span>Consultar Fila de Espera no WhatsApp</span>
+                </a>
+              )}
 
               {/* 2. Mala Digital / Provador em Casa 48h */}
-              {isInMala ? (
+              {!isAvailable ? (
+                <button
+                  type="button"
+                  disabled
+                  className="w-full py-3 text-sm font-semibold rounded-xl bg-stone-100 text-stone-500 border border-stone-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-none"
+                >
+                  <Clock className="w-4 h-4 text-amber-600" />
+                  <span>Peça Reservada na Mala (Indisponível no Momento)</span>
+                </button>
+              ) : isInMala ? (
                 <button
                   onClick={() => {
                     onRemoveFromMala(product.id);
